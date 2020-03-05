@@ -15,7 +15,7 @@
   "scripts": {
     "build": "babel index.js -o index.dist.js --source-maps",
     "prepublish": "yarn build",
-    "test": "jest && prettier --check './**/*.?(json|js|md|css)' && eslint ."
+    "test": "jest --coverage && prettier --check './**/*.?(json|js|md|css)' && eslint ."
   },
   "babel": {
     "presets": [
