@@ -1,4 +1,4 @@
-# iron-session
+# iron-session [![codecov](https://codecov.io/gh/vvo/iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/iron-session)
 
 **This JavaScript backend utility** allows you to create a session to then be stored in browser cookies via a signed and encrypted token value. This provides client sessions that are ⚒️ iron-strong.
 
