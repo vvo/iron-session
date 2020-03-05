@@ -1,8 +1,12 @@
 {
   "name": "iron-session",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "private": false,
   "description": "Backend agnostic session utility based on @hapi/iron with signed and encrypted cookie serialization ability",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vvo/iron-session.git"
+  },
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
   "files": [
@@ -15,6 +19,7 @@
   "scripts": {
     "build": "babel index.js -o index.dist.js --source-maps",
     "prepublish": "yarn build",
+    "semantic-release": "semantic-release",
     "test": "jest --coverage && prettier --check './**/*.?(json|js|md|css)' && eslint ."
   },
   "babel": {
@@ -68,7 +73,7 @@
     "jest-date-mock": "1.0.8",
     "prettier": "1.19.1",
     "prettier-plugin-packagejson": "2.0.10",
-    "semantic-release": "17.0.4"
+    "semantic-release": "^17.0.4"
   },
   "renovate": {
     "extends": [
