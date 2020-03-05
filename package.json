@@ -14,7 +14,8 @@
   "main": "index.dist.js",
   "scripts": {
     "build": "babel index.js -o index.dist.js --source-maps",
-    "test": "jest && yarn prettier --check './**/*.?(json|js|md|css)' && eslint ."
+    "prepublish": "yarn build",
+    "test": "jest && prettier --check './**/*.?(json|js|md|css)' && eslint ."
   },
   "babel": {
     "presets": [
