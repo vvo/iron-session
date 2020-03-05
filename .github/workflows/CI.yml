@@ -38,7 +38,7 @@ jobs:
         uses: codecov/codecov-action@v1
       - name: Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: npx semantic-release
+        run: yarn semantic-release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
