@@ -14,6 +14,8 @@ The token stored on the client contains the session data, not your server, makin
 - application not supporting cookies won't work, this could be solved in the future by exposing the underlying token instead of signed and encrypted cookies. Open an issue if you're interested.
 - on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, an `iron-session` containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
 
+Now that you know the drawbacks, you can decide if they are an issue for your application or not.
+
 **🤓 References:**
 
 - https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html#cookies
