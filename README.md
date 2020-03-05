@@ -109,6 +109,6 @@ export default async (req, res) => {
 
 ## Project status
 
-This is a recent library I authored because I needed it. While @hapi/iron is battle-tested and [used in production on a lot of websites](https://hapi.dev/), this library is not. Use it at your own risk.
+This is a recent library I authored because I needed it. While @hapi/iron is battle-tested and [used in production on a lot of websites](https://hapi.dev/), this library is not. Please use it at your own risk.
 
 If you find bugs or have API ideas, create an issue.
