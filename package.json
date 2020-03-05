@@ -1,0 +1,77 @@
+{
+  "name": "iron-session",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Backend agnostic session utility based on @hapi/iron with signed and encrypted cookie serialization ability",
+  "license": "MIT",
+  "author": "Vincent Voyer <vincent@codeagain.com>",
+  "files": [
+    "index.dist.js",
+    "index.dist.js.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "index.dist.js",
+  "scripts": {
+    "build": "babel index.js -o index.dist.js --source-maps",
+    "test": "jest && yarn prettier --check './**/*.?(json|js|md|css)' && eslint ."
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "12"
+          }
+        }
+      ]
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "jest": true,
+      "node": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2019,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:jest/recommended"
+    ]
+  },
+  "jest": {
+    "setupFiles": [
+      "jest-date-mock"
+    ]
+  },
+  "dependencies": {
+    "@hapi/iron": "^6.0.0",
+    "clone": "^2.1.2",
+    "cookie": "^0.4.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@types/jest": "25.1.3",
+    "babel-jest": "^25.1.0",
+    "eslint": "6.8.0",
+    "eslint-plugin-jest": "23.8.1",
+    "jest": "25.1.0",
+    "jest-date-mock": "^1.0.8",
+    "prettier": "1.19.1",
+    "prettier-plugin-packagejson": "^2.0.10",
+    "semantic-release": "^17.0.4"
+  },
+  "renovate": {
+    "extends": [
+      "config:js-lib"
+    ]
+  }
+}
