@@ -18,7 +18,7 @@
   "main": "index.dist.js",
   "scripts": {
     "build": "babel index.js -o index.dist.js --source-maps",
-    "prepublish": "yarn build",
+    "prepublishOnly": "yarn build",
     "semantic-release": "semantic-release",
     "test": "jest --coverage && prettier --check './**/*.?(json|js|md|css)' && eslint ."
   },
