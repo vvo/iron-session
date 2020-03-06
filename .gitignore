@@ -4,7 +4,7 @@
 
 # misc
 .DS_Store
-/index.dist*
+/dist/
 
 # debug
 npm-debug.log*

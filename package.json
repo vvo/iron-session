@@ -10,17 +10,18 @@
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
   "files": [
-    "index.dist.js",
-    "index.dist.js.map",
+    "dist/",
+    "lib/",
     "LICENSE",
     "README.md"
   ],
-  "main": "index.dist.js",
+  "main": "dist/",
   "scripts": {
-    "build": "babel index.js -o index.dist.js --source-maps",
+    "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
+    "check-formatting": "prettier --check './**/*.?(json|js|md|css)' && eslint .",
     "prepublishOnly": "yarn build",
     "semantic-release": "semantic-release",
-    "test": "jest --coverage && prettier --check './**/*.?(json|js|md|css)' && eslint ."
+    "test": "jest --coverage && yarn check-formatting"
   },
   "babel": {
     "presets": [

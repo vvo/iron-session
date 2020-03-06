@@ -1,5 +1,4 @@
-/.history/
 /.yarn/
 /.vscode/
-/index.dist*
+/dist/
 /coverage/
