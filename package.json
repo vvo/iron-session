@@ -2,7 +2,7 @@
   "name": "next-iron-session",
   "version": "0.0.0-development",
   "private": false,
-  "description": "Next.js session utility using signed and encryted cookies to store data. Based on @hapi/iron.",
+  "description": "Next.js stateless session utility using signed and encrypted cookies to store data",
   "repository": {
     "type": "git",
     "url": "https://github.com/vvo/next-iron-session.git"
