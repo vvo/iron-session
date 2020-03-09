@@ -31,12 +31,12 @@ Store passwords in secret environment variables on your platform.
 ```js
 import withIronSession from "iron-session";
 
-async function handler(req, res, session) {
-  session.set("user", {
+async function handler(req, res) {
+  req.session.set("user", {
     id: 230,
     admin: true
   });
-  await session.save();
+  await req.session.save();
   res.send("Logged in");
 }
 
@@ -51,7 +51,7 @@ export default withIronSession(handler, {
 import withIronSession from "iron-session";
 
 function handler(req, res, session) {
-  const user = session.get("user");
+  const user = req.session.get("user");
   res.send({ user });
 }
 
@@ -66,7 +66,7 @@ export default withIronSession(handler, {
 import withIronSession from "iron-session";
 
 function handler(req, res, session) {
-  session.destroy();
+  req.session.destroy();
   res.send("Logged out");
 }
 
@@ -79,13 +79,13 @@ export default withIronSession(handler, {
 
 ### withIronSession(handler, {password, ttl, cookieName, cookieOptions})
 
-### session.set
+### req.session.set
 
-### session.get
+### req.session.get
 
-### session.setFlash
+### req.session.setFlash
 
-### session.destroy
+### req.session.destroy
 
 ## FAQ
 
@@ -96,6 +96,7 @@ This makes your sessions stateless: you do not have to store session data on you
 - you cannot invalidate a seal when needed because there's no state stored on the server-side about them. We consider that the way the cookie is stored reduces the possibility for this eventuality to happen.
 - application not supporting cookies won't work, but you can use [iron-store](https://github.com/vvo/iron-store/) to implement something similar. In the future we could allow `next-iron-session` to accept [basic auth](https://tools.ietf.org/html/rfc7617) or bearer token methods too. Open an issue if you're interested.
 - on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, a `next-iron-session` cookie containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
+- performance: crypto on server side could be slow, if that's the case let me know. Also cookies are sent to every requests to your website, even images, so this could be an issue
 
 Now that you know the drawbacks, you can decide if they are an issue for your application or not.
 
@@ -111,9 +112,9 @@ Depending on your own needs and preferences, `next-iron-session-cookie` may or m
 
 ## Project status
 
-This is a recent library I authored because I needed it. While @hapi/iron is battle-tested and [used in production on a lot of websites](https://hapi.dev/), this library is not. Please use it at your own risk.
+This is a recent library I authored because I needed it. While @hapi/iron is battle-tested and [used in production on a lot of websites](https://hapi.dev/), this library is not (yet!). Please use it at your own risk.
 
-If you find bugs or have API ideas, create an issue.
+If you find bugs or have API ideas, [create an issue](https://github.com/vvo/next-iron-session/issues).
 
 ## 🤓 References
 
