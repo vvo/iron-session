@@ -1,11 +1,11 @@
 {
-  "name": "iron-session",
+  "name": "next-iron-session",
   "version": "0.0.0-development",
   "private": false,
-  "description": "Backend agnostic session utility based on @hapi/iron with signed and encrypted cookie serialization ability",
+  "description": "Next.js session utility using signed and encryted cookies to store data. Based on @hapi/iron.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vvo/iron-session.git"
+    "url": "https://github.com/vvo/next-iron-session.git"
   },
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
@@ -37,6 +37,7 @@
   },
   "eslintConfig": {
     "env": {
+      "es6": true,
       "jest": true,
       "node": true
     },
@@ -58,9 +59,9 @@
     ]
   },
   "dependencies": {
-    "@hapi/iron": "^6.0.0",
     "clone": "^2.1.2",
-    "cookie": "^0.4.0"
+    "cookie": "^0.4.0",
+    "iron-store": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
