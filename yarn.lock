@@ -3803,6 +3803,14 @@ ip@1.1.5:
   resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
   integrity sha1-vd7XARQpCCjAoDnnLvJfWq7ENUo=
 
+iron-store@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/iron-store/-/iron-store-1.0.0.tgz#0fe5736d5bc376f7c1dc3f3cf64526db6f95ae77"
+  integrity sha512-bwv/lD+zQYDzrGHpXP5ajm4Ge9Vgk+DE3I9WGHnmUic3X1Uk5MwtkhJMIw2fNiUddSS3R5AgTkMhvFYsamN+TQ==
+  dependencies:
+    "@hapi/iron" "^6.0.0"
+    clone "^2.1.2"
+
 is-accessor-descriptor@^0.1.6:
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/is-accessor-descriptor/-/is-accessor-descriptor-0.1.6.tgz#a9e12cb3ae8d876727eeef3843f8a0897b5c98d6"
@@ -4214,11 +4222,6 @@ jest-config@^25.1.0:
     micromatch "^4.0.2"
     pretty-format "^25.1.0"
     realpath-native "^1.1.0"
-
-jest-date-mock@1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/jest-date-mock/-/jest-date-mock-1.0.8.tgz#13468c0352c5a3614c6b356dbc6b88eb37d9e0b3"
-  integrity sha512-0Lyp+z9xvuNmLbK+5N6FOhSiBeux05Lp5bbveFBmYo40Aggl2wwxFoIrZ+rOWC8nDNcLeBoDd2miQdEDSf3iQw==
 
 jest-diff@^25.1.0:
   version "25.1.0"

@@ -1,11 +1,11 @@
 {
-  "name": "iron-session",
+  "name": "next-iron-session",
   "version": "0.0.0-development",
   "private": false,
-  "description": "Backend agnostic session utility based on @hapi/iron with signed and encrypted cookie serialization ability",
+  "description": "Next.js stateless session utility using signed and encrypted cookies to store data",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vvo/iron-session.git"
+    "url": "https://github.com/vvo/next-iron-session.git"
   },
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
@@ -37,6 +37,7 @@
   },
   "eslintConfig": {
     "env": {
+      "es6": true,
       "jest": true,
       "node": true
     },
@@ -52,15 +53,11 @@
       "plugin:jest/recommended"
     ]
   },
-  "jest": {
-    "setupFiles": [
-      "jest-date-mock"
-    ]
-  },
+  "jest": {},
   "dependencies": {
-    "@hapi/iron": "^6.0.0",
     "clone": "^2.1.2",
-    "cookie": "^0.4.0"
+    "cookie": "^0.4.0",
+    "iron-store": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
@@ -71,7 +68,6 @@
     "eslint": "6.8.0",
     "eslint-plugin-jest": "23.8.2",
     "jest": "25.1.0",
-    "jest-date-mock": "1.0.8",
     "prettier": "1.19.1",
     "prettier-plugin-packagejson": "2.0.10",
     "semantic-release": "17.0.4"
