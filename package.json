@@ -35,6 +35,9 @@
       ]
     ]
   },
+  "prettier": {
+    "arrowParens": "always"
+  },
   "eslintConfig": {
     "env": {
       "es6": true,
