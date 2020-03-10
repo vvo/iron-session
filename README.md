@@ -14,6 +14,22 @@ The seal is signed and encrypted using [@hapi/iron](https://github.com/hapijs/ir
 
 **By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
+_Table of contents:_
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API](#api)
+  - [withIronSession(handler, {password, ttl, cookieName, cookieOptions})](#withironsessionhandler-password-ttl-cookiename-cookieoptions)
+  - [req.session.set](#reqsessionset)
+  - [req.session.get](#reqsessionget)
+  - [req.session.setFlash](#reqsessionsetflash)
+  - [req.session.destroy](#reqsessiondestroy)
+- [FAQ](#faq)
+  - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
+  - [How is this different from JWT?](#how-is-this-different-from-jwt)
+- [Project status](#project-status)
+- [🤓 References](#-references)
+
 ## Installation
 
 ```bash
