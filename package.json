@@ -76,7 +76,7 @@
     "eslint": "6.8.0",
     "eslint-plugin-jest": "23.8.2",
     "jest": "25.1.0",
-    "jest-date-mock": "^1.0.8",
+    "jest-date-mock": "1.0.8",
     "prettier": "1.19.1",
     "prettier-plugin-packagejson": "2.0.10",
     "semantic-release": "17.0.4"
