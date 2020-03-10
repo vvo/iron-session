@@ -19,11 +19,12 @@ _Table of contents:_
 - [Installation](#installation)
 - [Usage](#usage)
 - [API](#api)
-  - [withIronSession(handler, {password, ttl, cookieName, cookieOptions})](#withironsessionhandler-password-ttl-cookiename-cookieoptions)
-  - [req.session.set](#reqsessionset)
-  - [req.session.get](#reqsessionget)
-  - [req.session.setFlash](#reqsessionsetflash)
-  - [req.session.destroy](#reqsessiondestroy)
+  - [withIronSession(handler, { password, ttl, cookieName, cookieOptions })](#withironsessionhandler--password-ttl-cookiename-cookieoptions-)
+  - [req.session.set(name, value)](#reqsessionsetname-value)
+  - [req.session.get(name)](#reqsessiongetname)
+  - [req.session.setFlash(name, value)](#reqsessionsetflashname-value)
+  - [req.session.unset(name)](#reqsessionunsetname)
+  - [req.session.destroy()](#reqsessiondestroy)
 - [FAQ](#faq)
   - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
   - [How is this different from JWT?](#how-is-this-different-from-jwt)
@@ -93,15 +94,33 @@ export default withIronSession(handler, {
 
 ## API
 
-### withIronSession(handler, {password, ttl, cookieName, cookieOptions})
+### withIronSession(handler, { password, ttl, cookieName, cookieOptions })
 
-### req.session.set
+- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
+- `ttl` (optional): In seconds, default to 14 days
+- `cookieName` (optional): Default to `__ironSession`
+- `cookieOptions` (optional): Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
 
-### req.session.get
+```js
+{
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax",
+  // The next line makes sure browser will expire cookies before seals are considered expired by the server. It also allows for clock difference of 60 seconds maximum between server and clients.
+  maxAge: (ttl === 0 ? 2147483647 : ttl) - 60,
+  path: "/",
+}
+```
 
-### req.session.setFlash
+### req.session.set(name, value)
 
-### req.session.destroy
+### req.session.get(name)
+
+### req.session.setFlash(name, value)
+
+### req.session.unset(name)
+
+### req.session.destroy()
 
 ## FAQ
 
