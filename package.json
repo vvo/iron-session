@@ -64,7 +64,7 @@
   "dependencies": {
     "clone": "^2.1.2",
     "cookie": "^0.4.0",
-    "iron-store": "^1.1.0"
+    "iron-store": "^1.2.0"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
