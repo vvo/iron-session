@@ -57,6 +57,10 @@
     ]
   },
   "jest": {
+    "setupFiles": [
+      "jest-date-mock"
+    ]
+  },
   "dependencies": {
     "clone": "^2.1.2",
     "cookie": "^0.4.0",
