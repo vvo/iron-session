@@ -97,9 +97,9 @@ export default withIronSession(handler, {
 ### withIronSession(handler, { password, ttl, cookieName, cookieOptions })
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
-- `ttl` (optional): In seconds, default to 14 days
-- `cookieName` (optional): Default to `__ironSession`
-- `cookieOptions` (optional): Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
+- `ttl`, _optional_: In seconds, default to 14 days
+- `cookieName`, _optional_: Default to `__ironSession`
+- `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
 
 ```js
 {
