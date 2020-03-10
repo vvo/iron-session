@@ -120,8 +120,8 @@ Now that you know the drawbacks, you can decide if they are an issue for your ap
 
 Not so much:
 
-- JWT is a standard, it stores metadata in the JWT seal themselves to ensure communication between different systems is flawless.
-- JWT seals are not encrypted, the payload is visible by customers if they manage to inspect the seal. You would have to use [JWE](https://tools.ietf.org/html/rfc7516) to achieve the same.
+- JWT is a standard, it stores metadata in the JWT token themselves to ensure communication between different systems is flawless.
+- JWT tokens are not encrypted, the payload is visible by customers if they manage to inspect the seal. You would have to use [JWE](https://tools.ietf.org/html/rfc7516) to achieve the same.
 - @hapi/iron mechanism is not a standard, it's a way to sign and encrypt data into seals
 
 Depending on your own needs and preferences, `next-iron-session-cookie` may or may not fit you.
