@@ -18,10 +18,11 @@
   "main": "dist/",
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
-    "check-formatting": "prettier --check './**/*.?(json|js|md|css)' && eslint .",
+    "format": "prettier --write '**/*.*'",
+    "lint": "prettier --check '**/*.*' && eslint .",
     "prepublishOnly": "yarn build",
     "semantic-release": "semantic-release",
-    "test": "jest --coverage && yarn check-formatting"
+    "test": "jest --coverage && yarn lint"
   },
   "babel": {
     "presets": [
