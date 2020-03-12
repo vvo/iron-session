@@ -45,6 +45,7 @@
       "jest": true,
       "node": true
     },
+    "parser": "babel-eslint",
     "parserOptions": {
       "ecmaVersion": 2019,
       "sourceType": "module"
