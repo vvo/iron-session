@@ -9,6 +9,7 @@ _🛠 Next.js stateless session utility using signed and encrypted cookies to st
 The seal stored on the client contains the session data, not your server, making it a "stateless" session from the server point of view. This is a different take than [next-session](https://github.com/hoangvvo/next-session/) where the cookie contains a session ID to then be used to map data on the server-side.
 
 The seal is signed and encrypted using [@hapi/iron](https://github.com/hapijs/iron), [iron-store](https://github.com/vvo/iron-store/) is used behind the scenes.
+This method of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage)**.
 
 **⚡️ Flash session data is supported**. It means you can store some data which will be deleted when read. This is useful for temporary data, redirects or notices on your UI.
 
@@ -134,6 +135,7 @@ This makes your sessions stateless: you do not have to store session data on you
 - performance: crypto on the server-side could be slow, if that's the case let me know. Also, cookies are sent to every request to your website, even images, so this could be an issue
 
 Now that you know the drawbacks, you can decide if they are an issue for your application or not.
+More information can also be found on the [Ruby On Rails website](https://guides.rubyonrails.org/security.html#session-storage) which uses the same technique.
 
 ### How is this different from [JWT](https://jwt.io/)?
 
