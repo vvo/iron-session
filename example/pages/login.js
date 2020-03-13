@@ -5,6 +5,7 @@ import useUser from "../lib/hooks/useUser";
 import Layout from "../components/layout";
 import Form from "../components/form";
 import fetch from "../lib/fetch";
+import { mutate } from "swr";
 
 const Login = () => {
   useUser({ redirectTo: "/profile", redirectIfFound: true });
@@ -21,13 +22,13 @@ const Login = () => {
     };
 
     try {
-      await fetch("/api/login", {
+      const user = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
 
-      Router.push("/profile");
+      mutate("/api/user", user);
     } catch (error) {
       console.error("An unexpected error happened:", error);
       setErrorMsg(error.data.message);

@@ -8,9 +8,10 @@ export default withSession(async (req, res) => {
   try {
     // we check that the user exists on GitHub and store some data in session
     const { login, avatar_url: avatarUrl } = await fetch(url);
-    req.session.set("user", { login, avatarUrl });
+    const user = { isLoggedIn: true, login, avatarUrl };
+    req.session.set("user", user);
     await req.session.save();
-    res.json({ ok: true });
+    res.json(user);
   } catch (error) {
     const { response: fetchResponse } = error;
     res.status(fetchResponse?.status || 500);
