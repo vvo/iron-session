@@ -1,10 +1,11 @@
 # dependencies
-/node_modules/
+node_modules/
 /coverage/
 
 # misc
 .DS_Store
 /dist/
+/example/.next/
 
 # debug
 npm-debug.log*
