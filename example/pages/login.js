@@ -1,6 +1,5 @@
 import React from "react";
 import { useState } from "react";
-import Router from "next/router";
 import useUser from "../lib/hooks/useUser";
 import Layout from "../components/layout";
 import Form from "../components/form";
