@@ -89,6 +89,8 @@
     "extends": [
       "config:js-lib"
     ],
-    "ignorePaths": "example/package.json"
+    "ignorePaths": [
+      "example/package.json"
+    ]
   }
 }
