@@ -88,6 +88,7 @@
   "renovate": {
     "extends": [
       "config:js-lib"
-    ]
+    ],
+    "ignorePaths": "example/package.json"
   }
 }
