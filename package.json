@@ -18,7 +18,7 @@
   "main": "dist/",
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
-    "format": "prettier --write '**/*.*'",
+    "format": "prettier --write '**/*.*' && eslint . --fix",
     "lint": "prettier --check '**/*.*' && eslint .",
     "prepublishOnly": "yarn build",
     "semantic-release": "semantic-release",
