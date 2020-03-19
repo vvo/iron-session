@@ -7,14 +7,12 @@ import fetch from "../lib/fetch";
 import { mutate } from "swr";
 
 const Login = () => {
-  useUser({ redirectTo: "/profile", redirectIfFound: true });
+  useUser({ redirectTo: "/profile-sg", redirectIfFound: true });
 
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e) {
     event.preventDefault();
-
-    if (errorMsg) setErrorMsg("");
 
     const body = {
       username: e.currentTarget.username.value

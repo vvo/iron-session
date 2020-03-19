@@ -2,6 +2,7 @@
   "editor.formatOnSave": true,
   "search.exclude": {
     ".yarn": true,
+    "example/.yarn": true,
     "yarn.lock": true
   },
   "eslint.packageManager": "yarn",

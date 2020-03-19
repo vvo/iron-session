@@ -1,10 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import useUser from "../lib/hooks/useUser";
+import { useRouter } from "next/router";
 import { mutate } from "swr";
 
 const Header = () => {
   const user = useUser();
+  const router = useRouter();
   return (
     <header>
       <nav>
@@ -23,12 +25,17 @@ const Header = () => {
           )}
           {user?.isLoggedIn && (
             <>
-              {" "}
               <li>
-                <Link href="/profile">
+                <Link href="/profile-sg">
                   <a>
                     <img src={user.avatarUrl} width={20} height={20} /> Profile
+                    (Static generation)
                   </a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/profile-ssr">
+                  <a>Profile (Server-side rendering)</a>
                 </Link>
               </li>
               <li>
@@ -39,11 +46,12 @@ const Header = () => {
                     await fetch("/api/logout");
                     // tell all SWRs with this key to revalidate
                     mutate("/api/user", { isLoggedIn: false });
+                    router.push("/login");
                   }}
                 >
                   Logout
                 </a>
-              </li>{" "}
+              </li>
             </>
           )}
         </ul>
