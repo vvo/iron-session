@@ -2,7 +2,6 @@ import React from "react";
 import Layout from "../components/layout";
 import withSession from "../lib/session";
 import PropTypes from "prop-types";
-import Head from "next/head";
 
 const SsrProfile = ({ user }) => {
   return (
