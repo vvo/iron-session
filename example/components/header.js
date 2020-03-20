@@ -29,13 +29,13 @@ const Header = () => {
                 <Link href="/profile-sg">
                   <a>
                     <img src={user.avatarUrl} width={20} height={20} /> Profile
-                    (Static generation)
+                    (Static Generation, recommended)
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/profile-ssr">
-                  <a>Profile (Server-side rendering)</a>
+                  <a>Profile (Server-side Rendering)</a>
                 </Link>
               </li>
               <li>

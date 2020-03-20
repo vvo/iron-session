@@ -2,6 +2,7 @@ import React from "react";
 import Layout from "../components/layout";
 import withSession from "../lib/session";
 import PropTypes from "prop-types";
+import Head from "next/head";
 
 const SsrProfile = ({ user }) => {
   return (
@@ -11,6 +12,10 @@ const SsrProfile = ({ user }) => {
         This page uses{" "}
         <a href="https://nextjs.org/docs/basic-features/pages#server-side-rendering">
           Server-side Rendering (SSR)
+        </a>{" "}
+        and{" "}
+        <a href="https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering">
+          getServerSideProps
         </a>
       </h2>
 

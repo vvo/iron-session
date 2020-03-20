@@ -6,5 +6,8 @@
     "env": {
       "SECRET_COOKIE_PASSWORD": "2gyZ3GDw3LHZQKDhPmPDL3sjREVRXPr8"
     }
+  },
+  "github": {
+    "silent": true
   }
 }
