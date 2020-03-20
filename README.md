@@ -19,6 +19,8 @@ This method of storing session data is the same technique used by **frameworks l
 
 **By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
+**Next.js's** 🗿[Static generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended) (SG) and ⚙️[Server-side Rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) (SSG) are both supported.
+
 _Table of contents:_
 
 - [Installation](#installation)
@@ -44,11 +46,13 @@ npm add next-iron-session
 
 ## Usage
 
+You can find a more complete real-world example in the [example folder](./example/).
+
 The password is a private key you must pass at runtime, it has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
 
-Store passwords in secret environment variables on your platform.
+⚠️ Store passwords in secret environment variables on your platform.
 
-**login.js**:
+**pages/api/login.js**:
 
 ```js
 import withIronSession from "iron-session";
@@ -67,7 +71,7 @@ export default withIronSession(handler, {
 });
 ```
 
-**user.js**:
+**pages/user.js**:
 
 ```js
 import withIronSession from "iron-session";
@@ -82,7 +86,7 @@ export default withIronSession(handler, {
 });
 ```
 
-**logout.js**:
+**pages/api/logout.js**:
 
 ```js
 import withIronSession from "iron-session";

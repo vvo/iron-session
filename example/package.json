@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "SECRET_COOKIE_ENCRYPTION_KEY=2gyZ3GDw3LHZQKDhPmPDL3sjREVRXPr8 next dev",
+    "dev": "SECRET_COOKIE_PASSWORD=2gyZ3GDw3LHZQKDhPmPDL3sjREVRXPr8 next dev",
     "start": "next start"
   },
   "eslintConfig": {
@@ -46,8 +46,9 @@
   },
   "dependencies": {
     "next": "9.3.1",
-    "next-iron-session": "3.0.1",
+    "next-iron-session": "latest",
     "node-fetch": "2.6.0",
+    "prop-types": "15.7.2",
     "react": "16.13.0",
     "react-dom": "16.13.0",
     "swr": "0.1.18"

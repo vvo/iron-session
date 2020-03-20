@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 const Form = ({ errorMessage, onSubmit }) => (
   <form onSubmit={onSubmit}>
     <label>
@@ -34,3 +36,8 @@ const Form = ({ errorMessage, onSubmit }) => (
 );
 
 export default Form;
+
+Form.propTypes = {
+  errorMessage: PropTypes.string,
+  onSubmit: PropTypes.func
+};
