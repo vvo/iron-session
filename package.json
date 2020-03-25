@@ -9,13 +9,13 @@
   },
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
+  "main": "dist/",
   "files": [
     "dist/",
     "lib/",
     "LICENSE",
     "README.md"
   ],
-  "main": "dist/",
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
     "format": "prettier --write '**/*.*' && eslint . --fix",
@@ -37,7 +37,7 @@
     ]
   },
   "prettier": {
-    "arrowParens": "always"
+    "trailingComma": "all"
   },
   "eslintConfig": {
     "env": {
@@ -81,8 +81,8 @@
     "eslint-plugin-react-hooks": "2.5.1",
     "jest": "25.2.0",
     "jest-date-mock": "1.0.8",
-    "prettier": "1.19.1",
-    "prettier-plugin-packagejson": "2.0.10",
+    "prettier": "2.0.2",
+    "prettier-plugin-packagejson": "2.1.2",
     "semantic-release": "17.0.4"
   },
   "renovate": {

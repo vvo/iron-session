@@ -39,5 +39,5 @@ export default Form;
 
 Form.propTypes = {
   errorMessage: PropTypes.string,
-  onSubmit: PropTypes.func
+  onSubmit: PropTypes.func,
 };

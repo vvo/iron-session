@@ -5,7 +5,7 @@ import fetch from "../fetch";
 
 export default function useUser({
   redirectTo = false,
-  redirectIfFound = false
+  redirectIfFound = false,
 } = {}) {
   const { data: user } = useSWR("/api/user", fetch);
 

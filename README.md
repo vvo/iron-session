@@ -60,14 +60,14 @@ import withIronSession from "iron-session";
 async function handler(req, res) {
   req.session.set("user", {
     id: 230,
-    admin: true
+    admin: true,
   });
   await req.session.save();
   res.send("Logged in");
 }
 
 export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long"
+  password: "complex_password_at_least_32_characters_long",
 });
 ```
 
@@ -82,7 +82,7 @@ function handler(req, res, session) {
 }
 
 export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long"
+  password: "complex_password_at_least_32_characters_long",
 });
 ```
 
@@ -97,7 +97,7 @@ function handler(req, res, session) {
 }
 
 export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long"
+  password: "complex_password_at_least_32_characters_long",
 });
 ```
 

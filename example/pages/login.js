@@ -15,14 +15,14 @@ const Login = () => {
     event.preventDefault();
 
     const body = {
-      username: e.currentTarget.username.value
+      username: e.currentTarget.username.value,
     };
 
     try {
       const user = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       mutate("/api/user", user);

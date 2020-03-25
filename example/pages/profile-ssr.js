@@ -32,7 +32,7 @@ const SsrProfile = ({ user }) => {
   );
 };
 
-export const getServerSideProps = withSession(async function({ req, res }) {
+export const getServerSideProps = withSession(async function ({ req, res }) {
   const user = req.session.get("user");
 
   if (user === undefined) {
@@ -43,7 +43,7 @@ export const getServerSideProps = withSession(async function({ req, res }) {
   }
 
   return {
-    props: { user: req.session.get("user") }
+    props: { user: req.session.get("user") },
   };
 });
 
@@ -57,6 +57,6 @@ SsrProfile.propTypes = {
   user: PropTypes.shape({
     isLoggedIn: PropTypes.bool,
     login: PropTypes.string,
-    avatarUrl: PropTypes.string
-  })
+    avatarUrl: PropTypes.string,
+  }),
 };

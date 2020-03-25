@@ -41,5 +41,5 @@ const Layout = ({ children }) => (
 export default Layout;
 
 Layout.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };
