@@ -44,7 +44,7 @@
       "node_modules/"
     ]
   },
-  "dependencies": {
+  "devDependencies": {
     "next": "9.3.1",
     "next-iron-session": "3.1.0",
     "node-fetch": "2.6.0",
