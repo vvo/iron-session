@@ -89,7 +89,6 @@
     "extends": [
       "config:js-lib",
       ":automergePatch",
-      ":automergeMinor",
       ":automergeBranch"
     ]
   }
