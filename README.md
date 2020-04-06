@@ -1,4 +1,4 @@
-# next-iron-session [![GitHub license](https://img.shields.io/github/license/vvo/next-iron-session?style=flat)](https://github.com/vvo/next-iron-session/blob/master/LICENSE) ![Tests](https://github.com/vvo/next-iron-session/workflows/Tests/badge.svg) [![codecov](https://codecov.io/gh/vvo/next-iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/next-iron-session) ![npm](https://img.shields.io/npm/v/next-iron-session)
+# next-iron-session [![GitHub license](https://img.shields.io/github/license/vvo/next-iron-session?style=flat)](https://github.com/vvo/next-iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/next-iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/next-iron-session/actions) [![codecov](https://codecov.io/gh/vvo/next-iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/next-iron-session) ![npm](https://img.shields.io/npm/v/next-iron-session)
 
 _🛠 Next.js stateless session utility using signed and encrypted cookies to store data_
 
