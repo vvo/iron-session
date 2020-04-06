@@ -55,7 +55,9 @@
     ],
     "extends": [
       "eslint:recommended",
-      "plugin:jest/recommended"
+      "plugin:jest/recommended",
+      "plugin:import/recommended",
+      "plugin:import/react"
     ]
   },
   "jest": {
@@ -76,6 +78,7 @@
     "babel-eslint": "10.1.0",
     "babel-jest": "25.2.6",
     "eslint": "6.8.0",
+    "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jest": "23.8.2",
     "eslint-plugin-react": "7.19.0",
     "eslint-plugin-react-hooks": "3.0.0",
@@ -89,7 +92,10 @@
     "extends": [
       "config:js-lib",
       ":automergePatch",
-      ":automergeBranch"
+      ":automergeBranch",
+      ":automergeLinters",
+      ":automergeTesters",
+      ":automergeTypes"
     ]
   }
 }

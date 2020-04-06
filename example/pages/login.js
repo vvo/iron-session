@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import useUser from "../lib/hooks/useUser";
 import Layout from "../components/layout";
 import Form from "../components/form";
