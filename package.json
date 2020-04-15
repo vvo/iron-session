@@ -57,7 +57,20 @@
       "eslint:recommended",
       "plugin:jest/recommended",
       "plugin:import/recommended"
-    ]
+    ],
+    "rules": {
+      "arrow-body-style": [
+        "error",
+        "always"
+      ],
+      "curly": "error",
+      "import/order": [
+        "error",
+        {
+          "newlines-between": "always"
+        }
+      ]
+    }
   },
   "jest": {
     "setupFiles": [
