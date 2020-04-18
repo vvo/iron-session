@@ -6579,12 +6579,12 @@ prepend-http@^1.0.1:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
   integrity sha1-1PRWKwzjaW5BrFLQ4ALlemNdxtw=
 
-prettier-plugin-packagejson@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-packagejson/-/prettier-plugin-packagejson-2.2.0.tgz#f7b12b6d0598c4a0ead1fba25315f73e3917e19a"
-  integrity sha512-sGOSvsTd70KhQCC+pMp/gr9Yp4Tk3IZ1fvE+3J4y+FosPhsRwnqXn+F1aGJ3Wk99vCaxox57/rie63/w5oZTvw==
+prettier-plugin-packagejson@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-packagejson/-/prettier-plugin-packagejson-2.2.1.tgz#cf394a1023a8ddc756825c0a7a94dd563dcd7f48"
+  integrity sha512-umn+ApVK/IpKOvlU2+tedVTsyo1DI0cSzESZIELS489cY1ihDkdbOz31BsgLXgSQhq2ve1t1hVs/K8EU12V+tQ==
   dependencies:
-    sort-package-json "1.41.0"
+    sort-package-json "1.42.0"
 
 prettier@2.0.4:
   version "2.0.4"
@@ -7526,10 +7526,10 @@ sort-object-keys@^1.1.3:
   resolved "https://registry.yarnpkg.com/sort-object-keys/-/sort-object-keys-1.1.3.tgz#bff833fe85cab147b34742e45863453c1e190b45"
   integrity sha512-855pvK+VkU7PaKYPc+Jjnmt4EzejQHyhhF33q31qG8x7maDzkeFhAAThdCYay11CISO+qAMwjOBP+fPZe0IPyg==
 
-sort-package-json@1.41.0:
-  version "1.41.0"
-  resolved "https://registry.yarnpkg.com/sort-package-json/-/sort-package-json-1.41.0.tgz#9ea0dd482e5c58a91baecddf629a243476682ad0"
-  integrity sha512-wiiqFbWReTOUBcNwRxUKJgYhoh3KN09RutpkcIZCE75cpZlf8CbyOTTMqWTZ3UXc4k6gyHjt/bonQeOfdPTOOQ==
+sort-package-json@1.42.0:
+  version "1.42.0"
+  resolved "https://registry.yarnpkg.com/sort-package-json/-/sort-package-json-1.42.0.tgz#6ccd043eb68ddda8c2f0e2dfc662b96543e85f4d"
+  integrity sha512-VPP4qRIJGBjqZ6snRRxcaAeV50/D9/bziiqwRajQmQqC1pee/+DzQ1yhB50SFkOkZYSC3KFcpjrSr8Jhvl/dcg==
   dependencies:
     detect-indent "^6.0.0"
     detect-newline "3.1.0"
