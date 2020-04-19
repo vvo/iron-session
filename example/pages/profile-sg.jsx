@@ -3,7 +3,7 @@ import useUser from "../lib/hooks/useUser";
 import Layout from "../components/layout";
 
 const SgProfile = () => {
-  const user = useUser({ redirectTo: "/login" });
+  const { user } = useUser({ redirectTo: "/login" });
 
   return (
     <Layout>
