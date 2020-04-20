@@ -1,11 +1,9 @@
 import React from "react";
 import useUser from "../lib/useUser";
-import Layout from "../components/layout";
+import Layout from "../components/Layout";
 
 const SgProfile = () => {
   const { user } = useUser({ redirectTo: "/login" });
-
-  console.log(user);
 
   if (!user || user.isLoggedIn === false) {
     return <Layout>loading...</Layout>;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useUser from "../lib/useUser";
-import Layout from "../components/layout";
-import Form from "../components/form";
+import Layout from "../components/Layout";
+import Form from "../components/Form";
 import fetchJson from "../lib/fetchJson";
 
 const Login = () => {
