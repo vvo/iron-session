@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-export default async function (...args) {
+export default async function fetchJson(...args) {
   try {
     const response = await fetch(...args);
 

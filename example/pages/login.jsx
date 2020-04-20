@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import useUser from "../lib/useUser";
-import Layout from "../components/layout";
-import Form from "../components/form";
-import fetch from "../lib/fetch";
+import Layout from "../components/Layout";
+import Form from "../components/Form";
+import fetchJson from "../lib/fetchJson";
 
 const Login = () => {
   // here we just check if user is already logged in and redirect to profile
@@ -22,7 +22,7 @@ const Login = () => {
 
     try {
       await mutateUser(
-        fetch("/api/login", {
+        fetchJson("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
