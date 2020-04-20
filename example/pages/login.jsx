@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useUser from "../lib/hooks/useUser";
+import useUser from "../lib/useUser";
 import Layout from "../components/layout";
 import Form from "../components/form";
 import fetch from "../lib/fetch";

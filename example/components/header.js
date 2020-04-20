@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import useUser from "../lib/hooks/useUser";
+import useUser from "../lib/useUser";
 import { useRouter } from "next/router";
 
 const Header = () => {
@@ -42,7 +42,8 @@ const Header = () => {
                   href="/api/logout"
                   onClick={async (e) => {
                     e.preventDefault();
-                    mutateUser(fetch("/api/logout"));
+                    await mutateUser(fetch("/api/logout"));
+                    router.push("/login");
                   }}
                 >
                   Logout

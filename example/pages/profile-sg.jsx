@@ -1,5 +1,5 @@
 import React from "react";
-import useUser from "../lib/hooks/useUser";
+import useUser from "../lib/useUser";
 import Layout from "../components/layout";
 
 const SgProfile = () => {
