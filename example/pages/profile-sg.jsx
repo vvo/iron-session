@@ -5,6 +5,12 @@ import Layout from "../components/layout";
 const SgProfile = () => {
   const { user } = useUser({ redirectTo: "/login" });
 
+  console.log(user);
+
+  if (!user || user.isLoggedIn === false) {
+    return <Layout>loading...</Layout>;
+  }
+
   return (
     <Layout>
       <h1>Your GitHub profile</h1>
@@ -17,16 +23,12 @@ const SgProfile = () => {
         <a href="https://github.com/zeit/swr">zeit/SWR</a>)
       </h2>
 
-      {user?.isLoggedIn && (
-        <>
-          <p style={{ fontStyle: "italic" }}>
-            Public data, from{" "}
-            <a href={githubUrl(user.login)}>{githubUrl(user.login)}</a>, reduced
-            to `login` and `avatar_url`.
-          </p>
-          <pre>{JSON.stringify(user, undefined, 2)}</pre>
-        </>
-      )}
+      <p style={{ fontStyle: "italic" }}>
+        Public data, from{" "}
+        <a href={githubUrl(user.login)}>{githubUrl(user.login)}</a>, reduced to
+        `login` and `avatar_url`.
+      </p>
+      <pre>{JSON.stringify(user, undefined, 2)}</pre>
     </Layout>
   );
 };

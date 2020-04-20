@@ -1,5 +1,5 @@
 import { SWRConfig } from "swr";
-import fetch from "../lib/fetch";
+import fetch from "../lib/fetchJson";
 
 function MyApp({ Component, pageProps }) {
   return (

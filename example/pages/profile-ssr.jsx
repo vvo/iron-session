@@ -39,7 +39,7 @@ export const getServerSideProps = withSession(async function ({ req, res }) {
     res.setHeader("location", "/login");
     res.statusCode = 302;
     res.end();
-    return;
+    return { props: {} };
   }
 
   return {

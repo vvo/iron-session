@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import useUser from "../lib/useUser";
 import { useRouter } from "next/router";
+import fetchJson from "../lib/fetchJson";
 
 const Header = () => {
   const { user, mutateUser } = useUser();
@@ -42,7 +43,7 @@ const Header = () => {
                   href="/api/logout"
                   onClick={async (e) => {
                     e.preventDefault();
-                    await mutateUser(fetch("/api/logout"));
+                    await mutateUser(fetchJson("/api/logout"));
                     router.push("/login");
                   }}
                 >
