@@ -2816,10 +2816,10 @@ invariant@^2.2.2:
   dependencies:
     loose-envify "^1.0.0"
 
-iron-store@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/iron-store/-/iron-store-1.2.0.tgz#a446c110aa71fa7c3a78fdbad182fe4be0544298"
-  integrity sha512-wt1cW5WjEa0gzQ3GsVujjCH6Rtn2skn6CXZcG6n3PWM+8QtsGqkpI2rb/phdTnpH23JgZudckCLNEg3yYOTA6g==
+iron-store@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/iron-store/-/iron-store-1.3.0.tgz#bcd8c0a5b0d89b27de4ce4ee7979574f8e903b89"
+  integrity sha512-Ics0Xy/1TTjOhZFLkarOpWfXp4TJ7foiKBFC/aXJH1bKwafNKrEhrHNeHyA/Jqx57tlhpIbGoNC3RUB+rRIz8Q==
   dependencies:
     "@hapi/iron" "^6.0.0"
     clone "^2.1.2"
@@ -3461,14 +3461,14 @@ neo-async@^2.5.0, neo-async@^2.6.1:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.1.tgz#ac27ada66167fa8849a6addd837f6b189ad2081c"
   integrity sha512-iyam8fBuCUpWeKPGpaNMetEocMt364qkCsfL9JuhjXX6dRnguRVOfk2GZaDpPjcOKiiXCPINZC1GczQ7iTq3Zw==
 
-next-iron-session@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/next-iron-session/-/next-iron-session-3.1.2.tgz#35145313124bacfc11ae8ee4913a6813fb49cfe3"
-  integrity sha512-h+uEvPQyPtSeAZsLreBY0as4hMH3n0Ds2/Tk4QawBMiYzeamwvB081sfhHHS6Ce5AjL4eQDU3wckT+AhlsCrZg==
+next-iron-session@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/next-iron-session/-/next-iron-session-3.2.0.tgz#c32195db831f1d8acc18a1483e38762c45f9a4fb"
+  integrity sha512-0ly9SouheqE+qSbzjZB4y2H8OKawsaZ6I4O9daDQWviZXbHlAvWPDof3ngVbA1hCWPOE7XSDZGGkpGP7XGAK0w==
   dependencies:
     clone "^2.1.2"
     cookie "^0.4.0"
-    iron-store "^1.2.0"
+    iron-store "^1.3.0"
 
 next-tick@~1.0.0:
   version "1.0.0"
