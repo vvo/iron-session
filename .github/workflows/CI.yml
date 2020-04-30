@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - next
   pull_request:
     branches:
       - master
+      - next
 
 jobs:
   ci:
@@ -37,7 +39,7 @@ jobs:
       - name: Code coverage
         uses: codecov/codecov-action@v1
       - name: Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next')
         run: yarn semantic-release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
