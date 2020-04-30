@@ -17,6 +17,8 @@ This method of storing session data is the same technique used by **frameworks l
 
 **⚡️ Flash session data is supported**. It means you can store some data which will be deleted when read. This is useful for temporary data, redirects or notices on your UI.
 
+**♻️ Password rotation is supported**. It allows you to change the password used to sign and encrypt sessions while still being able to decrypt sessions that were created with a previous password.
+
 **By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
 **Next.js's** 🗿 [Static generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended) (SG) and ⚙️ [Server-side Rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) (SSG) are both supported.
@@ -25,6 +27,8 @@ _Table of contents:_
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Examples](#examples)
+  - [Handle password rotation/update the password](#handle-password-rotationupdate-the-password)
 - [API](#api)
   - [withIronSession(handler, { password, ttl, cookieName, cookieOptions })](#withironsessionhandler--password-ttl-cookiename-cookieoptions-)
   - [req.session.set(name, value)](#reqsessionsetname-value)
@@ -50,7 +54,7 @@ You can find a more complete real-world example in the [example folder](./exampl
 
 The password is a private key you must pass at runtime, it has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
 
-⚠️ Store passwords in secret environment variables on your platform.
+⚠️ Always store passwords in secret environment variables on your platform.
 
 **pages/api/login.js**:
 
@@ -58,6 +62,7 @@ The password is a private key you must pass at runtime, it has to be at least 32
 import withIronSession from "iron-session";
 
 async function handler(req, res) {
+  // get user from database then:
   req.session.set("user", {
     id: 230,
     admin: true,
@@ -101,11 +106,58 @@ export default withIronSession(handler, {
 });
 ```
 
+## Examples
+
+### Handle password rotation/update the password
+
+When you want to:
+
+- rotate passwords for better security every two (or more, or less) weeks
+- change the password you previously used because it leaked somewhere (😱)
+
+Then you can use multiple passwords:
+
+**Week 1**:
+
+```js
+export default withIronSession(handler, {
+  password: [
+    {
+      id: 1,
+      password: "complex_password_at_least_32_characters_long",
+    },
+  ],
+});
+```
+
+**Week 2**:
+
+```js
+export default withIronSession(handler, {
+  password: [
+    {
+      id: 2,
+      password: "another_password_at_least_32_characters_long",
+    },
+    {
+      id: 1,
+      password: "complex_password_at_least_32_characters_long",
+    },
+  ],
+});
+```
+
+Notes:
+
+- `id` is required so that we do not have to try every password in the list when decrypting (the `id` is part of the cookie value).
+- The password used to encrypt session data (to `seal`) is always the first one in the array, so when rotating to put a new password, it must be first in the array list
+- Even if you do not provide an array at first, you can always move to array based passwords afterwards, knowing that your first password (`string`) was given `{id:1}` automatically.
+
 ## API
 
 ### withIronSession(handler, { password, ttl, cookieName, cookieOptions })
 
-- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
+- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `ttl`, _optional_: In seconds, default to 14 days
 - `cookieName`, _optional_: Default to `__ironSession`
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
