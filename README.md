@@ -30,7 +30,7 @@ _Table of contents:_
 - [Examples](#examples)
   - [Handle password rotation/update the password](#handle-password-rotationupdate-the-password)
 - [API](#api)
-  - [withIronSession(handler, { password, ttl, cookieName, cookieOptions })](#withironsessionhandler--password-ttl-cookiename-cookieoptions-)
+  - [withIronSession(handler, { password, cookieName, [ttl], [cookieOptions] })](#withironsessionhandler--password-cookiename-ttl-cookieoptions-)
   - [req.session.set(name, value)](#reqsessionsetname-value)
   - [req.session.get(name)](#reqsessiongetname)
   - [req.session.setFlash(name, value)](#reqsessionsetflashname-value)
@@ -155,11 +155,11 @@ Notes:
 
 ## API
 
-### withIronSession(handler, { password, ttl, cookieName, cookieOptions })
+### withIronSession(handler, { password, cookieName, [ttl], [cookieOptions] })
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
+- `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds, default to 14 days
-- `cookieName`, _optional_: Default to `__ironSession`
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
 
 ```js
