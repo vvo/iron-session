@@ -93,7 +93,7 @@
     "eslint-plugin-import": "2.20.2",
     "eslint-plugin-jest": "23.8.2",
     "eslint-plugin-react": "7.19.0",
-    "eslint-plugin-react-hooks": "3.0.0",
+    "eslint-plugin-react-hooks": "4.0.0",
     "jest": "25.5.3",
     "jest-date-mock": "1.0.8",
     "prettier": "2.0.5",
