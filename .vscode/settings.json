@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "search.exclude": {
     ".yarn": true,
-    "example/.yarn": true,
+    "examples/next.js/.yarn": true,
     "yarn.lock": true
   },
   "eslint.packageManager": "yarn",

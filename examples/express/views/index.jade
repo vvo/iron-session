@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  a(href="/login") Login
+  br
+  a(href="/profile") Profile (protected)
+  br
+  a(href="/logout") Logout
