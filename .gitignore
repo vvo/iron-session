@@ -5,7 +5,7 @@ node_modules/
 # misc
 .DS_Store
 /dist/
-/example/.next/
+/examples/next.js/.next/
 
 # debug
 npm-debug.log*

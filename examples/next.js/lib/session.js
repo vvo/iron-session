@@ -1,5 +1,5 @@
 // this file is a wrapper with defaults to be used in both API routes and `getServerSideProps` functions
-import withIronSession from "next-iron-session";
+import { withIronSession } from "next-iron-session";
 
 export default function withSession(handler) {
   return withIronSession(handler, {
@@ -7,7 +7,7 @@ export default function withSession(handler) {
     // ⚠️ Do not reuse the same password, create a different password for you and store it in a secret management system
     // Example for Zeit's now: https://zeit.co/docs/v2/serverless-functions/env-and-secrets
     password: process.env.SECRET_COOKIE_PASSWORD,
-    cookieName: "next-iron-session/example",
+    cookieName: "next-iron-session/examples/next.js",
     cookieOptions: {
       // the next line allows to use the session in non-https environements like
       // Next.js dev mode (http://localhost:3000)
