@@ -15,15 +15,13 @@ The seal stored on the client contains the session data, not your server, making
 The seal is signed and encrypted using [@hapi/iron](https://github.com/hapijs/iron), [iron-store](https://github.com/vvo/iron-store/) is used behind the scenes.
 This method of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage)**.
 
-**⚡️ Flash session data is supported**. It means you can store some data which will be deleted when read. This is useful for temporary data, redirects or notices on your UI.
-
 **♻️ Password rotation is supported**. It allows you to change the password used to sign and encrypt sessions while still being able to decrypt sessions that were created with a previous password.
-
-**By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
 **Next.js's** 🗿 [Static generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended) (SG) and ⚙️ [Server-side Rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) (SSG) are both supported.
 
 **There's a Connect middleware available** so you can use this library in any Connect compatible framework like Express.
+
+**By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
 _Table of contents:_
 
@@ -39,7 +37,6 @@ _Table of contents:_
   - [async applySession(req, res, { password, cookieName, [ttl], [cookieOptions] })](#async-applysessionreq-res--password-cookiename-ttl-cookieoptions-)
   - [req.session.set(name, value)](#reqsessionsetname-value)
   - [req.session.get(name)](#reqsessiongetname)
-  - [req.session.setFlash(name, value)](#reqsessionsetflashname-value)
   - [req.session.unset(name)](#reqsessionunsetname)
   - [req.session.destroy()](#reqsessiondestroy)
 - [FAQ](#faq)
@@ -284,8 +281,6 @@ await applySession(req, res, options);
 ### req.session.set(name, value)
 
 ### req.session.get(name)
-
-### req.session.setFlash(name, value)
 
 ### req.session.unset(name)
 
