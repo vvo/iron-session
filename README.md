@@ -308,7 +308,7 @@ Not so much:
 - JWT tokens are not encrypted, the payload is visible by customers if they manage to inspect the seal. You would have to use [JWE](https://tools.ietf.org/html/rfc7516) to achieve the same.
 - @hapi/iron mechanism is not a standard, it's a way to sign and encrypt data into seals
 
-Depending on your own needs and preferences, `next-iron-session-cookie` may or may not fit you.
+Depending on your own needs and preferences, `next-iron-session` may or may not fit you.
 
 ## Project status
 
