@@ -79,7 +79,7 @@ async function handler(req, res) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
-  // if your localhost is server on http:// then disable the secure flag
+  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production" ? true : false,
   },
@@ -98,7 +98,7 @@ function handler(req, res, session) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
-  // if your localhost is server on http:// then disable the secure flag
+  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production" ? true : false,
   },
@@ -117,7 +117,7 @@ function handler(req, res, session) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
-  // if your localhost is server on http:// then disable the secure flag
+  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production" ? true : false,
   },
@@ -187,7 +187,7 @@ import { ironSession } from "next-iron-session";
 const session = ironSession({
   cookieName: "next-iron-session/examples/express",
   password: process.env.SECRET_COOKIE_PASSWORD,
-  // if your localhost is server on http:// then disable the secure flag
+  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production" ? true : false,
   },
@@ -219,7 +219,7 @@ import { ironSession } from "next-iron-session";
 const session = ironSession({
   cookieName: "next-iron-session/examples/express",
   password: process.env.SECRET_COOKIE_PASSWORD,
-  // if your localhost is server on http:// then disable the secure flag
+  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production" ? true : false,
   },
