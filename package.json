@@ -10,6 +10,7 @@
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
   "main": "dist/",
+  "types": "lib/index.d.ts",
   "files": [
     "dist/",
     "lib/",
