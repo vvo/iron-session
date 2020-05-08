@@ -86,7 +86,7 @@ export default withIronSession(handler, {
 });
 ```
 
-**pages/user.js**:
+**pages/api/user.js**:
 
 ```js
 import { withIronSession } from "next-iron-session";
