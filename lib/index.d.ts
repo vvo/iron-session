@@ -27,6 +27,14 @@ export type SessionOptions = {
 
 export type Handler = (req: any, res: any) => any;
 
+export type Session = {
+  set: <T = any>(name: string, value: T) => void;
+  get: <T = any>(name: string) => T | undefined;
+  unset: (name: string) => void;
+  destroy: () => void;
+  save: () => Promise<void>;
+};
+
 export type CookieOptions = {
   /** Forbids JavaScript from accessing the cookie.
    * For example, through the Document.cookie property, the XMLHttpRequest API, or the Request API.
