@@ -7,7 +7,7 @@ var session = ironSession({
   password: process.env.SECRET_COOKIE_PASSWORD,
   cookieOptions: {
     // the next line allows to use the session in non-https environements
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 
