@@ -81,12 +81,12 @@ export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 ```
 
-**pages/user.js**:
+**pages/api/user.js**:
 
 ```js
 import { withIronSession } from "next-iron-session";
@@ -100,7 +100,7 @@ export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 ```
@@ -119,7 +119,7 @@ export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 ```
@@ -189,7 +189,7 @@ const session = ironSession({
   password: process.env.SECRET_COOKIE_PASSWORD,
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 
@@ -221,7 +221,7 @@ const session = ironSession({
   password: process.env.SECRET_COOKIE_PASSWORD,
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    secure: process.env.NODE_ENV === "production",
   },
 });
 import nextConnect from "next-connect";
