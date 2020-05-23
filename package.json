@@ -91,7 +91,7 @@
     "@types/jest": "25.2.2",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.0.1",
-    "eslint": "7.0.0",
+    "eslint": "7.1.0",
     "eslint-plugin-import": "2.20.2",
     "eslint-plugin-jest": "23.13.0",
     "eslint-plugin-react": "7.20.0",
