@@ -88,19 +88,19 @@
     "@babel/cli": "7.8.4",
     "@babel/core": "7.9.6",
     "@babel/preset-env": "7.9.6",
-    "@types/jest": "25.2.2",
+    "@types/jest": "25.2.3",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.0.1",
-    "eslint": "7.0.0",
+    "eslint": "7.1.0",
     "eslint-plugin-import": "2.20.2",
-    "eslint-plugin-jest": "23.11.0",
+    "eslint-plugin-jest": "23.13.1",
     "eslint-plugin-react": "7.20.0",
     "eslint-plugin-react-hooks": "4.0.2",
     "jest": "26.0.1",
     "jest-date-mock": "1.0.8",
     "prettier": "2.0.5",
     "prettier-plugin-packagejson": "2.2.3",
-    "semantic-release": "17.0.7"
+    "semantic-release": "17.0.8"
   },
   "renovate": {
     "extends": [
