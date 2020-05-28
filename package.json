@@ -102,6 +102,10 @@
     "prettier-plugin-packagejson": "2.2.4",
     "semantic-release": "17.0.8"
   },
+  "engines": {
+    "node": ">=0.11.0"
+  },
+  "engineStrict": true,
   "renovate": {
     "extends": [
       "config:js-lib",
