@@ -50,6 +50,15 @@ const Header = () => {
                   Logout
                 </a>
               </li>
+              <li>
+                <a href="https://github.com/vvo/next-iron-session">
+                  <img
+                    src="/GitHub-Mark-Light-32px.png"
+                    widht="32"
+                    height="32"
+                  />
+                </a>
+              </li>
             </>
           )}
         </ul>
