@@ -17,7 +17,7 @@ export type SessionOptions = {
   /** Password of the cookie
    *
    *  Required */
-  password: string;
+  password: string | { id: number; password: string }[];
 
   /** Time to live in seconds.
    *
