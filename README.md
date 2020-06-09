@@ -41,6 +41,7 @@ _Table of contents:_
   - [req.session.destroy()](#reqsessiondestroy)
 - [FAQ](#faq)
   - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
+  - [What are the drawbacks?](#what-are-the-drawbacks)
   - [How is this different from JWT?](#how-is-this-different-from-jwt)
 - [Project status](#project-status)
 - [Credits](#credits)
@@ -290,9 +291,13 @@ await applySession(req, res, options);
 
 ### Why use pure 🍪 cookies for sessions?
 
-This makes your sessions stateless: you do not have to store session data on your server. This is particularly useful in serverless architectures. Still, there are some drawbacks to this approach:
+This makes your sessions stateless: you do not have to store session data on your server. You do not need another server or service to store session data. This is particularly useful in serverless architectures where you're trying to reduce your backend dependencies.
 
-- you cannot invalidate a seal when needed because there's no state stored on the server-side about them. We consider that the way the cookie is stored reduces the possibility for this eventuality to happen.
+### What are the drawbacks?
+
+There are some drawbacks to this approach:
+
+- you cannot invalidate a seal when needed because there's no state stored on the server-side about them. We consider that the way the cookie is stored reduces the possibility for this eventuality to happen. Also, in most applications the first thing you do when receiving an authenticated request is to validate the user and their rights in your database, which defeats the case where someone would try to use a token while their account was deactivated/deleted. Now if someone steals a user token you should have a process in place to mitigate that: deactivate the user and force a re-login with a flag in your database for example.
 - application not supporting cookies won't work, but you can use [iron-store](https://github.com/vvo/iron-store/) to implement something similar. In the future, we could allow `next-iron-session` to accept [basic auth](https://tools.ietf.org/html/rfc7617) or bearer token methods too. Open an issue if you're interested.
 - on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, a `next-iron-session` cookie containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
 - performance: crypto on the server-side could be slow, if that's the case let me know. Also, cookies are sent to every request to your website, even images, so this could be an issue
