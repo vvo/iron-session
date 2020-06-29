@@ -94,7 +94,7 @@
     "eslint": "7.3.1",
     "eslint-plugin-import": "2.22.0",
     "eslint-plugin-jest": "23.17.1",
-    "eslint-plugin-react": "7.20.0",
+    "eslint-plugin-react": "7.20.1",
     "eslint-plugin-react-hooks": "4.0.4",
     "jest": "26.1.0",
     "jest-date-mock": "1.0.8",
