@@ -16,7 +16,6 @@ export default withSession(async (req, res) => {
     const events = await fetchJson(url);
     res.json(events);
   } catch (error) {
-    console.log("NOPE");
     const { response: fetchResponse } = error;
     res.status(fetchResponse?.status || 500).json(error.data);
   }
