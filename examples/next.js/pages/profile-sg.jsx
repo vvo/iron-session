@@ -1,11 +1,13 @@
 import React from "react";
 import useUser from "../lib/useUser";
+import useEvents from "../lib/useEvents";
 import Layout from "../components/Layout";
 
 const SgProfile = () => {
   const { user } = useUser({ redirectTo: "/login" });
+  const { events, loadingEvents } = useEvents(user);
 
-  if (!user || user.isLoggedIn === false) {
+  if (!user?.isLoggedIn || loadingEvents) {
     return <Layout>loading...</Layout>;
   }
 
@@ -27,6 +29,11 @@ const SgProfile = () => {
         `login` and `avatar_url`.
       </p>
       <pre>{JSON.stringify(user, undefined, 2)}</pre>
+
+      <p>
+        Number of GitHub events for user: <b>{events.length}</b>, last event
+        type: <b>{events[0].type}</b>
+      </p>
     </Layout>
   );
 };

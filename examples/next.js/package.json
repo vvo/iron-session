@@ -46,11 +46,11 @@
   },
   "devDependencies": {
     "next": "9.4.4",
-    "next-iron-session": "4.1.6",
+    "next-iron-session": "4.1.7",
     "node-fetch": "2.6.0",
     "prop-types": "15.7.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "swr": "0.2.2"
+    "swr": "0.2.3"
   }
 }
