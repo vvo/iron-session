@@ -246,7 +246,7 @@ This can be used to wrap Next.js [`getServerSideProps`](https://nextjs.org/docs/
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds, default to 14 days
-- `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
+- [`cookieOptions`](https://github.com/jshttp/cookie#cookieserializename-value-options), _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
 
 ```js
 {
@@ -256,6 +256,10 @@ This can be used to wrap Next.js [`getServerSideProps`](https://nextjs.org/docs/
   // The next line makes sure browser will expire cookies before seals are considered expired by the server. It also allows for clock difference of 60 seconds maximum between server and clients.
   maxAge: (ttl === 0 ? 2147483647 : ttl) - 60,
   path: "/",
+  // other options:
+  // domain, if you want the cookie to be valid for the whole domain and subdomains, use domain: example.com
+  // encode, there should be no need to use this option, encoding is done by next-iron-session already
+  // expires, there should be no need to use this option, maxAge takes precedence
 }
 ```
 
