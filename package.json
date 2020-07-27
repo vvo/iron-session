@@ -93,7 +93,7 @@
     "babel-jest": "26.1.0",
     "eslint": "7.5.0",
     "eslint-plugin-import": "2.22.0",
-    "eslint-plugin-jest": "23.18.2",
+    "eslint-plugin-jest": "23.19.0",
     "eslint-plugin-react": "7.20.4",
     "eslint-plugin-react-hooks": "4.0.8",
     "jest": "26.1.0",
