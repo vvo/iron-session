@@ -8,9 +8,9 @@
   "dependencies": {
     "debug": "~4.1.1",
     "express": "~4.17.1",
-    "http-errors": "~1.7.3",
+    "http-errors": "~1.8.0",
     "jade": "~1.11.0",
     "morgan": "~1.10.0",
-    "next-iron-session": "^4.0.0"
+    "next-iron-session": "^4.1.7"
   }
 }
