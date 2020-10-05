@@ -289,7 +289,9 @@ await applySession(req, res, options);
 
 ### req.session.unset(name)
 
-### req.session.destroy()
+### req.session.save() => promise
+
+### req.session.destroy() => promise
 
 ## FAQ
 
