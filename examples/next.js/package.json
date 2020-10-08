@@ -45,7 +45,7 @@
     ]
   },
   "devDependencies": {
-    "next": "9.5.1",
+    "next": "9.5.4",
     "next-iron-session": "4.1.7",
     "node-fetch": "2.6.1",
     "prop-types": "15.7.2",
