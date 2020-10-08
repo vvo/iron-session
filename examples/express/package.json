@@ -6,11 +6,11 @@
     "start": "SECRET_COOKIE_PASSWORD=Zp-p!QhpyU_0q!@taxoceA.4q35B7@4q node ./bin/www"
   },
   "dependencies": {
-    "debug": "~4.1.1",
+    "debug": "~4.2.0",
     "express": "~4.17.1",
     "http-errors": "~1.8.0",
     "jade": "~1.11.0",
     "morgan": "~1.10.0",
-    "next-iron-session": "^4.1.7"
+    "next-iron-session": "^4.1.9"
   }
 }
