@@ -21,7 +21,7 @@
     "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
     "format": "prettier --write '**/*.*' && eslint . --fix",
     "lint": "prettier --check '**/*.*' && eslint .",
-    "post-install": "yarn build",
+    "prepare": "yarn build",
     "prepublishOnly": "yarn build",
     "semantic-release": "semantic-release",
     "test": "jest --coverage && yarn lint"
