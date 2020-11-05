@@ -11,18 +11,14 @@ on:
       - next
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
   test:
-    needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [10, 12, 14]
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
@@ -46,6 +42,8 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next')
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Read Node.js version to install from `.nvmrc`
         run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
         id: nvm
