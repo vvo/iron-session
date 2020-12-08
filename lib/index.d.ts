@@ -19,6 +19,11 @@ export type SessionOptions = {
    *  Required */
   password: string | { id: number; password: string }[];
 
+  /** Domains to reset when duplicate cookies are found
+   *
+   * Default: null */
+  resetDomains?: Array<?string>;
+
   /** Time to live in seconds.
    *
    * Default: 15 days 8 */
