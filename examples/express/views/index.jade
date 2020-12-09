@@ -7,4 +7,7 @@ block content
   br
   a(href="/profile") Profile (protected)
   br
-  a(href="/logout") Logout
+  //- Use POST for logout to avoid caching issues
+  //- See https://github.com/vvo/next-iron-session/issues/274
+  form(action="/logout", method="post")
+    button(type="submit") Logout

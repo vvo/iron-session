@@ -38,7 +38,8 @@ _Table of contents:_
   - [req.session.set(name, value)](#reqsessionsetname-value)
   - [req.session.get(name)](#reqsessiongetname)
   - [req.session.unset(name)](#reqsessionunsetname)
-  - [req.session.destroy()](#reqsessiondestroy)
+  - [req.session.save() => promise](#reqsessionsave--promise)
+  - [req.session.destroy() => promise](#reqsessiondestroy--promise)
 - [FAQ](#faq)
   - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
   - [What are the drawbacks?](#what-are-the-drawbacks)
@@ -292,6 +293,10 @@ await applySession(req, res, options);
 ### req.session.save() => promise
 
 ### req.session.destroy() => promise
+
+Note: If you use `req.session.destroy()` in an API route, you need to make sure this route will not be cached. To do so, either call this route via a POST request `fetch("/api/logout", { method: "POST" })` or add `cache-control: no-store, max-age=0` to its response.
+
+See https://github.com/vvo/next-iron-session/issues/274 for more details.
 
 ## FAQ
 

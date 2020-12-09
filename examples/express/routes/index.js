@@ -34,7 +34,9 @@ router.get("/profile", session, async function (req, res) {
   });
 });
 
-router.get("/logout", session, async function (req, res) {
+// use POST for logout so that its not cached by default
+// see https://github.com/vvo/next-iron-session/issues/274
+router.post("/logout", session, async function (req, res) {
   req.session.destroy();
   res.redirect("/");
 });
