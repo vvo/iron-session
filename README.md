@@ -279,7 +279,7 @@ app.use(ironSession({ ...options }));
 Allows you to use this module the way you want as long as you have access to `req` and `res`.
 
 ```js
-import { applySession } from "next-session";
+import { applySession } from "next-iron-session";
 
 await applySession(req, res, options);
 ```
