@@ -45,12 +45,12 @@
     ]
   },
   "devDependencies": {
-    "next": "10.0.3",
+    "next": "10.0.6",
     "next-iron-session": "4.1.10",
     "node-fetch": "2.6.1",
     "prop-types": "15.7.2",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "swr": "0.3.9"
+    "swr": "0.4.1"
   }
 }
