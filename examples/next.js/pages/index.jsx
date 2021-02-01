@@ -51,6 +51,7 @@ const Home = () => (
         the `/login` route.
       </li>
     </ol>
+    <div>test</div>
     <style jsx>{`
       li {
         margin-bottom: 0.5rem;
