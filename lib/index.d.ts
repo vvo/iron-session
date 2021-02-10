@@ -57,6 +57,11 @@ export type CookieOptions = {
    *
    * Default: true */
   secure?: boolean;
+
+  /**
+   * Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, it will be 15 days by default
+   */
+  maxAge?: number;
 };
 
 export function applySession(
