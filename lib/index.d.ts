@@ -28,7 +28,7 @@ export type SessionOptions = {
 export type Handler = (req: any, res: any) => any;
 
 export type Session = {
-  set: <T = any>(name: string, value: T) => void;
+  set: <T = any>(name: string, value: T) => T;
   get: <T = any>(name: string) => T | undefined;
   unset: (name: string) => void;
   destroy: () => void;
