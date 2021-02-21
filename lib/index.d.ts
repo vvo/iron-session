@@ -32,7 +32,7 @@ export type Session = {
   get: <T = any>(name: string) => T | undefined;
   unset: (name: string) => void;
   destroy: () => void;
-  save: () => Promise<void>;
+  save: () => Promise<string>;
 };
 
 export type CookieOptions = {
