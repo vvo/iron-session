@@ -25,7 +25,10 @@ export type SessionOptions = {
   ttl?: number;
 };
 
-export type Handler<Req, Res> = (req: Req & { session: Session }, res: Res) => any;
+export type Handler<Req, Res> = (
+  req: Req & { session: Session },
+  res: Res
+) => any;
 
 export type Session = {
   set: <T = any>(name: string, value: T) => T;
@@ -67,14 +70,14 @@ export type CookieOptions = {
 export function applySession(
   req: any,
   res: any,
-  sessionOptions: SessionOptions,
+  sessionOptions: SessionOptions
 ): Promise<void>;
 
 export function ironSession(
-  sessionOptions: SessionOptions,
+  sessionOptions: SessionOptions
 ): (req: any, res: any, next: any) => void;
 
 export function withIronSession(
   handler: Handler,
-  sessionOptions: SessionOptions,
+  sessionOptions: SessionOptions
 ): (...args: any[]) => Promise<any>;
