@@ -4,7 +4,7 @@ This example creates an authentication system that uses a **signed and encrypted
 
 It uses current best practices for authentication in the Next.js ecosystem.
 
-**Features:**
+**Features:** 
 
 - [Static Generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended) (SG), recommended example
 - [Server-side Rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) (SSR) example in case you need it
