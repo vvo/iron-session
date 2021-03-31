@@ -21,7 +21,7 @@ export type SessionOptions = {
 
   /** Time to live in seconds.
    *
-   * Default: 15 days 8 */
+   * Default: 15 days */
   ttl?: number;
 };
 
