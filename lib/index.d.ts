@@ -1,3 +1,5 @@
+import { IncomingMessage, ServerResponse } from "http";
+
 export type SessionOptions = {
   /** Name of the cookie
    *
@@ -25,11 +27,50 @@ export type SessionOptions = {
   ttl?: number;
 };
 
-export type Handler = (req: any, res: any) => any;
+/**
+ * This the NextApiRequest with Session type and NextApiResponse
+ * This is stright from Next.js 'next/next-server/util.d.ts'
+ */
+type Env = {
+  [key: string]: string;
+};
+export interface WithNextApiRequest extends IncomingMessage {
+  query: {
+    [key: string]: string | string[];
+  };
+  cookies: {
+    [key: string]: string;
+  };
+  body: any;
+  env: Env;
+  preview?: boolean;
+  previewData?: any;
+  session: Session;
+}
+type Send<T> = (body: T) => void;
+export type NextApiResponse<T = any> = ServerResponse & {
+  send: Send<T>;
+  json: Send<T>;
+  status: (statusCode: number) => NextApiResponse<T>;
+  redirect(url: string): NextApiResponse<T>;
+  redirect(status: number, url: string): NextApiResponse<T>;
+
+  setPreviewData: (
+    data: object | string,
+    options?: {
+      maxAge?: number;
+    },
+  ) => NextApiResponse<T>;
+  clearPreviewData: () => NextApiResponse<T>;
+};
+export type Handler<T = any> = (
+  req: WithNextApiRequest,
+  res: NextApiResponse<T>,
+) => void | Promise<void>;
 
 export type Session = {
   set: <T = any>(name: string, value: T) => T;
-  get: <T = any>(name: string) => T | undefined;
+  get: <T = any>(name?: string) => T | undefined;
   unset: (name: string) => void;
   destroy: () => void;
   save: () => Promise<string>;
