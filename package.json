@@ -79,6 +79,7 @@
     ]
   },
   "dependencies": {
+    "@types/cookie": "^0.4.0",
     "array.prototype.flat": "^1.2.4",
     "clone": "^2.1.2",
     "cookie": "^0.4.1",
