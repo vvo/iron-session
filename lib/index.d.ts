@@ -1,4 +1,4 @@
-import type { CookieSerializeOptions } from "@types/cookie";
+import type { CookieSerializeOptions } from "cookie";
 
 export type SessionOptions = {
   /** Name of the cookie
