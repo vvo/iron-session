@@ -20,9 +20,9 @@ It uses current best practices for authentication in the Next.js ecosystem.
 
 ## Deploy your own
 
-Deploy the example using [ZEIT Now](https://zeit.co/now):
+Deploy the example using [Vercel](https://vercel.com):
 
-[![Deploy with ZEIT Now](https://zeit.co/button)](https://zeit.co/import/project?template=https://github.com/vvo/next-iron-session/tree/master/example)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vvo/next-iron-session/tree/master/examples/next.js&project-name=next-iron-session&repository-name=next-iron-session)
 
 ## ⚠️ Always create your own `SECRET_COOKIE_PASSWORD`
 
