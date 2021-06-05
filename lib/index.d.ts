@@ -1,4 +1,16 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Request, Response } from "express";
 import type { CookieSerializeOptions } from "cookie";
+
+type ExpressRequestWithSession = Request & { session: Session };
+type NextApiRequestWithSession = NextApiRequest & { session: Session };
+export type IronRequest = ExpressRequestWithSession | NextApiRequestWithSession;
+export type IronResponse = Response | NextApiResponse;
+
+export type IronHandler<IronRequest, IronResponse> = (
+  req: IronRequest,
+  res: IronResponse,
+) => any;
 
 export type SessionOptions = {
   /** Name of the cookie
@@ -27,11 +39,6 @@ export type SessionOptions = {
   ttl?: number;
 };
 
-export type Handler<Req, Res> = (
-  req: Req & { session: Session },
-  res: Res,
-) => any;
-
 export type Session = {
   set: <T = any>(name: string, value: T) => T;
   get: <T = any>(name: string) => T | undefined;
@@ -51,6 +58,6 @@ export function ironSession(
 ): (req: any, res: any, next: any) => void;
 
 export function withIronSession(
-  handler: Handler,
+  handler: IronHandler<IronRequest, IronResponse>,
   sessionOptions: SessionOptions,
 ): (...args: any[]) => Promise<any>;
