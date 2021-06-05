@@ -12,6 +12,8 @@ export type IronHandler<IronRequest, IronResponse> = (
   res: IronResponse,
 ) => any;
 
+export type Handler = IronHandler<IronRequest, IronResponse>;
+
 export type SessionOptions = {
   /** Name of the cookie
    *
