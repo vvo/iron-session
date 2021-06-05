@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "next start"
+    "build": "npx next build",
+    "dev": "npx next dev",
+    "start": "npx next start"
   },
   "eslintConfig": {
     "env": {
@@ -45,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react": "^17.0.9",
     "next": "10.0.7",
     "next-iron-session": "4.1.12",
     "node-fetch": "2.6.1",
