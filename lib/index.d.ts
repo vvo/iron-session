@@ -1,3 +1,5 @@
+import type { CookieSerializeOptions } from "cookie";
+
 export type SessionOptions = {
   /** Name of the cookie
    *
@@ -12,7 +14,7 @@ export type SessionOptions = {
       sameSite: 'lax'
       secure: true
      } */
-  cookieOptions?: CookieOptions;
+  cookieOptions?: CookieSerializeOptions;
 
   /** Password of the cookie
    *
@@ -21,7 +23,7 @@ export type SessionOptions = {
 
   /** Time to live in seconds.
    *
-   * Default: 15 days 8 */
+   * Default: 15 days */
   ttl?: number;
 };
 
@@ -36,35 +38,6 @@ export type Session = {
   unset: (name: string) => void;
   destroy: () => void;
   save: () => Promise<string>;
-};
-
-export type CookieOptions = {
-  /** Forbids JavaScript from accessing the cookie.
-   * For example, through the Document.cookie property, the XMLHttpRequest API, or the Request API.
-   * This mitigates attacks against cross-site scripting (XSS).
-   *
-   * Default: true */
-  httpOnly?: boolean;
-
-  /** A path that must exist in the requested URL, or the browser won't send the Cookie header.
-   *
-   * Default: "/" */
-  path?: string;
-
-  /** Asserts that a cookie must not be sent with cross-origin requests, providing some protection against cross-site request forgery attacks
-   *
-   * Default: "lax" */
-  sameSite?: "none" | "lax" | "strict";
-
-  /** A secure cookie is only sent to the server when a request is made with the https: scheme.
-   *
-   * Default: true */
-  secure?: boolean;
-
-  /**
-   * Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, it will be 15 days by default
-   */
-  maxAge?: number;
 };
 
 export function applySession(

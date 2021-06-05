@@ -39,7 +39,7 @@ _Table of contents:_
   - [req.session.get(name)](#reqsessiongetname)
   - [req.session.unset(name)](#reqsessionunsetname)
   - [req.session.save() => promise](#reqsessionsave--promise)
-  - [req.session.destroy() => promise](#reqsessiondestroy--promise)
+  - [req.session.destroy()](#reqsessiondestroy)
 - [FAQ](#faq)
   - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
   - [What are the drawbacks?](#what-are-the-drawbacks)
@@ -81,6 +81,7 @@ async function handler(req, res) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -100,6 +101,7 @@ function handler(req, res, session) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -119,6 +121,7 @@ function handler(req, res, session) {
 
 export default withIronSession(handler, {
   password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -292,7 +295,7 @@ await applySession(req, res, options);
 
 ### req.session.save() => promise
 
-### req.session.destroy() => promise
+### req.session.destroy()
 
 Note: If you use `req.session.destroy()` in an API route, you need to make sure this route will not be cached. To do so, either call this route via a POST request `fetch("/api/logout", { method: "POST" })` or add `cache-control: no-store, max-age=0` to its response.
 
@@ -341,4 +344,4 @@ Thanks to [hapi](https://hapi.dev/) team for creating [iron](https://github.com/
 ## 🤓 References
 
 - https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html#cookies
-- https://owasp.org/www-project-cheat-sheets/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#encryption-based-seal-pattern
+- https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#encryption-based-token-pattern
