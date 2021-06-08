@@ -58,15 +58,15 @@ yarn add next-iron-session
 
 ## Usage
 
-You can find real-world examples (Next.js, Express) in the [examples folder](./examples/).
+You can find full featured examples (Next.js, Express) in the [examples folder](./examples/).
 
 The password is a private key you must pass at runtime, it has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
 
 ⚠️ Always store passwords in secret environment variables on your platform.
 
-**pages/api/login.js**:
-
 ```js
+// pages/api/login.js
+
 import { withIronSession } from "next-iron-session";
 
 async function handler(req, res) {
@@ -89,9 +89,9 @@ export default withIronSession(handler, {
 });
 ```
 
-**pages/api/user.js**:
-
 ```js
+// pages/api/user.js
+
 import { withIronSession } from "next-iron-session";
 
 function handler(req, res, session) {
@@ -109,9 +109,9 @@ export default withIronSession(handler, {
 });
 ```
 
-**pages/api/logout.js**:
-
 ```js
+// pages/api/logout.js
+
 import { withIronSession } from "next-iron-session";
 
 function handler(req, res, session) {
@@ -134,6 +134,39 @@ export default withIronSession(handler, {
 - they expire
 - a wrong password was used
 - we can't find back the password id in the current list
+
+## TypeScript usage
+
+Also see the [full TypeScript example](./examples/next-typescript).
+
+```ts
+// pages/api/login.ts
+import { NextApiRequest, NextApiResponse } from "next";
+import { withIronSession, Session } from "next-iron-session";
+type NextIronRequest = NextApiRequest & { session: Session };
+
+async function handler(
+  req: NextIronRequest,
+  res: NextApiResponse,
+): Promise<void> {
+  // get user from database then:
+  req.session.set("user", {
+    id: 230,
+    admin: true,
+  });
+  await req.session.save();
+  res.send("Logged in");
+}
+
+export default withIronSession(handler, {
+  password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
+  // if your localhost is served on http:// then disable the secure flag
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
+});
+```
 
 ## Examples
 
