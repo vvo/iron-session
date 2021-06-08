@@ -1,11 +1,5 @@
 # next-iron-session [![GitHub license](https://img.shields.io/github/license/vvo/next-iron-session?style=flat)](https://github.com/vvo/next-iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/next-iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/next-iron-session/actions) [![codecov](https://codecov.io/gh/vvo/next-iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/next-iron-session) ![npm](https://img.shields.io/npm/v/next-iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=next-iron-session) [![Github All Contributors](https://img.shields.io/github/all-contributors/vvo/next-iron-session)](#contributors-)
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-
 _🛠 Next.js and Express (connect middleware) stateless session utility using signed and encrypted cookies to store data_
 
 ---
