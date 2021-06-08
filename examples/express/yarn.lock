@@ -44,6 +44,11 @@
     "@hapi/cryptiles" "5.x.x"
     "@hapi/hoek" "9.x.x"
 
+"@types/cookie@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@types/cookie/-/cookie-0.4.0.tgz#14f854c0f93d326e39da6e3b6f34f7d37513d108"
+  integrity sha512-y7mImlc/rNkvCRmg8gC3/lj87S7pTUIJ6QGjwHR9WQJcFs+ZMTOaoPrkdFA/YdbuqVEmEbb5RdhVxMkAcgOnpg==
+
 accepts@~1.3.7:
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.7.tgz#531bc726517a3b2b41f850021c6cc15eaab507cd"
@@ -643,11 +648,12 @@ negotiator@0.6.2:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.2.tgz#feacf7ccf525a77ae9634436a64883ffeca346fb"
   integrity sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw==
 
-next-iron-session@^4.1.12:
-  version "4.1.12"
-  resolved "https://registry.yarnpkg.com/next-iron-session/-/next-iron-session-4.1.12.tgz#b0b26adb5414482be9d9d12ca41909dd57664fb4"
-  integrity sha512-1eopV444Bov+hy1fy3JVQJpyPyO0KEz3QvnOLycvhyyIGRB3UTPCWMxFWlbOQbS07WKajAEW/IphdbVB3207aw==
+next-iron-session@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/next-iron-session/-/next-iron-session-4.2.0.tgz#cad971389b0845ab4517d8b096dea817b022830f"
+  integrity sha512-RzdbAmB77HJYXPdWrOjsPPE/b6yiSDAwhXEnX5z6mSYUMh22vR1iJD/CeBjs3FWxL39qO78CsLtIjpcojFz4DA==
   dependencies:
+    "@types/cookie" "^0.4.0"
     array.prototype.flat "^1.2.4"
     clone "^2.1.2"
     cookie "^0.4.1"

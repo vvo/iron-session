@@ -116,6 +116,7 @@
       ":automergeLinters",
       ":automergeTesters",
       ":automergeTypes"
-    ]
+    ],
+    "ignorePaths": []
   }
 }

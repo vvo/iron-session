@@ -11,6 +11,6 @@
     "http-errors": "~1.8.0",
     "jade": "~1.11.0",
     "morgan": "~1.10.0",
-    "next-iron-session": "^4.1.12"
+    "next-iron-session": "^4.2.0"
   }
 }
