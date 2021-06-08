@@ -2,6 +2,7 @@
   "files": [
     "README.md"
   ],
+  "badgeTemplate": "",
   "imageSize": 100,
   "commit": false,
   "contributors": [
