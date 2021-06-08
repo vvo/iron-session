@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Vandivier",
+      "name": "John Vandivier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5559355?v=4",
+      "profile": "http://www.afterecon.com/",
+      "contributions": [
+        "code",
+        "ideas",
+        "example"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "next-iron-session",
+  "projectOwner": "vvo",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
