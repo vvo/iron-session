@@ -27,6 +27,7 @@ _Table of contents:_
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [TypeScript usage](#typescript-usage)
 - [Examples](#examples)
   - [Handle password rotation/update the password](#handle-password-rotationupdate-the-password)
   - [Express / Connect middleware: `ironSession`](#express--connect-middleware-ironsession)
