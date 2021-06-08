@@ -27,7 +27,10 @@ export type SessionOptions = {
   ttl?: number;
 };
 
-export type Handler = (req: any, res: any) => any;
+export type Handler<Req, Res> = (
+  req: Req & { session: Session },
+  res: Res,
+) => any;
 
 export type Session = {
   set: <T = any>(name: string, value: T) => T;

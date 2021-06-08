@@ -1,5 +1,5 @@
 {
-  "name": "express",
+  "name": "next-iron-session-express-example",
   "version": "0.0.0",
   "private": true,
   "scripts": {
