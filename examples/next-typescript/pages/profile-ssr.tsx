@@ -3,7 +3,19 @@ import Layout from "../components/Layout";
 import withSession from "../lib/session";
 import PropTypes from "prop-types";
 
-const SsrProfile = ({ user }) => {
+type User = {
+  isLoggedIn: boolean;
+  login: string;
+  avatarUrl: string;
+};
+
+type UserProps = {
+  user: User;
+};
+
+const SsrProfile = (props: UserProps) => {
+  const { user } = props;
+
   return (
     <Layout>
       <h1>Your GitHub profile</h1>
@@ -32,20 +44,22 @@ const SsrProfile = ({ user }) => {
   );
 };
 
-export const getServerSideProps = withSession(async function ({ req, res }) {
-  const user = req.session.get("user");
+export const getServerSideProps = withSession<{ props: UserProps | {} }>(
+  async function ({ req, res }) {
+    const user = req.session.get("user");
 
-  if (user === undefined) {
-    res.setHeader("location", "/login");
-    res.statusCode = 302;
-    res.end();
-    return { props: {} };
-  }
+    if (user === undefined) {
+      res.setHeader("location", "/login");
+      res.statusCode = 302;
+      res.end();
+      return { props: {} };
+    }
 
-  return {
-    props: { user: req.session.get("user") },
-  };
-});
+    return {
+      props: { user },
+    };
+  },
+);
 
 export default SsrProfile;
 
