@@ -46,7 +46,7 @@ const SsrProfile = (props: UserProps) => {
 
 export const getServerSideProps = withSession<{ props: UserProps | {} }>(
   async function ({ req, res }) {
-    const user = req.session.get("user");
+    const user: User | undefined = req.session.get("user");
 
     if (user === undefined) {
       res.setHeader("location", "/login");
