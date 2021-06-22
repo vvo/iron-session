@@ -4,6 +4,10 @@ _🛠 Next.js and Express (connect middleware) stateless session utility using s
 
 ---
 
+[![Secret banner](/secret.png)](https://www.joinsecret.com/?via=vincentvoyer&utm_source=VincentVoyer&utm_medium=referral&utm_campaign=5_GitHub_nextironsession "Join Secret, The #1 Platform for Startup Deals & Resources")
+
+<h2 align="center">👆 Here's how I bootstrap my indie projects: I use startup credits.<br/>Use my code <u>VVO20</u> and get 20% off <a href="https://www.joinsecret.com/?via=vincentvoyer&utm_source=VincentVoyer&utm_medium=referral&utm_campaign=5_GitHub_nextironsession">Secret</a>.</h2>
+
 **This [Next.js](https://nextjs.org/), [Express](https://expressjs.com/) and [Connect](https://github.com/senchalabs/connect) backend utility** allows you to create a session to then be stored in browser cookies via a signed and encrypted seal. This provides client sessions that are ⚒️ iron-strong.
 
 The seal stored on the client contains the session data, not your server, making it a "stateless" session from the server point of view. This is a different take than [next-session](https://github.com/hoangvvo/next-session/) where the cookie contains a session ID to then be used to map data on the server-side.
