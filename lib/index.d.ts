@@ -51,6 +51,6 @@ export function ironSession(
 ): (req: any, res: any, next: any) => void;
 
 export function withIronSession(
-  handler: Handler,
+  handler: Handler<any, any>,
   sessionOptions: SessionOptions,
 ): (...args: any[]) => Promise<any>;
