@@ -14,7 +14,7 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e) {
-    event.preventDefault();
+    e.preventDefault(); // this prevents the default execution of submit event
 
     const body = {
       username: e.currentTarget.username.value,
