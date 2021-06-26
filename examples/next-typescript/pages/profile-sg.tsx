@@ -20,7 +20,7 @@ const SgProfile = () => {
           Static Generation (SG)
         </a>{" "}
         and the <a href="/api/user">/api/user</a> route (using{" "}
-        <a href="https://github.com/zeit/swr">zeit/SWR</a>)
+        <a href="https://github.com/vercel/swr">vercel/SWR</a>)
       </h2>
 
       <p style={{ fontStyle: "italic" }}>
