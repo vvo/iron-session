@@ -13,7 +13,7 @@ const Login = () => {
 
   const [errorMsg, setErrorMsg] = useState("");
 
-  async function handleSubmit(e) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const body = {
