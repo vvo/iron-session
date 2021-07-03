@@ -17,7 +17,7 @@ const Login = () => {
     event.preventDefault();
 
     const body = {
-      username: e.currentTarget.username.value,
+      username: event.currentTarget.username.value,
     };
 
     try {
