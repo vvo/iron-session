@@ -13,11 +13,11 @@ const Login = () => {
 
   const [errorMsg, setErrorMsg] = useState("");
 
-  async function handleSubmit(e) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const body = {
-      username: e.currentTarget.username.value,
+      username: event.currentTarget.username.value,
     };
 
     try {
