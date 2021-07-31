@@ -4,13 +4,15 @@ import { Session, withIronSession } from "next-iron-session";
 
 // optionally add stronger typing for next-specific implementation
 export type NextIronRequest = NextApiRequest & { session: Session };
-export type NextIronHandler = (
-  req: NextIronRequest,
-  res: NextApiResponse,
-) => void | Promise<void>;
+export type NextIronHandler<T> =
+  | ((req: NextIronRequest, res: NextApiResponse) => void | Promise<void>)
+  | ((context: {
+      req: NextIronRequest;
+      res: NextApiResponse;
+    }) => T | Promise<T>);
 
-const withSession = (handler: NextIronHandler) =>
-  withIronSession(handler, {
+export function withSession<T>(handler: NextIronHandler<T>) {
+  return withIronSession(handler, {
     password: process.env.SECRET_COOKIE_PASSWORD,
     cookieName: "next-iron-session/examples/next.js",
     cookieOptions: {
@@ -19,5 +21,6 @@ const withSession = (handler: NextIronHandler) =>
       secure: process.env.NODE_ENV === "production",
     },
   });
+}
 
 export default withSession;
