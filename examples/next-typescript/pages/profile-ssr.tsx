@@ -1,17 +1,10 @@
+import PropTypes from "prop-types";
 import React from "react";
+
+import { UserProps } from "@customTypes/User";
+
 import Layout from "../components/Layout";
 import withSession from "../lib/session";
-import PropTypes from "prop-types";
-
-type User = {
-  isLoggedIn: boolean;
-  login: string;
-  avatarUrl: string;
-};
-
-type UserProps = {
-  user: User;
-};
 
 const SsrProfile = (props: UserProps) => {
   const { user } = props;
