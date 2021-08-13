@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/react": "^17.0.9",
-    "next": "10.2.3",
+    "next": "11.1.0",
     "next-iron-session": "4.2.0",
     "node-fetch": "2.6.1",
     "prop-types": "15.7.2",
