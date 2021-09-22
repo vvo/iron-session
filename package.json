@@ -102,7 +102,7 @@
     "jest-date-mock": "1.0.8",
     "prettier": "2.3.1",
     "prettier-plugin-packagejson": "2.2.11",
-    "semantic-release": "17.4.3"
+    "semantic-release": "17.4.7"
   },
   "engines": {
     "node": ">=0.11.0"
