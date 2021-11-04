@@ -1,0 +1,11 @@
+{
+  "sourceMaps": true,
+  "jsc": {
+    "parser": {
+      "syntax": "typescript"
+    },
+    "paths": {
+      "iron-session": ["../src/index.ts"]
+    }
+  }
+}
