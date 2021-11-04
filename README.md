@@ -1,7 +1,6 @@
 # iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE)
 
-<center><b>⭐️ Featured in the Next.js documentation</b></center>
-<br/>
+<p align="center"><b>⭐️ Featured in the Next.js documentation</b></p>
 
 [![Tests](https://github.com/vvo/iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/iron-session/actions) [![codecov](https://codecov.io/gh/vvo/iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/iron-session) ![npm](https://img.shields.io/npm/v/iron-session) [![Downloads](https://img.shields.io/npm/dm/iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session) [![Github All Contributors](https://img.shields.io/github/all-contributors/vvo/iron-session)](#contributors-)
 
