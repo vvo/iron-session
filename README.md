@@ -1,6 +1,6 @@
 # iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/iron-session/actions) ![npm](https://img.shields.io/npm/v/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session)
 
-<p align="center"><b>⭐️ Featured in the [Next.js documentation](https://nextjs.org/docs/authentication)</b></p>
+<p align="center"><b>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></b></p>
 
 _🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework._
 
