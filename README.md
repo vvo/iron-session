@@ -2,7 +2,7 @@
 
 <p align="center"><b>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></b></p>
 
-**⚠️Nov 2021 update**: The library was renamed to `iron-session` and fully rewritten in TypeScript, it includes lots of new features and fixes. Follow the migration guide here: https://github.com/vvo/iron-session/releases/tag/v6.0.0.
+**⚠️ Nov 2021 update**: The library was renamed to `iron-session` and fully rewritten in TypeScript, it includes lots of new features and fixes. Follow the migration guide here: https://github.com/vvo/iron-session/releases/tag/v6.0.0.
 
 _🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework._
 
