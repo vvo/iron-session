@@ -38,7 +38,7 @@
     "lint": "eslint --ext ts,js,jsx,tsx src/ next/ express/ examples/",
     "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/",
     "postpublish": "rm next/*.d.ts next/*.js next/*.map next/*.mjs && rm express/*.d.ts express/*.js express/*.map express/*.mjs",
-    "test": "jest --coverage && npm run lint && tsc --noEmit && npm run build && npm run build:clean",
+    "test": "jest --coverage --ci && npm run lint && tsc --noEmit && npm run build && npm run build:clean",
     "watch": "npm run build:clean && concurrently \"npm:watch:*\"",
     "watch:express": "tsup express/index.ts -d express/dist --watch express/index.ts",
     "watch:next": "tsup next/index.ts -d next/dist --watch next/index.ts",

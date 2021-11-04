@@ -17,8 +17,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: "npm"
       - run: npm ci
-      - run: npm run lint
-      - run: npm run test --ci --coverage
+      - run: npm run test
       - uses: codecov/codecov-action@v2
 
   # release:
