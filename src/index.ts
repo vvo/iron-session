@@ -66,8 +66,10 @@ export interface IronSessionOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IronSessionData {
-  // If we allow for any keys, then there's no more type check on unknown properties which is not good
-  // If we allow for any keys, the later delete will work but I prefer to disable the check at this stage and
+  // If we allow for any keys, then there's no more type check on unknown properties
+  // which is not good
+  // If we allow for any keys, the later delete will work but I prefer to disable the
+  // check at this stage and
   // provide good type checking instead
   // [key: string]: unknown;
 }
@@ -121,14 +123,6 @@ export async function getIronSession(
     }
   });
 
-  const isHttps = (req.socket as TLSSocket).encrypted === true;
-
-  if (userSessionOptions.cookieOptions?.secure === true && isHttps === false) {
-    throw new Error(
-      `iron-session: Can't use secure cookies when not in https. See usage at https://github.com/vvo/iron-session/`,
-    );
-  }
-
   const options: Required<IronSessionOptions> = {
     ...defaultOptions,
     ...userSessionOptions,
@@ -140,6 +134,8 @@ export async function getIronSession(
 
   // if the user did not set the secure flag themselves, we automatically configure it
   if (userSessionOptions.cookieOptions?.secure === undefined) {
+    const isHttps = (req.socket as TLSSocket).encrypted === true;
+
     options.cookieOptions.secure = isHttps;
   }
 

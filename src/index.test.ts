@@ -63,18 +63,6 @@ test("bad password length", async () => {
   );
 });
 
-test("it throws when user passes secure:true and protocol is http://", async () => {
-  await expect(
-    // @ts-ignore we actually want to test this
-    getIronSession({ ...defaultReq, socket: {} }, defaultRes, {
-      ...defaultOptions,
-      cookieOptions: { secure: true },
-    }),
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"iron-session: Can't use secure cookies when not in https. See usage at https://github.com/vvo/iron-session/"`,
-  );
-});
-
 test("getSession(req, res, options)", async () => {
   const session = await getIronSession(defaultReq, defaultRes, defaultOptions);
   expect(session).toMatchInlineSnapshot(`Object {}`);
