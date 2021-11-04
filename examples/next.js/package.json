@@ -1,56 +1,37 @@
 {
-  "name": "with-iron-session",
-  "version": "1.0.0",
+  "name": "next.js",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "start": "next start"
   },
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "es6": true,
-      "node": true
-    },
-    "parser": "babel-eslint",
-    "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true
-      },
-      "ecmaVersion": 2019,
-      "sourceType": "module"
-    },
-    "settings": {
-      "react": {
-        "version": "16.3.0"
-      }
-    },
-    "plugins": [
-      "react",
-      "react-hooks"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:react/recommended"
-    ],
-    "rules": {
-      "react-hooks/exhaustive-deps": "warn",
-      "react-hooks/rules-of-hooks": "error",
-      "react/no-unescaped-entities": "off",
-      "react/prop-types": "warn"
-    },
-    "ignorePatterns": [
-      "node_modules/"
-    ]
+  "dependencies": {
+    "iron-session": "latest",
+    "next": "^12.0.1",
+    "octokit": "^1.7.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "swr": "^1.0.1"
   },
   "devDependencies": {
-    "next": "10.2.3",
-    "next-iron-session": "4.2.0",
-    "node-fetch": "2.6.1",
-    "prop-types": "15.7.2",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "swr": "0.5.6"
+    "eslint-config-next": "^12.0.1"
+  },
+  "renovate": {
+    "extends": [
+      "config:js-app",
+      ":automergePatch",
+      ":automergeBranch",
+      ":automergePatch",
+      ":automergeBranch",
+      ":automergeLinters",
+      ":automergeTesters",
+      ":automergeTypes"
+    ],
+    "timezone": "Europe/Paris",
+    "schedule": [
+      "before 3am on Monday"
+    ]
   }
 }

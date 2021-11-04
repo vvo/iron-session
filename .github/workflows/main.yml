@@ -1,0 +1,38 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: ["12", "14", "16", "17"]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: bahmutov/npm-install@v1
+      - run: npm run lint
+      - run: npm run test --ci --coverage
+      - uses: codecov/codecov-action@v2
+
+  # release:
+  #   name: Release library if necessary
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next')
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: lts
+  #     - uses: bahmutov/npm-install@v1
+  #     - run: npx semantic-release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

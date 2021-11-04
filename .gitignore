@@ -1,16 +1,14 @@
-# dependencies
 node_modules/
 /coverage/
-
-# misc
 .DS_Store
-/dist/
-/examples/next.js/.next/
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-.now
 .next
+TODO
+dist/
+next/*.js
+next/*.mjs
+next/*.map
+next/*.d.ts
+express/*.js
+express/*.mjs
+express/*.map
+express/*.d.ts

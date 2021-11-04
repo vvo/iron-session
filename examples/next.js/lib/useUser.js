@@ -3,7 +3,7 @@ import Router from "next/router";
 import useSWR from "swr";
 
 export default function useUser({
-  redirectTo = false,
+  redirectTo = "",
   redirectIfFound = false,
 } = {}) {
   const { data: user, mutate: mutateUser } = useSWR("/api/user");

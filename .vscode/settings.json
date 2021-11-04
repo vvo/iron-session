@@ -1,14 +1,13 @@
 {
-  "editor.formatOnSave": true,
-  "search.exclude": {
-    ".yarn": true,
-    "examples/next.js/.yarn": true,
-    "yarn.lock": true
-  },
-  "eslint.packageManager": "yarn",
-  "eslint.alwaysShowStatus": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.packageManager": "npm",
+  "eslint.alwaysShowStatus": true,
   "[markdown]": {
     "editor.formatOnSave": true
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

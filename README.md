@@ -1,46 +1,41 @@
-# next-iron-session [![GitHub license](https://img.shields.io/github/license/vvo/next-iron-session?style=flat)](https://github.com/vvo/next-iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/next-iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/next-iron-session/actions) [![codecov](https://codecov.io/gh/vvo/next-iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/next-iron-session) ![npm](https://img.shields.io/npm/v/next-iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=next-iron-session) [![Github All Contributors](https://img.shields.io/github/all-contributors/vvo/next-iron-session)](#contributors-)
+# iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE)
 
-_🛠 Next.js and Express (connect middleware) stateless session utility using signed and encrypted cookies to store data_
+[![Tests](https://github.com/vvo/iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/iron-session/actions) [![codecov](https://codecov.io/gh/vvo/iron-session/branch/master/graph/badge.svg)](https://codecov.io/gh/vvo/iron-session) ![npm](https://img.shields.io/npm/v/iron-session) [![Downloads](https://img.shields.io/npm/dm/iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session) [![Github All Contributors](https://img.shields.io/github/all-contributors/vvo/iron-session)](#contributors-)
+
+_🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework._
+
+**⭐️ Featured in the Next.js documentation**
+
+The session data is stored in encrypted cookies ("seals"). And only your server can decode the session data. There are no session ids, making iron sessions "stateless" from the server point of view.
+
+This strategy of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage)** (their default strategy).
+
+The underlying cryptography library is [iron](https://hapi.dev/module/iron) which was [created by the lead developer of OAuth 2.0](https://hueniversedotcom.wordpress.com/2015/09/19/auth-to-see-the-wizard-or-i-wrote-an-oauth-replacement/).
+
+<p align="center"><b>Online demo at <a href="https://iron-session.vercel.app/">https://iron-session.vercel.app</a> 👀</b></p>
 
 ---
-
-**This [Next.js](https://nextjs.org/), [Express](https://expressjs.com/) and [Connect](https://github.com/senchalabs/connect) backend utility** allows you to create a session to then be stored in browser cookies via a signed and encrypted seal. This provides client sessions that are ⚒️ iron-strong.
-
-The seal stored on the client contains the session data, not your server, making it a "stateless" session from the server point of view. This is a different take than [next-session](https://github.com/hoangvvo/next-session/) where the cookie contains a session ID to then be used to map data on the server-side.
-
-<p align="center"><b>Online demo at <a href="https://next-iron-session.now.sh/">https://next-iron-session.now.sh/</a> 👀</b></p>
-
----
-
-The seal is signed and encrypted using [@hapi/iron](https://github.com/hapijs/iron), [iron-store](https://github.com/vvo/iron-store/) is used behind the scenes.
-This method of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage)**.
-
-**♻️ Password rotation is supported**. It allows you to change the password used to sign and encrypt sessions while still being able to decrypt sessions that were created with a previous password.
-
-**Next.js's** 🗿 [Static generation](https://nextjs.org/docs/basic-features/pages#static-generation-recommended) (SG) and ⚙️ [Server-side Rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) (SSR) are both supported.
-
-**There's a Connect middleware available** so you can use this library in any Connect compatible framework like Express.
-
-**By default the cookie has an ⏰ expiration time of 15 days**, set via [`maxAge`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives). After that, even if someone tries to reuse the cookie, `next-iron-session` will not accept the underlying seal because the expiration is part of the seal value. See https://hapi.dev/family/iron for more information on @hapi/iron mechanisms.
 
 _Table of contents:_
 
 - [Installation](#installation)
-- [Usage](#usage)
-- [TypeScript usage](#typescript-usage)
-- [Examples](#examples)
+- [Usage (Next.js)](#usage-nextjs)
+- [Advanced usage](#advanced-usage)
+  - [Coding best practices](#coding-best-practices)
+  - [Session wrappers](#session-wrappers)
+  - [Typing session data with TypeScript](#typing-session-data-with-typescript)
+  - [Express](#express)
   - [Handle password rotation/update the password](#handle-password-rotationupdate-the-password)
-  - [Express / Connect middleware: `ironSession`](#express--connect-middleware-ironsession)
-  - [Usage with `next-connect`](#usage-with-next-connect)
+  - [Magic links](#magic-links)
+  - [Impersonation, login as someone else](#impersonation-login-as-someone-else)
+  - [Session cookies](#session-cookies)
 - [API](#api)
-  - [withIronSession(handler, { password, cookieName, [ttl], [cookieOptions] })](#withironsessionhandler--password-cookiename-ttl-cookieoptions-)
-  - [ironSession({ password, cookieName, [ttl], [cookieOptions] })](#ironsession-password-cookiename-ttl-cookieoptions-)
-  - [async applySession(req, res, { password, cookieName, [ttl], [cookieOptions] })](#async-applysessionreq-res--password-cookiename-ttl-cookieoptions-)
-  - [req.session.set(name, value)](#reqsessionsetname-value)
-  - [req.session.get(name)](#reqsessiongetname)
-  - [req.session.unset(name)](#reqsessionunsetname)
-  - [req.session.save() => promise](#reqsessionsave--promise)
-  - [req.session.destroy()](#reqsessiondestroy)
+  - [ironOptions](#ironoptions)
+  - [Next.js: withIronSessionApiRoute(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions)
+  - [Next.js: withIronSessionSsr(handler, ironOptions)](#nextjs-withironsessionssrhandler-ironoptions)
+  - [Express: ironSession(ironOptions)](#express-ironsessionironoptions)
+  - [session.save()](#sessionsave)
+  - [session.destroy()](#sessiondestroy)
 - [FAQ](#faq)
   - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
   - [What are the drawbacks?](#what-are-the-drawbacks)
@@ -53,124 +48,275 @@ _Table of contents:_
 ## Installation
 
 ```bash
-npm add next-iron-session
-
-yarn add next-iron-session
+npm add iron-session
 ```
 
-## Usage
+## Usage (Next.js)
 
-You can find full featured examples (Next.js, Express) in the [examples folder](./examples/).
+You can find full featured examples (Next.js, Express) in the [examples folder](examples).
 
-The password is a private key you must pass at runtime, it has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords.
+The password is a private key you must pass at runtime and builtime (for getServerSideProps), it has to be at least 32 characters long. You can use https://1password.com/password-generator/ to generate strong passwords.
 
-⚠️ Always store passwords in secret environment variables on your platform.
+Session duration is 14 days by default, check the API docs for more info.
 
-```js
-// pages/api/login.js
+⚠️ Always store passwords in encrypted environment variables on your platform. Vercel does this automatically.
 
-import { withIronSession } from "next-iron-session";
-
-async function handler(req, res) {
-  // get user from database then:
-  req.session.set("user", {
-    id: 230,
-    admin: true,
-  });
-  await req.session.save();
-  res.send("Logged in");
-}
-
-export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long",
-  cookieName: "myapp_cookiename",
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-  },
-});
-```
-
-```js
-// pages/api/user.js
-
-import { withIronSession } from "next-iron-session";
-
-function handler(req, res, session) {
-  const user = req.session.get("user");
-  res.send({ user });
-}
-
-export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long",
-  cookieName: "myapp_cookiename",
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-  },
-});
-```
-
-```js
-// pages/api/logout.js
-
-import { withIronSession } from "next-iron-session";
-
-function handler(req, res, session) {
-  req.session.destroy();
-  res.send("Logged out");
-}
-
-export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long",
-  cookieName: "myapp_cookiename",
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-  },
-});
-```
-
-⚠️ Sessions are automatically recreated (empty session though) when:
-
-- they expire
-- a wrong password was used
-- we can't find back the password id in the current list
-
-## TypeScript usage
-
-Also see the [full TypeScript example](./examples/next-typescript).
+**Login API Route:**
 
 ```ts
 // pages/api/login.ts
-import { NextApiRequest, NextApiResponse } from "next";
-import { withIronSession, Session } from "next-iron-session";
-type NextIronRequest = NextApiRequest & { session: Session };
 
-async function handler(
-  req: NextIronRequest,
-  res: NextApiResponse,
-): Promise<void> {
+import { withIronSessionApiRoute } from "iron-session/next";
+
+export default withIronSessionApiRoute(
+  async function loginRoute(req, res) {
+    // get user from database then:
+    req.session.user = {
+      id: 230,
+      admin: true,
+    };
+    await req.session.save();
+    res.send({ ok: true });
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
+```
+
+**User API Route:**
+
+```ts
+// pages/api/user.ts
+
+import { withIronSessionApiRoute } from "iron-session/next";
+
+export default withIronSessionApiRoute(
+  function userRoute(req, res) {
+    res.send({ user: req.session.user });
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
+```
+
+**Logout Route:**
+
+```ts
+// pages/api/logout.ts
+
+import { withIronSessionApiRoute } from "iron-session/next";
+
+export default withIronSessionApiRoute(
+  function logoutRoute(req, res, session) {
+    req.session.destroy();
+    res.send({ ok: true });
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
+```
+
+**getServerSideProps:**
+
+```ts
+// pages/admin.tsx
+
+import { withIronSessionSsr } from "iron-session/next";
+
+export const getServerSideProps = withIronSessionSsr(
+  async function getServerSideProps({ req }) {
+    const user = req.session.user;
+
+    if (user.admin !== true) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {
+        user: req.session.user,
+      },
+    };
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
+```
+
+Note: We encourage you to create a `withSession` utility so you do not have to repeat the password and cookie name in every route. You can see how to do that [in the example](./examples/next.js-typescript/lib/session.ts).
+
+## Advanced usage
+
+### Coding best practices
+
+Here's an example Login API route that is easier to read because of less nesting:
+
+```ts
+// pages/api/login.ts
+
+import { withIronSessionApiRoute } from "iron-session/next";
+import { ironOptions } from "lib/config";
+
+export default withIronSessionApiRoute(loginRoute, ironOptions);
+
+async function loginRoute(req, res) {
+    // get user from database then:
+    req.session.user = {
+      id: 230,
+      admin: true,
+    };
+    await req.session.save();
+    res.send({ ok: true });
+  }
+);
+```
+
+```ts
+// lib/config.ts
+
+export const ironOptions = {
+  cookieName: "myapp_cookiename",
+  password: "complex_password_at_least_32_characters_long",
+};
+```
+
+### Session wrappers
+
+If you do not want to pass down the password and cookie name in every API route file or page then you can create wrappers like this:
+
+**JavaScript:**
+
+```js
+// lib/withSession.js
+
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
+
+const sessionOptions = {
+  password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
+};
+
+export function withSessionRoute(handler) {
+  return withIronSessionApiRoute(handler, sessionOptions);
+}
+
+export function withSessionSsr(handler) {
+  return withIronSessionSsr(handler, sessionOptions);
+}
+```
+
+**TypeScript:**
+
+```ts
+// lib/withSession.ts
+
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
+import {
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+  NextApiHandler,
+} from "next";
+
+const sessionOptions = {
+  password: "complex_password_at_least_32_characters_long",
+  cookieName: "myapp_cookiename",
+};
+
+export function withSessionRoute(handler: NextApiHandler) {
+  return withIronSessionApiRoute(handler, sessionOptions);
+}
+
+// Theses types are compatible with InferGetStaticPropsType https://nextjs.org/docs/basic-features/data-fetching#typescript-use-getstaticprops
+export function withSessionSsr<
+  P extends { [key: string]: unknown } = { [key: string]: unknown },
+>(
+  handler: (
+    context: GetServerSidePropsContext,
+  ) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>,
+) {
+  return withIronSessionSsr(handler, sessionOptions);
+}
+```
+
+**Usage in API Routes:**
+
+```ts
+// pages/api/login.ts
+
+import { withSessionApiRoute } from "lib/withSession";
+
+export default withSessionApiRoute(loginRoute);
+
+async function loginRoute(req, res) {
   // get user from database then:
-  req.session.set("user", {
+  req.session.user = {
     id: 230,
     admin: true,
-  });
+  };
   await req.session.save();
   res.send("Logged in");
 }
-
-export default withIronSession(handler, {
-  password: "complex_password_at_least_32_characters_long",
-  cookieName: "myapp_cookiename",
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-  },
-});
 ```
 
-## Examples
+**Usage in getServerSideProps:**
+
+```ts
+// pages/admin.tsx
+
+import { withSessionSsr } from "lib/withSession";
+
+export const getServerSideProps = withIronSessionSsr(
+  async function getServerSideProps({ req }) {
+    const user = req.session.user;
+
+    if (user.admin !== true) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {
+        user: req.session.user,
+      },
+    };
+  },
+);
+```
+
+### Typing session data with TypeScript
+
+`req.session` is automatically populated with the right types so .save() and .destroy() can be called on it.
+
+But you might want to go further and type your session data also. To do so, use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation):
+
+```ts
+declare module "iron-session" {
+  interface IronSessionData {
+    user?: {
+      id: number;
+      admin?: boolean;
+    };
+  }
+}
+```
+
+You can put this code anywhere in your project, as long as it is in a file that will be required at some point. For example it could be inside your `lib/withSession.ts` wrapper or inside an [`additional.d.ts`](https://nextjs.org/docs/basic-features/typescript) if you're using Next.js.
+
+We've taken this technique from [express-session types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/express-session). If you have any comment on
+
+### Express
+
+See [examples/express](examples/express) for an example of how to use this with Express.
 
 ### Handle password rotation/update the password
 
@@ -184,103 +330,178 @@ Then you can use multiple passwords:
 **Week 1**:
 
 ```js
-export default withIronSession(handler, {
-  password: [
-    {
-      id: 1,
-      password: "complex_password_at_least_32_characters_long",
-    },
-  ],
+withIronSessionApiRoute(handler, {
+  password: {
+    1: "complex_password_at_least_32_characters_long",
+  },
 });
 ```
 
 **Week 2**:
 
 ```js
-export default withIronSession(handler, {
-  password: [
+withIronSessionApiRoute(handler, {
+  password: {
+    2: "another_password_at_least_32_characters_long",
+    1: "complex_password_at_least_32_characters_long",
+  },
+});
+```
+
+**Notes:**
+
+- The password used to encrypt session data (to `seal`) is always the highest number found in the map (2 in the example).
+- The passwords used to decrypt session data are all passwords in the map (this is how rotation works).
+- Even if you do not provide a list at first, you can always move to multiple passwords afterwards. The first password you've used has a default id of 1.
+
+### Magic links
+
+Because of the stateless nature of `iron-session`, it's very easy to implement patterns like magic links. For example, you might want to send an email to the user with a link to a page where they will be automatically logged in. Or you might want to send a Slack message to someone with a link to your application where they will be automatically logged in.
+
+Here's how to implement that:
+
+**Send an email with a magic link to the user**:
+
+```ts
+// pages/api/sendEmail.ts
+
+import { sealData } from "iron-session";
+
+export default async function sendEmailRoute(req, res) {
+  const user = getUserFromDatabase(req.query.userId);
+
+  const seal = await sealData(
     {
-      id: 2,
-      password: "another_password_at_least_32_characters_long",
+      userId: user.id,
     },
     {
-      id: 1,
       password: "complex_password_at_least_32_characters_long",
     },
-  ],
-});
+  );
+
+  await sendEmail(
+    user.email,
+    "Magic link",
+    `Hey there ${user.name}, <a href="https://myapp.com/api/magicLogin?seal=${seal}">click here to login</a>.`,
+  );
+
+  res.send({ ok: true });
+}
 ```
 
-Notes:
+**Login the user automatically and redirect:**
 
-- `id` is required so that we do not have to try every password in the list when decrypting (the `id` is part of the cookie value).
-- The password used to encrypt session data (to `seal`) is always the first one in the array, so when rotating to put a new password, it must be first in the array list
-- Even if you do not provide an array at first, you can always move to array based passwords afterwards, knowing that your first password (`string`) was given `{id:1}` automatically.
+```ts
+// pages/api/magicLogin.ts
 
-### Express / Connect middleware: `ironSession`
+import { unsealData } from "iron-session";
+import { withIronSessionApiRoute } from "iron-session/next";
 
-You can import and use `ironSession` if you want to use `next-iron-session` in [Express](https://expressjs.com/) and [Connect](https://github.com/senchalabs/connect).
+const ironOptions = {
+  password: "complex_password_at_least_32_characters_long",
+};
 
-```js
-import { ironSession } from "next-iron-session";
+export default withIronSessionApiRoute(magicLoginRoute, ironOptions);
 
-const session = ironSession({
-  cookieName: "next-iron-session/examples/express",
-  password: process.env.SECRET_COOKIE_PASSWORD,
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-  },
+async function magicLoginRoute(req, res) {
+  const { userId } = await unsealData(req.query.seal, ironOptions);
+
+  const user = getUserFromDatabase(userId);
+
+  req.session.user = {
+    id: user.id,
+  };
+
+  await req.session.save();
+
+  res.redirect(`/dashboard`);
+}
+```
+
+You might want to include error handling in the API routes. For example checking if `req.session.user` is already defined in login or handling bad seals.
+
+### Impersonation, login as someone else
+
+You may want to impersonate your own users, to check how they see your application. This can be extremely useful. For example you could have a page that list all your users and with links you can click to impersonate them.
+
+**Login as someone else:**
+
+```ts
+// pages/api/impersonate.ts
+
+import { withIronSessionApiRoute } from "iron-session/next";
+
+export default withIronSessionApiRoute(impersonateRoute, {
+  password: "complex_password_at_least_32_characters_long",
 });
 
-router.get("/profile", session, async function (req, res) {
-  // now you can access all of the req.session.* utilities
-  if (req.session.get("user") === undefined) {
-    res.redirect("/restricted");
-    return;
+async function impersonateRoute(req, res) {
+  if (!req.session.isAdmin) {
+    // let's pretend this route does not exists if user is not an admin
+    return res.status(404).end();
   }
 
-  res.render("profile", {
-    title: "Profile",
-    userId: req.session.get("user").id,
-  });
-});
+  req.session.originalUser = req.session.originalUser || req.session.user;
+  req.session.user = {
+    id: req.query.userId,
+  };
+  await req.session.save();
+  res.redirect("/dashboard");
+}
 ```
 
-A more complete example using Express can be found in the [examples folder](./examples/express).
+**Stop impersonation:**
 
-### Usage with `next-connect`
+```ts
+// pages/api/stopImpersonate.ts
 
-Since `ironSession` is an Express / Connect middleware, it means you can use it with [`next-connect`](https://github.com/hoangvvo/next-connect):
+import { withIronSessionApiRoute } from "iron-session/next";
 
-```js
-import { ironSession } from "next-iron-session";
+export default withIronSessionApiRoute(stopImpersonateRoute, {
+  password: "complex_password_at_least_32_characters_long",
+});
 
-const session = ironSession({
-  cookieName: "next-iron-session/examples/express",
-  password: process.env.SECRET_COOKIE_PASSWORD,
-  // if your localhost is served on http:// then disable the secure flag
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+async function stopImpersonateRoute(req, res) {
+  if (!req.session.isAdmin) {
+    // let's pretend this route does not exists if user is not an admin
+    return res.status(404).end();
+  }
+
+  req.session.user = req.session.originalUser;
+  delete req.session.originalUser;
+  await req.session.save();
+  res.redirect("/dashboard");
+}
+```
+
+### Session cookies
+
+If you want cookies to expire when the user closes the browser, pass `maxAge: undefined` in cookie options, this way:
+
+```ts
+// pages/api/user.ts
+
+import { withIronSessionApiRoute } from "iron-session/next";
+
+export default withIronSessionApiRoute(
+  function userRoute(req, res) {
+    res.send({ user: req.session.user });
   },
-});
-import nextConnect from "next-connect";
-
-const handler = nextConnect();
-
-handler.use(session).get((req, res) => {
-  const user = req.session.get("user");
-  res.send(`Hello user ${user.id}`);
-});
-
-export default handler;
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+    cookieOptions: { maxAge: undefined },
+  },
+);
 ```
+
+Beware, modern browsers might not delete cookies at all using this technique because of [session restoring](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_the_lifetime_of_a_cookie).
 
 ## API
 
-### withIronSession(handler, { password, cookieName, [ttl], [cookieOptions] })
+### ironOptions
 
-This can be used to wrap Next.js [`getServerSideProps`](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) or [API Routes](https://nextjs.org/docs/api-routes/introduction) so you can then access all `req.session.*` methods.
+Only two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `cookieName`, **required**: Name of the cookie to be stored
@@ -290,51 +511,81 @@ This can be used to wrap Next.js [`getServerSideProps`](https://nextjs.org/docs/
 ```js
 {
   httpOnly: true,
-  secure: true,
-  sameSite: "lax",
-  // The next line makes sure browser will expire cookies before seals are considered expired by the server. It also allows for clock difference of 60 seconds maximum between server and clients.
+  secure: true, // true when using https, false otherwise
+  sameSite: "lax", // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
+  // The next line makes sure browser will expire cookies before seals are considered expired by the server. It also allows for clock difference of 60 seconds maximum between servers and clients.
   maxAge: (ttl === 0 ? 2147483647 : ttl) - 60,
   path: "/",
   // other options:
   // domain, if you want the cookie to be valid for the whole domain and subdomains, use domain: example.com
-  // encode, there should be no need to use this option, encoding is done by next-iron-session already
+  // encode, there should be no need to use this option, encoding is done by iron-session already
   // expires, there should be no need to use this option, maxAge takes precedence
 }
 ```
 
-### ironSession({ password, cookieName, [ttl], [cookieOptions] })
+### Next.js: withIronSessionApiRoute(handler, ironOptions)
 
-Connect middleware.
+Wraps a [Next.js API Route](https://nextjs.org/docs/api-routes/dynamic-api-routes) and adds a `session` object to the request.
 
-```js
-import { ironSession } from "next-iron-session";
+```ts
+import { withIronSessionApiRoute } from "iron-session/next";
 
-app.use(ironSession({ ...options }));
+export default withIronSessionApiRoute(
+  function userRoute(req, res) {
+    res.send({ user: req.session.user });
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
 ```
 
-### async applySession(req, res, { password, cookieName, [ttl], [cookieOptions] })
+### Next.js: withIronSessionSsr(handler, ironOptions)
+
+Wraps a [Next.js getServerSideProps](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) and adds a `session` object to the request of the context.
+
+```ts
+import { withIronSessionSsr } from "iron-session/next";
+
+export const getServerSideProps = withIronSessionSsr(
+  async function getServerSideProps({ req }) {
+    return {
+      props: {
+        user: req.session.user,
+      },
+    };
+  },
+  {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+  },
+);
+```
+
+### Express: ironSession(ironOptions)
+
+Creates an express middleware that adds a `session` object to the request.
+
+```js
+import { ironSession } from "iron-session";
+
+app.use(ironSession(ironOptions));
+```
+
+### session.save()
+
+Saves the session and sets the cookie header to be sent once the response is sent.
+
+```ts
+await req.session.save();
+```
+
+### session.destroy()
+
+Empties the session object and sets the cookie header to be sent once the response is sent. The browser will then remove the cookie automatically.
 
 Allows you to use this module the way you want as long as you have access to `req` and `res`.
-
-```js
-import { applySession } from "next-iron-session";
-
-await applySession(req, res, options);
-```
-
-### req.session.set(name, value)
-
-### req.session.get(name)
-
-### req.session.unset(name)
-
-### req.session.save() => promise
-
-### req.session.destroy()
-
-Note: If you use `req.session.destroy()` in an API route, you need to make sure this route will not be cached. To do so, either call this route via a POST request `fetch("/api/logout", { method: "POST" })` or add `cache-control: no-store, max-age=0` to its response.
-
-See https://github.com/vvo/next-iron-session/issues/274 for more details.
 
 ## FAQ
 
@@ -347,8 +598,8 @@ This makes your sessions stateless: you do not have to store session data on you
 There are some drawbacks to this approach:
 
 - you cannot invalidate a seal when needed because there's no state stored on the server-side about them. We consider that the way the cookie is stored reduces the possibility for this eventuality to happen. Also, in most applications the first thing you do when receiving an authenticated request is to validate the user and their rights in your database, which defeats the case where someone would try to use a token while their account was deactivated/deleted. Now if someone steals a user token you should have a process in place to mitigate that: deactivate the user and force a re-login with a flag in your database for example.
-- application not supporting cookies won't work, but you can use [iron-store](https://github.com/vvo/iron-store/) to implement something similar. In the future, we could allow `next-iron-session` to accept [basic auth](https://tools.ietf.org/html/rfc7617) or bearer token methods too. Open an issue if you're interested.
-- on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, a `next-iron-session` cookie containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
+- application not supporting cookies won't work, but you can use [iron-store](https://github.com/vvo/iron-store/) to implement something similar. In the future, we could allow `iron-session` to accept [basic auth](https://tools.ietf.org/html/rfc7617) or bearer token methods too. Open an issue if you're interested.
+- on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, a `iron-session` cookie containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
 - performance: crypto on the server-side could be slow, if that's the case let me know. Also, cookies are sent to every request to your website, even images, so this could be an issue
 
 Now that you know the drawbacks, you can decide if they are an issue for your application or not.
@@ -362,13 +613,11 @@ Not so much:
 - JWT tokens are not encrypted, the payload is visible by customers if they manage to inspect the seal. You would have to use [JWE](https://tools.ietf.org/html/rfc7516) to achieve the same.
 - @hapi/iron mechanism is not a standard, it's a way to sign and encrypt data into seals
 
-Depending on your own needs and preferences, `next-iron-session` may or may not fit you.
+Depending on your own needs and preferences, `iron-session` may or may not fit you.
 
 ## Project status
 
-This is a recent library I authored because I needed it. While @hapi/iron is battle-tested and [used in production on a lot of websites](https://hapi.dev/), this library is not (yet!). Please use it at your own risk.
-
-If you find bugs or have API ideas, [create an issue](https://github.com/vvo/next-iron-session/issues).
+✅ Production ready and maintained.
 
 ## Credits
 
@@ -390,7 +639,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="http://www.afterecon.com/"><img src="https://avatars.githubusercontent.com/u/5559355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Vandivier</b></sub></a><br /><a href="https://github.com/vvo/next-iron-session/commits?author=Vandivier" title="Code">💻</a> <a href="#ideas-Vandivier" title="Ideas, Planning, & Feedback">🤔</a> <a href="#example-Vandivier" title="Examples">💡</a></td>
+    <td align="center"><a href="http://www.afterecon.com/"><img src="https://avatars.githubusercontent.com/u/5559355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Vandivier</b></sub></a><br /><a href="https://github.com/vvo/iron-session/commits?author=Vandivier" title="Code">💻</a> <a href="#ideas-Vandivier" title="Ideas, Planning, & Feedback">🤔</a> <a href="#example-Vandivier" title="Examples">💡</a></td>
   </tr>
 </table>
 

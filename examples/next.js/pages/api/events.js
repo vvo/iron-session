@@ -1,22 +1,25 @@
-import withSession from "../../lib/session";
-import fetchJson from "../../lib/fetchJson";
+import { withIronSessionApiRoute } from "iron-session/next";
+import { sessionOptions } from "lib/session";
+import { Octokit } from "octokit";
 
-export default withSession(async (req, res) => {
-  const user = req.session.get("user");
+const octokit = new Octokit();
 
-  if (!user?.isLoggedIn) {
+export default withIronSessionApiRoute(async (req, res) => {
+  const user = req.session.user;
+
+  if (!user || user.isLoggedIn === false) {
     res.status(401).end();
     return;
   }
 
-  const url = `https://api.github.com/users/${user.login}/events`;
-
   try {
-    // we check that the user exists on GitHub and store some data in session
-    const events = await fetchJson(url);
+    const { data: events } =
+      await octokit.rest.activity.listPublicEventsForUser({
+        username: user.login,
+      });
+
     res.json(events);
   } catch (error) {
-    const { response: fetchResponse } = error;
-    res.status(fetchResponse?.status || 500).json(error.data);
+    res.status(200).json([]);
   }
-});
+}, sessionOptions);

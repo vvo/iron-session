@@ -1,6 +1,7 @@
-import withSession from "../../lib/session";
+import { withIronSessionApiRoute } from "iron-session/next";
+import { sessionOptions } from "lib/session";
 
-export default withSession(async (req, res) => {
+export default withIronSessionApiRoute(async (req, res) => {
   req.session.destroy();
-  res.json({ isLoggedIn: false });
-});
+  res.json({ isLoggedIn: false, login: "", avatarUrl: "" });
+}, sessionOptions);
