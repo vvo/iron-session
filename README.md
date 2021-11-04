@@ -35,12 +35,12 @@ _Table of contents:_
   - [session.save()](#sessionsave)
   - [session.destroy()](#sessiondestroy)
 - [FAQ](#faq)
-  - [Why use pure 🍪 cookies for sessions?](#why-use-pure--cookies-for-sessions)
+  - [Why use pure cookies for sessions?](#why-use-pure-cookies-for-sessions)
   - [What are the drawbacks?](#what-are-the-drawbacks)
   - [How is this different from JWT?](#how-is-this-different-from-jwt)
 - [Project status](#project-status)
 - [Credits](#credits)
-- [🤓 References](#-references)
+- [References](#references)
 - [Contributors ✨](#contributors-)
 
 ## Installation
@@ -587,7 +587,7 @@ Allows you to use this module the way you want as long as you have access to `re
 
 ## FAQ
 
-### Why use pure 🍪 cookies for sessions?
+### Why use pure cookies for sessions?
 
 This makes your sessions stateless: you do not have to store session data on your server. You do not need another server or service to store session data. This is particularly useful in serverless architectures where you're trying to reduce your backend dependencies.
 
@@ -623,7 +623,7 @@ Thanks to [Hoang Vo](https://github.com/hoangvvo) for advice and guidance while 
 
 Thanks to [hapi](https://hapi.dev/) team for creating [iron](https://github.com/hapijs/iron).
 
-## 🤓 References
+## References
 
 - https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html#cookies
 - https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#samesite-cookie-attribute
