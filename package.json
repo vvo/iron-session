@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework.",
   "license": "MIT",
   "author": "Vincent Voyer <vincent@codeagain.com>",
