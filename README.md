@@ -41,7 +41,7 @@ _Table of contents:_
 - [Project status](#project-status)
 - [Credits](#credits)
 - [References](#references)
-- [Contributors ✨](#contributors-)
+- [Contributors](#contributors)
 
 ## Installation
 
@@ -628,7 +628,7 @@ Thanks to [hapi](https://hapi.dev/) team for creating [iron](https://github.com/
 - https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html#cookies
 - https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#samesite-cookie-attribute
 
-## Contributors ✨
+## Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
