@@ -4,7 +4,9 @@ import { Octokit } from "octokit";
 
 const octokit = new Octokit();
 
-export default withIronSessionApiRoute(async (req, res) => {
+export default withIronSessionApiRoute(eventsRoute, sessionOptions);
+
+async function eventsRoute(req, res) {
   const user = req.session.user;
 
   if (!user || user.isLoggedIn === false) {
@@ -22,4 +24,4 @@ export default withIronSessionApiRoute(async (req, res) => {
   } catch (error) {
     res.status(200).json([]);
   }
-}, sessionOptions);
+}

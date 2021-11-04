@@ -583,7 +583,7 @@ await req.session.save();
 
 Empties the session object and sets the cookie header to be sent once the response is sent. The browser will then remove the cookie automatically.
 
-Allows you to use this module the way you want as long as you have access to `req` and `res`.
+You don't have to call `req.session.save()` after calling `req.session.destroy()`. The session is saved automatically.
 
 ## FAQ
 
@@ -597,7 +597,7 @@ There are some drawbacks to this approach:
 
 - you cannot invalidate a seal when needed because there's no state stored on the server-side about them. We consider that the way the cookie is stored reduces the possibility for this eventuality to happen. Also, in most applications the first thing you do when receiving an authenticated request is to validate the user and their rights in your database, which defeats the case where someone would try to use a token while their account was deactivated/deleted. Now if someone steals a user token you should have a process in place to mitigate that: deactivate the user and force a re-login with a flag in your database for example.
 - application not supporting cookies won't work, but you can use [iron-store](https://github.com/vvo/iron-store/) to implement something similar. In the future, we could allow `iron-session` to accept [basic auth](https://tools.ietf.org/html/rfc7617) or bearer token methods too. Open an issue if you're interested.
-- on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, a `iron-session` cookie containing `{user: {id: 230, admin: true}}` is 358 bytes signed and encrypted: still plenty of available cookie space in here.
+- on most browsers, you're limited to 4,096 bytes per cookie. To give you an idea, an `iron-session` cookie containing `{user: {id: 100}}` is 265 bytes signed and encrypted: still plenty of available cookie space in here.
 - performance: crypto on the server-side could be slow, if that's the case let me know. Also, cookies are sent to every request to your website, even images, so this could be an issue
 
 Now that you know the drawbacks, you can decide if they are an issue for your application or not.

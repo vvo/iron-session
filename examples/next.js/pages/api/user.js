@@ -1,7 +1,9 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "lib/session";
 
-export default withIronSessionApiRoute(async (req, res) => {
+export default withIronSessionApiRoute(userRoute, sessionOptions);
+
+async function userRoute(req, res) {
   if (req.session.user) {
     // in a real world application you might read the user id from the session and then do a database request
     // to get more information on the user if needed
@@ -16,4 +18,4 @@ export default withIronSessionApiRoute(async (req, res) => {
       avatarUrl: "",
     });
   }
-}, sessionOptions);
+}

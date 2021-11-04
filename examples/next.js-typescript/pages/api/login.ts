@@ -3,9 +3,12 @@ import type { User } from "./user";
 import { Octokit } from "octokit";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "lib/session";
+import { NextApiRequest, NextApiResponse } from "next";
 const octokit = new Octokit();
 
-export default withIronSessionApiRoute(async (req, res) => {
+export default withIronSessionApiRoute(loginRoute, sessionOptions);
+
+async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
   const { username } = await req.body;
 
   try {
@@ -17,8 +20,7 @@ export default withIronSessionApiRoute(async (req, res) => {
     req.session.user = user;
     await req.session.save();
     res.json(user);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error) {
     res.status(500).json({ message: (error as Error).message });
   }
-}, sessionOptions);
+}

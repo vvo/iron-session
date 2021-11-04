@@ -15,7 +15,6 @@ export default withIronSessionApiRoute(async (req, res) => {
     req.session.user = user;
     await req.session.save();
     res.json(user);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

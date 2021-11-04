@@ -313,8 +313,6 @@ test("session.destroy", async () => {
 
   expect(session).toMatchInlineSnapshot(`Object {}`);
 
-  await session.save();
-
   expect(res.setHeader.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       "set-cookie",
