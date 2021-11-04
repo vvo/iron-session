@@ -29,6 +29,7 @@ _Table of contents:_
   - [Magic links](#magic-links)
   - [Impersonation, login as someone else](#impersonation-login-as-someone-else)
   - [Session cookies](#session-cookies)
+  - [Firebase usage](#firebase-usage)
 - [API](#api)
   - [ironOptions](#ironoptions)
   - [Next.js: withIronSessionApiRoute(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions)
@@ -496,6 +497,10 @@ export default withIronSessionApiRoute(
 ```
 
 Beware, modern browsers might not delete cookies at all using this technique because of [session restoring](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_the_lifetime_of_a_cookie).
+
+### Firebase usage
+
+This library can be used with Firebase, as long as you set the cookie name to `__session` which seems to be the only valid cookie name there.
 
 ## API
 
