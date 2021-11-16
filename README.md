@@ -253,9 +253,9 @@ export function withSessionSsr<
 ```ts
 // pages/api/login.ts
 
-import { withSessionApiRoute } from "lib/withSession";
+import { withSessionRoute } from "lib/withSession";
 
-export default withSessionApiRoute(loginRoute);
+export default withSessionRoute(loginRoute);
 
 async function loginRoute(req, res) {
   // get user from database then:
