@@ -5,7 +5,7 @@ This is a small example application generated with the [Express application gene
 The tl;dr; on how to use `iron-session` with Express is this:
 
 ```js
-import { ironSession } from "iron-session";
+import { ironSession } from "iron-session/express";
 
 const session = ironSession({
   cookieName: "iron-session/examples/express",
