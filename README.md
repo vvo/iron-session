@@ -573,7 +573,7 @@ export const getServerSideProps = withIronSessionSsr(
 Creates an express middleware that adds a `session` object to the request.
 
 ```js
-import { ironSession } from "iron-session";
+import { ironSession } from "iron-session/express";
 
 app.use(ironSession(ironOptions));
 ```
