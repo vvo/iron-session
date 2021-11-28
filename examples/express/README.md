@@ -10,6 +10,9 @@ import { ironSession } from "iron-session/express";
 const session = ironSession({
   cookieName: "iron-session/examples/express",
   password: process.env.SECRET_COOKIE_PASSWORD,
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 });
 
 router.get("/profile", session, async function (req, res) {

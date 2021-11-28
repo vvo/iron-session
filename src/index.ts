@@ -2,7 +2,6 @@ import Iron from "@hapi/iron";
 import type { CookieSerializeOptions } from "cookie";
 import { parse as parseCookie, serialize as serializeCookie } from "cookie";
 import type { IncomingMessage, ServerResponse } from "http";
-import type { TLSSocket } from "tls";
 
 // default time allowed to check for iron seal validity when ttl passed
 // see https://hapi.dev/family/iron/api/?v=6.0.0#options
@@ -131,13 +130,6 @@ export async function getIronSession(
       ...(userSessionOptions.cookieOptions || {}),
     },
   };
-
-  // if the user did not set the secure flag themselves, we automatically configure it
-  if (userSessionOptions.cookieOptions?.secure === undefined) {
-    const isHttps = (req.socket as TLSSocket).encrypted === true;
-
-    options.cookieOptions.secure = isHttps;
-  }
 
   if (options.ttl === 0) {
     // ttl = 0 means no expiration

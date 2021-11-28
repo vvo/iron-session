@@ -5,6 +5,9 @@ var router = express.Router();
 var session = ironSession({
   cookieName: "iron-session/examples/express",
   password: process.env.SECRET_COOKIE_PASSWORD,
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 });
 
 /* GET home page. */

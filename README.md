@@ -82,6 +82,10 @@ export default withIronSessionApiRoute(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -100,6 +104,10 @@ export default withIronSessionApiRoute(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -119,6 +127,10 @@ export default withIronSessionApiRoute(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -149,6 +161,10 @@ export const getServerSideProps = withIronSessionSsr(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -187,6 +203,10 @@ async function loginRoute(req, res) {
 export const ironOptions = {
   cookieName: "myapp_cookiename",
   password: "complex_password_at_least_32_characters_long",
+  // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 };
 ```
 
@@ -204,6 +224,10 @@ import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 const sessionOptions = {
   password: "complex_password_at_least_32_characters_long",
   cookieName: "myapp_cookiename",
+  // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 };
 
 export function withSessionRoute(handler) {
@@ -230,6 +254,10 @@ import {
 const sessionOptions = {
   password: "complex_password_at_least_32_characters_long",
   cookieName: "myapp_cookiename",
+  // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 };
 
 export function withSessionRoute(handler: NextApiHandler) {
@@ -398,14 +426,18 @@ export default async function sendEmailRoute(req, res) {
 import { unsealData } from "iron-session";
 import { withIronSessionApiRoute } from "iron-session/next";
 
-const ironOptions = {
+export default withIronSessionApiRoute(magicLoginRoute, {
+  cookieName: "myapp_cookiename",
   password: "complex_password_at_least_32_characters_long",
-};
-
-export default withIronSessionApiRoute(magicLoginRoute, ironOptions);
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
+});
 
 async function magicLoginRoute(req, res) {
-  const { userId } = await unsealData(req.query.seal, ironOptions);
+  const { userId } = await unsealData(req.query.seal, {
+    password: "complex_password_at_least_32_characters_long",
+  });
 
   const user = getUserFromDatabase(userId);
 
@@ -433,7 +465,11 @@ You may want to impersonate your own users, to check how they see your applicati
 import { withIronSessionApiRoute } from "iron-session/next";
 
 export default withIronSessionApiRoute(impersonateRoute, {
+  cookieName: "myapp_cookiename",
   password: "complex_password_at_least_32_characters_long",
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 });
 
 async function impersonateRoute(req, res) {
@@ -459,7 +495,11 @@ async function impersonateRoute(req, res) {
 import { withIronSessionApiRoute } from "iron-session/next";
 
 export default withIronSessionApiRoute(stopImpersonateRoute, {
+  cookieName: "myapp_cookiename",
   password: "complex_password_at_least_32_characters_long",
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+  },
 });
 
 async function stopImpersonateRoute(req, res) {
@@ -491,7 +531,10 @@ export default withIronSessionApiRoute(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
-    cookieOptions: { maxAge: undefined },
+    cookieOptions: {
+      maxAge: undefined,
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -542,6 +585,10 @@ export default withIronSessionApiRoute(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```
@@ -564,6 +611,10 @@ export const getServerSideProps = withIronSessionSsr(
   {
     cookieName: "myapp_cookiename",
     password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
   },
 );
 ```

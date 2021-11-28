@@ -217,64 +217,6 @@ test("Passing down maxAge = undefined (session cookies)", async () => {
   `);
 });
 
-test("it automatically sets the secure flag in https", async () => {
-  const res = {
-    getHeader: jest.fn(),
-    setHeader: jest.fn(),
-  };
-
-  const session = await getIronSession(
-    defaultReq,
-    res as unknown as ServerResponse,
-    {
-      ...defaultOptions,
-      cookieOptions: { maxAge: undefined },
-    },
-  );
-
-  await session.save();
-  const headerValue = res.setHeader.mock.calls[0][1];
-  const cookie = headerValue[0].split(";");
-  cookie.shift();
-  expect(cookie).toMatchInlineSnapshot(`
-    Array [
-      " Path=/",
-      " HttpOnly",
-      " Secure",
-      " SameSite=Lax",
-    ]
-  `);
-});
-
-test("it automatically removes the secure flag in http", async () => {
-  const res = {
-    getHeader: jest.fn(),
-    setHeader: jest.fn(),
-  };
-
-  const req = {
-    ...defaultReq,
-    socket: {},
-  } as IncomingMessage;
-
-  const session = await getIronSession(req, res as unknown as ServerResponse, {
-    ...defaultOptions,
-    cookieOptions: { maxAge: undefined },
-  });
-
-  await session.save();
-  const headerValue = res.setHeader.mock.calls[0][1];
-  const cookie = headerValue[0].split(";");
-  cookie.shift();
-  expect(cookie).toMatchInlineSnapshot(`
-    Array [
-      " Path=/",
-      " HttpOnly",
-      " SameSite=Lax",
-    ]
-  `);
-});
-
 test("session.destroy", async () => {
   const res = {
     getHeader: jest.fn(),
