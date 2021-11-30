@@ -193,8 +193,7 @@ async function loginRoute(req, res) {
     };
     await req.session.save();
     res.send({ ok: true });
-  }
-);
+}
 ```
 
 ```ts
