@@ -12,3 +12,5 @@ express/*.js
 express/*.mjs
 express/*.map
 express/*.d.ts
+
+.vscode/
