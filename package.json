@@ -2,19 +2,21 @@
   "name": "iron-session",
   "version": "6.0.3",
   "description": "Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework.",
-  "license": "MIT",
-  "author": "Vincent Voyer <vincent@codeagain.com>",
-  "repository": "https://github.com/vvo/iron-session.git",
+  "keywords": [
+    "Next.js",
+    "session",
+    "cookies",
+    "login",
+    "auth",
+    "Express",
+    "NestJS"
+  ],
   "bugs": {
     "url": "https://github.com/vvo/iron-session/issues"
   },
-  "keywords": [
-    "Login",
-    "Auth",
-    "Next.js",
-    "Express",
-    "NestJs"
-  ],  
+  "repository": "https://github.com/vvo/iron-session.git",
+  "license": "MIT",
+  "author": "Vincent Voyer <vincent@codeagain.com>",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
