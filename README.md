@@ -1,4 +1,4 @@
-# iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/iron-session/actions) ![npm](https://img.shields.io/npm/v/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session)
+# iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![Tests](https://github.com/vvo/iron-session/workflows/Tests/badge.svg)](https://github.com/vvo/iron-session/actions) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session)
 
 <p align="center"><b>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></b></p>
 
@@ -186,13 +186,13 @@ import { ironOptions } from "lib/config";
 export default withIronSessionApiRoute(loginRoute, ironOptions);
 
 async function loginRoute(req, res) {
-    // get user from database then:
-    req.session.user = {
-      id: 230,
-      admin: true,
-    };
-    await req.session.save();
-    res.send({ ok: true });
+  // get user from database then:
+  req.session.user = {
+    id: 230,
+    admin: true,
+  };
+  await req.session.save();
+  res.send({ ok: true });
 }
 ```
 
