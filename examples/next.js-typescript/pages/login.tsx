@@ -32,6 +32,7 @@ export default function Login() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(body),
                 }),
+                false,
               );
             } catch (error) {
               if (error instanceof FetchError) {
