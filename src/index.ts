@@ -1,6 +1,6 @@
 import Iron from "@hapi/iron";
 import type { CookieSerializeOptions } from "cookie";
-import { parse as parseCookie, serialize as serializeCookie } from "cookie";
+import cookie from "cookie";
 import type { IncomingMessage, ServerResponse } from "http";
 
 // default time allowed to check for iron seal validity when ttl passed
@@ -155,7 +155,7 @@ export async function getIronSession(
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  const sealFromCookies = parseCookie(req.headers.cookie || "")[
+  const sealFromCookies = cookie.parse(req.headers.cookie || "")[
     options.cookieName
   ];
 
@@ -179,7 +179,7 @@ export async function getIronSession(
           password: passwordsAsMap,
           ttl: options.ttl,
         });
-        const cookieValue = serializeCookie(
+        const cookieValue = cookie.serialize(
           options.cookieName,
           seal,
           options.cookieOptions,
@@ -201,7 +201,7 @@ export async function getIronSession(
           delete session[key];
         });
 
-        const cookieValue = serializeCookie(options.cookieName, "", {
+        const cookieValue = cookie.serialize(options.cookieName, "", {
           ...options.cookieOptions,
           maxAge: 0,
         });
