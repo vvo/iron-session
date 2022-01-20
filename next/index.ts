@@ -7,10 +7,10 @@ import type { IronSessionOptions } from "iron-session";
 import { getIronSession } from "iron-session";
 import getPropertyDescriptorForReqSession from "../src/getPropertyDescriptorForReqSession";
 
-export function withIronSessionApiRoute(
-  handler: NextApiHandler,
+export function withIronSessionApiRoute<ResponseType>(
+  handler: NextApiHandler<ResponseType>,
   options: IronSessionOptions,
-): NextApiHandler {
+): NextApiHandler<ResponseType> {
   return async function nextApiHandlerWrappedWithIronSession(req, res) {
     const session = await getIronSession(req, res, options);
 
