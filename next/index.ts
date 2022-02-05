@@ -2,10 +2,9 @@ import type {
   NextApiHandler,
   GetServerSidePropsContext,
   GetServerSidePropsResult,
-} from "next";
+} from "next/types";
 import type { IronSessionOptions } from "iron-session";
-import { getIronSession } from "iron-session";
-import getPropertyDescriptorForReqSession from "../src/getPropertyDescriptorForReqSession";
+import { getIronSession, getPropertyDescriptorForReqSession } from "iron-session";
 
 export function withIronSessionApiRoute(
   handler: NextApiHandler,

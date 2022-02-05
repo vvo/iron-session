@@ -3,6 +3,7 @@
   "include": ["src", "next"],
   "exclude": ["node_modules", "./**/dist"],
   "compilerOptions": {
+    "baseUrl": "./",
     "paths": {
       "iron-session": ["./src/index.ts"],
       "iron-session/next": ["./next/index.ts"],

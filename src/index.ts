@@ -317,3 +317,5 @@ export async function sealData(
 function normalizeStringPasswordToMap(password: password) {
   return typeof password === "string" ? { 1: password } : password;
 }
+
+export { default as getPropertyDescriptorForReqSession } from "./getPropertyDescriptorForReqSession";
