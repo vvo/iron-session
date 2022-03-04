@@ -417,6 +417,22 @@ export default async function sendEmailRoute(req, res) {
 }
 ```
 
+The default `ttl` for such seals is 14 days. To specify a `ttl`, provide it in seconds like so:
+
+```ts
+  const fifteenMinutesInSeconds = 15 * 60;
+  
+  const seal = await sealData(
+    {
+      userId: user.id,
+    },
+    {
+      password: "complex_password_at_least_32_characters_long",
+      ttl: fifteenMinutesInSeconds,
+    },
+  );
+```
+
 **Login the user automatically and redirect:**
 
 ```ts
