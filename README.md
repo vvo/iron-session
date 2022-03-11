@@ -394,7 +394,7 @@ withIronSessionApiRoute(handler, {
 - The passwords used to decrypt session data are all passwords in the map (this is how rotation works).
 - Even if you do not provide a list at first, you can always move to multiple passwords afterwards. The first password you've used has a default id of 1.
 - As you can see from the last example, it is not necessary to include all past keys
-- If you omit past keys then any remaining users of them will be logged out, instead of rotated
+- If you omit past keys then any remaining users of them will be logged out
 
 ### Magic links
 
