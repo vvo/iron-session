@@ -376,11 +376,25 @@ withIronSessionApiRoute(handler, {
 });
 ```
 
+**Some time in the distant future**:
+
+```js
+withIronSessionApiRoute(handler, {
+  password: {
+    112: "latest_password_at_least_32_characters_long",
+    111: "previous_password_at_least_32_characters_long",
+    110: "earlier_password_at_least_32_characters_long"
+  },
+});
+```
+
 **Notes:**
 
 - The password used to encrypt session data (to `seal`) is always the highest number found in the map (2 in the example).
 - The passwords used to decrypt session data are all passwords in the map (this is how rotation works).
 - Even if you do not provide a list at first, you can always move to multiple passwords afterwards. The first password you've used has a default id of 1.
+- As you can see from the last example, it is not necessary to include all past keys
+- If you omit past keys then any remaining users of them will be logged out, instead of rotated
 
 ### Magic links
 
