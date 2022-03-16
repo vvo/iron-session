@@ -8,12 +8,12 @@
     "start": "next start"
   },
   "dependencies": {
-    "iron-session": "^6.0.3",
+    "iron-session": "^6.1.0",
     "next": "latest",
-    "octokit": "^1.7.0",
+    "octokit": "^1.7.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "swr": "^1.0.1"
+    "swr": "^1.2.2"
   },
   "devDependencies": {
     "eslint-config-next": "latest"
