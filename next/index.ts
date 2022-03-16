@@ -2,21 +2,23 @@ import type {
   NextApiHandler,
   GetServerSidePropsContext,
   GetServerSidePropsResult,
+  NextApiRequest,
+  NextApiResponse,
 } from "next";
 import type { IronSessionOptions } from "iron-session";
 import { getIronSession } from "iron-session";
 import getPropertyDescriptorForReqSession from "../src/getPropertyDescriptorForReqSession";
-import type { IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 
 // Argument types based on getIronSession function
-type GetIronSessionOptions = (
-  request: IncomingMessage,
-  response: ServerResponse,
-) => Promise<IronSessionOptions>;
+type GetIronSessionApiOptions = (
+  request: NextApiRequest,
+  response: NextApiResponse,
+) => Promise<IronSessionOptions> | IronSessionOptions;
 
 export function withIronSessionApiRoute(
   handler: NextApiHandler,
-  options: IronSessionOptions | GetIronSessionOptions,
+  options: IronSessionOptions | GetIronSessionApiOptions,
 ): NextApiHandler {
   return async function nextApiHandlerWrappedWithIronSession(req, res) {
     // If options is a function, call it and assign the results back.
@@ -38,13 +40,18 @@ export function withIronSessionApiRoute(
   };
 }
 
+type GetIronSessionSSROptions = (
+  request: IncomingMessage,
+  response: ServerResponse,
+) => Promise<IronSessionOptions> | IronSessionOptions;
+
 export function withIronSessionSsr<
   P extends { [key: string]: unknown } = { [key: string]: unknown },
 >(
   handler: (
     context: GetServerSidePropsContext,
   ) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>,
-  options: IronSessionOptions | GetIronSessionOptions,
+  options: IronSessionOptions | GetIronSessionSSROptions,
 ) {
   return async function nextGetServerSidePropsHandlerWrappedWithIronSession(
     context: GetServerSidePropsContext,

@@ -60,6 +60,31 @@ test("withIronSessionApiRoute: req.session.save creates a cookie", async () => {
   await wrappedHandler(getDefaultReq(), getDefaultRes());
 });
 
+test("withIconSessionApiRoute: IronSessionOptions passed as a function works correctly", async () => {
+  const wrappedHandler = withIronSessionApiRoute(
+    async function handler(req, res) {
+      req.session.user = { id: 200 };
+      await req.session.save();
+      const headerValue = (res.setHeader as jest.Mock).mock.calls[0][1];
+      const cookie = headerValue[0];
+      const cookieParams = cookie.split(";").slice(1).join(";");
+      const cookieName = cookie.split("=")[0];
+
+      expect(cookieParams).toMatchInlineSnapshot(
+        `" Max-Age=60; Path=/; HttpOnly; Secure; SameSite=Lax"`,
+      );
+      expect(cookieName).toBe("dynamic-cookie-name");
+    },
+    () => ({
+      cookieName: "dynamic-cookie-name",
+      password,
+      ttl: 120,
+    }),
+  );
+
+  await wrappedHandler(getDefaultReq(), getDefaultRes());
+});
+
 test("withIronSessionApiRoute: req.session.destroy removes the cookie", async () => {
   const wrappedHandler = withIronSessionApiRoute(
     async function handler(req, res) {
