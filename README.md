@@ -753,6 +753,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="http://www.afterecon.com/"><img src="https://avatars.githubusercontent.com/u/5559355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Vandivier</b></sub></a><br /><a href="https://github.com/vvo/iron-session/commits?author=Vandivier" title="Code">💻</a> <a href="#ideas-Vandivier" title="Ideas, Planning, & Feedback">🤔</a> <a href="#example-Vandivier" title="Examples">💡</a></td>
+    <td align="center"><a href="https://searchableguy.com"><img src="https://avatars.githubusercontent.com/u/73341821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>searchableguy</b></sub></a><br /><a href="https://github.com/vvo/iron-session/commits?author=searchableguy" title="Tests">⚠️</a> <a href="https://github.com/vvo/iron-session/commits?author=searchableguy" title="Documentation">📖</a> <a href="https://github.com/vvo/iron-session/commits?author=searchableguy" title="Code">💻</a></td>
   </tr>
 </table>
 
