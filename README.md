@@ -586,7 +586,7 @@ Only two options are required: `password` and `cookieName`. Everything else is a
 }
 ```
 
-### Next.js: withIronSessionApiRoute(handler, ironOptions | (req, res) => IronSessionOptions | Promise\<IronSessionOptions\>)
+### Next.js: withIronSessionApiRoute(handler, ironOptions | (req: NextApiRequest, res: NextApiResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
 
 Wraps a [Next.js API Route](https://nextjs.org/docs/api-routes/dynamic-api-routes) and adds a `session` object to the request.
 
@@ -629,7 +629,7 @@ export default withIronSessionApiRoute(
 );
 ```
 
-### Next.js: withIronSessionSsr(handler, ironOptions | (req, res) => IronSessionOptions | Promise\<IronSessionOptions\>)
+### Next.js: withIronSessionSsr(handler, ironOptions | (req: IncomingMessage, res: ServerResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
 
 Wraps a [Next.js getServerSideProps](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) and adds a `session` object to the request of the context.
 

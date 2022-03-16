@@ -40,6 +40,7 @@ export function withIronSessionApiRoute(
   };
 }
 
+// Argument type based on the SSR context
 type GetIronSessionSSROptions = (
   request: IncomingMessage,
   response: ServerResponse,
