@@ -420,17 +420,17 @@ export default async function sendEmailRoute(req, res) {
 The default `ttl` for such seals is 14 days. To specify a `ttl`, provide it in seconds like so:
 
 ```ts
-  const fifteenMinutesInSeconds = 15 * 60;
-  
-  const seal = await sealData(
-    {
-      userId: user.id,
-    },
-    {
-      password: "complex_password_at_least_32_characters_long",
-      ttl: fifteenMinutesInSeconds,
-    },
-  );
+const fifteenMinutesInSeconds = 15 * 60;
+
+const seal = await sealData(
+  {
+    userId: user.id,
+  },
+  {
+    password: "complex_password_at_least_32_characters_long",
+    ttl: fifteenMinutesInSeconds,
+  },
+);
 ```
 
 **Login the user automatically and redirect:**
@@ -586,7 +586,7 @@ Only two options are required: `password` and `cookieName`. Everything else is a
 }
 ```
 
-### Next.js: withIronSessionApiRoute(handler, ironOptions)
+### Next.js: withIronSessionApiRoute(handler, ironOptions | (req: NextApiRequest, res: NextApiResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
 
 Wraps a [Next.js API Route](https://nextjs.org/docs/api-routes/dynamic-api-routes) and adds a `session` object to the request.
 
@@ -606,9 +606,30 @@ export default withIronSessionApiRoute(
     },
   },
 );
+
+// You can also pass an async or sync function which takes request and response object and return IronSessionOptions
+export default withIronSessionApiRoute(
+  function userRoute(req, res) {
+    res.send({ user: req.session.user });
+  },
+  (req, res) => {
+    // Infer max cookie from request
+    const maxCookieAge = getMaxCookieAge(req);
+    return {
+      cookieName: "myapp_cookiename",
+      password: "complex_password_at_least_32_characters_long",
+      // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+      cookieOptions: {
+        // setMaxCookie age here.
+        maxCookieAge,
+        secure: process.env.NODE_ENV === "production",
+      },
+    };
+  },
+);
 ```
 
-### Next.js: withIronSessionSsr(handler, ironOptions)
+### Next.js: withIronSessionSsr(handler, ironOptions | (req: IncomingMessage, res: ServerResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
 
 Wraps a [Next.js getServerSideProps](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) and adds a `session` object to the request of the context.
 
@@ -630,6 +651,27 @@ export const getServerSideProps = withIronSessionSsr(
     cookieOptions: {
       secure: process.env.NODE_ENV === "production",
     },
+  },
+);
+
+// You can also pass an async or sync function which takes request and response object and return IronSessionOptions
+export const getServerSideProps = withIronSessionSsr(
+  async function getServerSideProps({ req }) {
+    return {
+      props: {
+        user: req.session.user,
+      },
+    };
+  },
+  (req, res) => {
+    return {
+      cookieName: "myapp_cookiename",
+      password: "complex_password_at_least_32_characters_long",
+      // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+      cookieOptions: {
+        secure: process.env.NODE_ENV === "production",
+      },
+    };
   },
 );
 ```
