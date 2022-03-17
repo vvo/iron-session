@@ -32,8 +32,8 @@ _Table of contents:_
   - [Firebase usage](#firebase-usage)
 - [API](#api)
   - [ironOptions](#ironoptions)
-  - [Next.js: withIronSessionApiRoute(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions)
-  - [Next.js: withIronSessionSsr(handler, ironOptions)](#nextjs-withironsessionssrhandler-ironoptions)
+  - [Next.js: withIronSessionApiRoute(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions--req-nextapirequest-res-nextapiresponse--ironoptions--promiseironoptions)
+  - [Next.js: withIronSessionSsr(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions--req-nextapirequest-res-nextapiresponse--ironoptions--promiseironoptions)
   - [Express: ironSession(ironOptions)](#express-ironsessionironoptions)
   - [session.save()](#sessionsave)
   - [session.destroy()](#sessiondestroy)
@@ -586,7 +586,7 @@ Only two options are required: `password` and `cookieName`. Everything else is a
 }
 ```
 
-### Next.js: withIronSessionApiRoute(handler, ironOptions | (req: NextApiRequest, res: NextApiResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
+### Next.js: withIronSessionApiRoute(handler, ironOptions | (req: NextApiRequest, res: NextApiResponse) => IronOptions | Promise\<IronOptions\>)
 
 Wraps a [Next.js API Route](https://nextjs.org/docs/api-routes/dynamic-api-routes) and adds a `session` object to the request.
 
@@ -629,7 +629,7 @@ export default withIronSessionApiRoute(
 );
 ```
 
-### Next.js: withIronSessionSsr(handler, ironOptions | (req: IncomingMessage, res: ServerResponse) => IronSessionOptions | Promise\<IronSessionOptions\>)
+### Next.js: withIronSessionSsr(handler, ironOptions | (req: IncomingMessage, res: ServerResponse) => IronOptions | Promise\<IronOptions\>)
 
 Wraps a [Next.js getServerSideProps](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) and adds a `session` object to the request of the context.
 
