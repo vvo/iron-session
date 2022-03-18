@@ -21,11 +21,16 @@ export function withIronSessionApiRoute(
   options: IronSessionOptions | GetIronSessionApiOptions,
 ): NextApiHandler {
   return async function nextApiHandlerWrappedWithIronSession(req, res) {
+    let sessionOptions: IronSessionOptions;
+
     // If options is a function, call it and assign the results back.
     if (options instanceof Function) {
-      options = await options(req, res);
+      sessionOptions = await options(req, res);
+    } else {
+      sessionOptions = options;
     }
-    const session = await getIronSession(req, res, options);
+
+    const session = await getIronSession(req, res, sessionOptions);
 
     // we define req.session as being enumerable (so console.log(req) shows it)
     // and we also want to allow people to do:
@@ -57,11 +62,21 @@ export function withIronSessionSsr<
   return async function nextGetServerSidePropsHandlerWrappedWithIronSession(
     context: GetServerSidePropsContext,
   ) {
+    let sessionOptions: IronSessionOptions;
+
     // If options is a function, call it and assign the results back.
     if (options instanceof Function) {
-      options = await options(context.req, context.res);
+      sessionOptions = await options(context.req, context.res);
+    } else {
+      sessionOptions = options;
     }
-    const session = await getIronSession(context.req, context.res, options);
+
+    const session = await getIronSession(
+      context.req,
+      context.res,
+      sessionOptions,
+    );
+
     Object.defineProperty(
       context.req,
       "session",

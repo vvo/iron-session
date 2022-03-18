@@ -69,19 +69,22 @@ test("withIconSessionApiRoute: IronSessionOptions passed as a function works cor
       const cookie = headerValue[0];
       const cookieParams = cookie.split(";").slice(1).join(";");
       const cookieName = cookie.split("=")[0];
-
+      // When giving session, iron implementation substracts 60 seconds.
+      const maxAgeValue = Number(req.headers["value"]) - 60;
       expect(cookieParams).toMatchInlineSnapshot(
-        `" Max-Age=60; Path=/; HttpOnly; Secure; SameSite=Lax"`,
+        `" Max-Age=${maxAgeValue}; Path=/; HttpOnly; Secure; SameSite=Lax"`,
       );
       expect(cookieName).toBe("dynamic-cookie-name");
     },
-    () => ({
+    (request) => ({
       cookieName: "dynamic-cookie-name",
       password,
-      ttl: 120,
+      ttl: Number(request.headers["value"]),
     }),
   );
 
+  // Run it twice to make sure different value is assigned on computed session option from request
+  await wrappedHandler(getDefaultReq(), getDefaultRes());
   await wrappedHandler(getDefaultReq(), getDefaultRes());
 });
 
@@ -192,9 +195,50 @@ test("withIronSessionSsr: req.session exists", async () => {
   } as unknown as GetServerSidePropsContext);
 });
 
+test("withIronSessionSsr: IronSessionOptions passed as a function to be computed on each request work correctly", async () => {
+  const wrappedHandler = withIronSessionSsr(
+    async function handler(context) {
+      context.req.session.user = { id: 200 };
+      await context.req.session.save();
+      const headerValue = (context.res.setHeader as jest.Mock).mock.calls[0][1];
+      const cookie = headerValue[0];
+      const cookieParams = cookie.split(";").slice(1).join(";");
+      const cookieName = cookie.split("=")[0];
+      // When giving session, iron implementation substracts 60 seconds.
+      const maxAgeValue = Number(context.req.headers["value"]) - 60;
+      expect(cookieParams).toMatchInlineSnapshot(
+        `" Max-Age=${maxAgeValue}; Path=/; HttpOnly; Secure; SameSite=Lax"`,
+      );
+      expect(cookieName).toBe("dynamic-cookie-name");
+      return {
+        props: {},
+      };
+    },
+    (request) => ({
+      cookieName: "dynamic-cookie-name",
+      password,
+      ttl: Number(request.headers["value"]),
+    }),
+  );
+
+  // Run it twice to make sure different value is assigned on computed session option from request
+  await wrappedHandler({
+    req: getDefaultReq(),
+    res: getDefaultRes(),
+  } as unknown as GetServerSidePropsContext);
+
+  await wrappedHandler({
+    req: getDefaultReq(),
+    res: getDefaultRes(),
+  } as unknown as GetServerSidePropsContext);
+});
+
 function getDefaultReq() {
   return {
-    headers: {},
+    headers: {
+      // Random number between 100 to 1000
+      value: Math.floor(Math.random() * 900) + 100,
+    },
     socket: {
       encrypted: true,
     },
