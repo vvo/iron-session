@@ -302,7 +302,7 @@ async function loginRoute(req, res) {
 
 import { withSessionSsr } from "lib/withSession";
 
-export const getServerSideProps = withIronSessionSsr(
+export const getServerSideProps = withSessionSsr(
   async function getServerSideProps({ req }) {
     const user = req.session.user;
 
