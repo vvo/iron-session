@@ -62,6 +62,8 @@ Session duration is 14 days by default, check the API docs for more info.
 
 ⚠️ Always store passwords in encrypted environment variables on your platform. Vercel does this automatically.
 
+test
+
 **Login API Route:**
 
 ```ts
