@@ -328,6 +328,8 @@ export const getServerSideProps = withSessionSsr(
 But you might want to go further and type your session data also. To do so, use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation):
 
 ```ts
+import * as IronSession from "iron-session";
+
 declare module "iron-session" {
   interface IronSessionData {
     user?: {
