@@ -568,7 +568,7 @@ Only two options are required: `password` and `cookieName`. Everything else is a
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use https://1password.com/password-generator/ to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `cookieName`, **required**: Name of the cookie to be stored
-- `ttl`, _optional_: In seconds or 0 for max, default to 14 days
+- `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies (~70 years).
 - [`cookieOptions`](https://github.com/jshttp/cookie#cookieserializename-value-options), _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
 
 ```js
