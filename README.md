@@ -10,7 +10,7 @@ This strategy of storing session data is the same technique used by **frameworks
 
 The underlying cryptography library is [iron](https://hapi.dev/module/iron) which was [created by the lead developer of OAuth 2.0](https://hueniversedotcom.wordpress.com/2015/09/19/auth-to-see-the-wizard-or-i-wrote-an-oauth-replacement/).
 
-<p align="center"><b>Online demo at <a href="https://iron-session-example.vercel.app/">https://iron-session-example.vercel.app</a> 👀</b></p>
+<p align="center"><b>Online demo: <a href="https://iron-session-example.vercel.app/">https://iron-session-example.vercel.app</a> 👀</b></p>
 
 ---
 
