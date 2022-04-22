@@ -2,8 +2,6 @@
 
 <p align="center"><b>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></b></p>
 
-**⚠️ Nov 2021 update**: The library was renamed to `iron-session` and fully rewritten in TypeScript, it includes lots of new features and fixes. Follow the migration guide here: https://github.com/vvo/iron-session/releases/tag/v6.0.0.
-
 _🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework._
 
 The session data is stored in encrypted cookies ("seals"). And only your server can decode the session data. There are no session ids, making iron sessions "stateless" from the server point of view.
@@ -32,8 +30,8 @@ _Table of contents:_
   - [Firebase usage](#firebase-usage)
 - [API](#api)
   - [ironOptions](#ironoptions)
-  - [Next.js: withIronSessionApiRoute(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions--req-nextapirequest-res-nextapiresponse--ironoptions--promiseironoptions)
-  - [Next.js: withIronSessionSsr(handler, ironOptions)](#nextjs-withironsessionapiroutehandler-ironoptions--req-nextapirequest-res-nextapiresponse--ironoptions--promiseironoptions)
+  - [Next.js: withIronSessionApiRoute(handler, ironOptions | (req: NextApiRequest, res: NextApiResponse) => IronOptions | Promise\<IronOptions\>)](#nextjs-withironsessionapiroutehandler-ironoptions--req-nextapirequest-res-nextapiresponse--ironoptions--promiseironoptions)
+  - [Next.js: withIronSessionSsr(handler, ironOptions | (req: IncomingMessage, res: ServerResponse) => IronOptions | Promise\<IronOptions\>)](#nextjs-withironsessionssrhandler-ironoptions--req-incomingmessage-res-serverresponse--ironoptions--promiseironoptions)
   - [Express: ironSession(ironOptions)](#express-ironsessionironoptions)
   - [session.save()](#sessionsave)
   - [session.destroy()](#sessiondestroy)
