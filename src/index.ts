@@ -96,15 +96,26 @@ export async function getIronSession(
   res: ServerResponse,
   userSessionOptions: IronSessionOptions,
 ): Promise<IronSession> {
-  if (
-    !req ||
-    !res ||
-    !userSessionOptions ||
-    !userSessionOptions.cookieName ||
-    !userSessionOptions.password
-  ) {
+  const { cookieName, password } = userSessionOptions ?? {};
+  const requiredParams = [
+    { param: req, name: "'req'" },
+    { param: res, name: "'res'" },
+    { param: cookieName, name: "'cookieName'" },
+    { param: password, name: "'password'" },
+  ];
+
+  const missingParams = requiredParams.reduce<string[]>((prev, curr) => {
+    if (!curr.param) {
+      prev.push(curr.name);
+    }
+    return prev;
+  }, []);
+
+  if (missingParams.length) {
     throw new Error(
-      `iron-session: Bad usage. Minimum usage is const session = await getIronSession(req, res, { cookieName: "...", password: "...". Check the usage here: https://github.com/vvo/iron-session`,
+      `iron-session: Bad usage. The following parameters are 'undefined' - ${missingParams.join(
+        ", ",
+      )}. Minimum usage is const session = await getIronSession(req, res, { cookieName: "...", password: "...". Check the usage here: https://github.com/vvo/iron-session`,
     );
   }
 

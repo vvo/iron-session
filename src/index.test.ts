@@ -22,35 +22,46 @@ declare module "iron-session" {
   }
 }
 
-test("no req", async () => {
+test("no params", async () => {
   // @ts-ignore we actually want to test this
   await expect(getIronSession()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"iron-session: Bad usage. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
+    `"iron-session: Bad usage. The following parameters are 'undefined' - 'req', 'res', 'cookieName', 'password'. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
+  );
+});
+
+test("no req", async () => {
+  // @ts-ignore we actually want to test this
+  await expect(
+    getIronSession(undefined, defaultRes, defaultOptions),
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"iron-session: Bad usage. The following parameters are 'undefined' - 'req'. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
   );
 });
 
 test("no res", async () => {
   // @ts-ignore we actually want to test this
-  await expect(getIronSession({})).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"iron-session: Bad usage. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
+  await expect(
+    getIronSession(defaultReq, undefined, defaultOptions),
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"iron-session: Bad usage. The following parameters are 'undefined' - 'res'. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
   );
 });
 
 test("no password", async () => {
   await expect(
     // @ts-ignore we actually want to test this
-    getIronSession({}, {}),
+    getIronSession(defaultReq, defaultRes, { cookieName }),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"iron-session: Bad usage. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
+    `"iron-session: Bad usage. The following parameters are 'undefined' - 'password'. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
   );
 });
 
 test("no cookie name", async () => {
   await expect(
     // @ts-ignore we actually want to test this
-    getIronSession({}, {}, { password }),
+    getIronSession(defaultReq, defaultRes, { password }),
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"iron-session: Bad usage. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
+    `"iron-session: Bad usage. The following parameters are 'undefined' - 'cookieName'. Minimum usage is const session = await getIronSession(req, res, { cookieName: \\"...\\", password: \\"...\\". Check the usage here: https://github.com/vvo/iron-session"`,
   );
 });
 
