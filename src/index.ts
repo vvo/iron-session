@@ -213,7 +213,17 @@ export async function getIronSession(
   return session as IronSession;
 }
 
-function addToCookies(cookieValue: string, res: ServerResponse) {
+function addToCookies(
+  cookieValue: string,
+  res: ServerResponse & {
+    headers?: { append(name: string, value: string): void };
+  },
+) {
+  if (typeof res.headers?.append === "function") {
+    res.headers.append("set-cookie", cookieValue);
+    return;
+  }
+
   let existingSetCookie =
     (res.getHeader("set-cookie") as string[] | string) ?? [];
   if (typeof existingSetCookie === "string") {
