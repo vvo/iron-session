@@ -121,11 +121,11 @@
     }
   },
   "dependencies": {
-    "@hapi/iron": "^6.0.0",
     "@types/cookie": "^0.5.1",
     "@types/express": "^4.17.13",
     "@types/node": "^16.11.7",
-    "cookie": "^0.5.0"
+    "cookie": "^0.5.0",
+    "iron-webcrypto": "^0.0.1"
   },
   "devDependencies": {
     "@swc/core": "1.2.171",

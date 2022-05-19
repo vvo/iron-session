@@ -1,4 +1,4 @@
-import Iron from "@hapi/iron";
+import * as Iron from "iron-webcrypto";
 import type { CookieSerializeOptions } from "cookie";
 import cookie from "cookie";
 import type { IncomingMessage, ServerResponse } from "http";
@@ -246,10 +246,11 @@ export async function unsealData<T = Record<string, unknown>>(
     });
 
     if (tokenVersion === 2) {
-      return data;
+      return data as T;
     }
 
     return {
+      // @ts-expect-error `persistent` does not exist on newer tokens
       ...data.persistent,
     };
   } catch (error) {

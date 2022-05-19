@@ -9,6 +9,7 @@
       "iron-session/express": ["./express/index.ts"]
     },
     "declarationMap": true,
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true
   }
 }
