@@ -92,7 +92,7 @@ declare module "http" {
 }
 
 export async function getIronSession(
-  req: IncomingMessage,
+  req: IncomingMessage & { cookies?: { [key: string]: string } },
   res: ServerResponse,
   userSessionOptions: IronSessionOptions,
 ): Promise<IronSession> {
@@ -155,9 +155,8 @@ export async function getIronSession(
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  const sealFromCookies = cookie.parse(req.headers.cookie || "")[
-    options.cookieName
-  ];
+  const sealFromCookies = (req.cookies ??
+    cookie.parse(req.headers.cookie || ""))[options.cookieName];
 
   const session =
     sealFromCookies === undefined
