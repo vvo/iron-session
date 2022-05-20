@@ -1,7 +1,7 @@
 import * as Iron from "iron-webcrypto";
 import type { CookieSerializeOptions } from "cookie";
 import cookie from "cookie";
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingHttpHeaders } from "http";
 
 // default time allowed to check for iron seal validity when ttl passed
 // see https://hapi.dev/family/iron/api/?v=6.0.0#options
@@ -91,9 +91,24 @@ declare module "http" {
   }
 }
 
+type RequestType =
+  | { headers: IncomingHttpHeaders }
+  | { cookies: { [key: string]: string } };
+
+type ResponseType =
+  | {
+      headersSent: boolean;
+      setHeader(
+        name: string,
+        value: number | string | ReadonlyArray<string>,
+      ): unknown;
+      getHeader(name: string): number | string | string[] | undefined;
+    }
+  | { headers: { append(name: string, value: string): void } };
+
 export async function getIronSession(
-  req: IncomingMessage & { cookies?: { [key: string]: string } },
-  res: ServerResponse,
+  req: RequestType,
+  res: ResponseType,
   userSessionOptions: IronSessionOptions,
 ): Promise<IronSession> {
   if (
@@ -155,8 +170,9 @@ export async function getIronSession(
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  const sealFromCookies = (req.cookies ??
-    cookie.parse(req.headers.cookie || ""))[options.cookieName];
+  const sealFromCookies = (
+    "cookies" in req ? req.cookies : cookie.parse(req.headers.cookie || "")
+  )[options.cookieName];
 
   const session =
     sealFromCookies === undefined
@@ -169,7 +185,7 @@ export async function getIronSession(
   Object.defineProperties(session, {
     save: {
       value: async function save() {
-        if (res.headersSent === true) {
+        if ("headersSent" in res && res.headersSent === true) {
           throw new Error(
             `iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()`,
           );
@@ -212,13 +228,8 @@ export async function getIronSession(
   return session as IronSession;
 }
 
-function addToCookies(
-  cookieValue: string,
-  res: ServerResponse & {
-    headers?: { append(name: string, value: string): void };
-  },
-) {
-  if (typeof res.headers?.append === "function") {
+function addToCookies(cookieValue: string, res: ResponseType) {
+  if ("headers" in res) {
     res.headers.append("set-cookie", cookieValue);
     return;
   }
