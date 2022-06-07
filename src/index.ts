@@ -1,7 +1,7 @@
 import * as Iron from "iron-webcrypto";
 import type { CookieSerializeOptions } from "cookie";
 import cookie from "cookie";
-import type { IncomingHttpHeaders } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 
 // default time allowed to check for iron seal validity when ttl passed
 // see https://hapi.dev/family/iron/api/?v=6.0.0#options
@@ -91,20 +91,8 @@ declare module "http" {
   }
 }
 
-type RequestType =
-  | { headers: IncomingHttpHeaders }
-  | { cookies: { [key: string]: string } };
-
-type ResponseType =
-  | {
-      headersSent: boolean;
-      setHeader(
-        name: string,
-        value: number | string | ReadonlyArray<string>,
-      ): unknown;
-      getHeader(name: string): number | string | string[] | undefined;
-    }
-  | { headers: { append(name: string, value: string): void } };
+type RequestType = IncomingMessage | Request;
+type ResponseType = ServerResponse | Response;
 
 export async function getIronSession(
   req: RequestType,
@@ -170,8 +158,10 @@ export async function getIronSession(
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  const sealFromCookies = (
-    "cookies" in req ? req.cookies : cookie.parse(req.headers.cookie || "")
+  const sealFromCookies = cookie.parse(
+    "credentials" in req
+      ? req.headers.get("cookie") || ""
+      : req.headers.cookie || "",
   )[options.cookieName];
 
   const session =

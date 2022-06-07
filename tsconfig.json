@@ -10,6 +10,7 @@
     },
     "declarationMap": true,
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": ["ES2019", "DOM"]
   }
 }
