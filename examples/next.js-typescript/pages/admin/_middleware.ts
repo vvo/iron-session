@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
+import { getIronSession } from "iron-session/edge";
 import { sessionOptions } from "lib/session";
 
 export const middleware = async (req: NextRequest) => {
