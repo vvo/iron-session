@@ -50,6 +50,7 @@ export interface IronSessionOptions {
   /**
    * This is the time in seconds that the session will be valid for. This also set the max-age attribute of
    * the cookie automatically (minus 60 seconds so that the cookie always expire before the session).
+   * If omitted, defaults to 14 days. If 0, iron-session will compute the maximum allowed value by cookies (~70 years).
    */
   ttl?: number;
 
