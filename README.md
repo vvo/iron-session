@@ -6,7 +6,7 @@ _🛠 Node.js stateless session utility using signed and encrypted cookies to st
 
 The session data is stored in encrypted cookies ("seals"). And only your server can decode the session data. There are no session ids, making iron sessions "stateless" from the server point of view.
 
-This strategy of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage)** (their default strategy).
+This strategy of storing session data is the same technique used by **frameworks like [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage) or [Laravel](https://laravel.com/docs/session)** (their default strategy).
 
 The underlying cryptography library is [iron](https://hapi.dev/module/iron) which was [created by the lead developer of OAuth 2.0](https://hueniversedotcom.wordpress.com/2015/09/19/auth-to-see-the-wizard-or-i-wrote-an-oauth-replacement/).
 
