@@ -47,7 +47,8 @@ _Table of contents:_
 ## Installation
 
 ```bash
-npm add iron-session
+npm install iron-session
+yarn add iron-session
 ```
 
 ## Usage (Next.js)
