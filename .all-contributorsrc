@@ -27,6 +27,17 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "brc-dd",
+      "name": "Divyansh Singh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40380293?v=4",
+      "profile": "http://brc-dd.me",
+      "contributions": [
+        "code",
+        "doc",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
