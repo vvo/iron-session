@@ -383,6 +383,9 @@ export const getServerSideProps = withSessionSsr(
 But you might want to go further and type your session data also. So you can get autocompletion on `session.user` for example. To do so, use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation):
 
 ```ts
+// You may need the next line in some situations
+// import * as IronSession from "iron-session";
+
 declare module "iron-session" {
   interface IronSessionData {
     user?: {
