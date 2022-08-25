@@ -16,9 +16,3 @@ declare module "iron-session" {
     user?: User;
   }
 }
-
-declare module "iron-session/edge" {
-  interface IronSessionData {
-    user?: User;
-  }
-}
