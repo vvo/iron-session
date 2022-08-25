@@ -1,3 +1,6 @@
+// This allows the types to be linked from the main module instead of duplicated
+export type { IronSessionOptions, IronSessionData } from "iron-session";
+
 import {
   createGetIronSession,
   createSealData,
@@ -17,7 +20,6 @@ const getCrypto = (): Crypto => {
 
 const _crypto = getCrypto();
 
-export * from "../src/core";
 export const unsealData = createUnsealData(_crypto);
 export const sealData = createSealData(_crypto);
 export const getIronSession = createGetIronSession(
