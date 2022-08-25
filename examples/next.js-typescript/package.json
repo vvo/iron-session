@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "iron-session": "^6.2.0-beta.0",
+    "iron-session": "^6.2.0",
     "next": "^12.2.5",
     "octokit": "^2.0.7",
     "react": "^18.2.0",
