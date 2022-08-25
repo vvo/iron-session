@@ -1,14 +1,17 @@
 {
   "extends": "@tsconfig/node12/tsconfig.json",
-  "include": ["src", "next"],
+  "include": ["src", "next", "express", "edge"],
   "exclude": ["node_modules", "./**/dist"],
   "compilerOptions": {
     "paths": {
       "iron-session": ["./src/index.ts"],
       "iron-session/next": ["./next/index.ts"],
-      "iron-session/express": ["./express/index.ts"]
+      "iron-session/express": ["./express/index.ts"],
+      "iron-session/edge": ["./edge/index.ts"]
     },
     "declarationMap": true,
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true,
+    "lib": ["ES2019", "DOM"]
   }
 }

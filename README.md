@@ -17,7 +17,8 @@ The underlying cryptography library is [iron](https://hapi.dev/module/iron) whic
 _Table of contents:_
 
 - [Installation](#installation)
-- [Usage (Next.js)](#usage-nextjs)
+- [Next.js usage](#nextjs-usage)
+- [Next.js middlewares usage](#nextjs-middlewares-usage)
 - [Advanced usage](#advanced-usage)
   - [Coding best practices](#coding-best-practices)
   - [Session wrappers](#session-wrappers)
@@ -50,7 +51,7 @@ _Table of contents:_
 npm add iron-session
 ```
 
-## Usage (Next.js)
+## Next.js usage
 
 You can find full featured examples (Next.js, Express) in the [examples folder](examples).
 
@@ -168,6 +169,61 @@ export const getServerSideProps = withIronSessionSsr(
 ```
 
 Note: We encourage you to create a `withSession` utility so you do not have to repeat the password and cookie name in every route. You can see how to do that [in the example](./examples/next.js-typescript/lib/session.ts).
+
+## Next.js middlewares usage
+
+As of version 6.2.0, this library is compatible with [Next.js middlewares](https://nextjs.org/docs/advanced-features/middleware) locally and when deployed on Vercel.
+
+Since there's no pre-available `res` object in Next.js's middlewares, you need to use iron-session this way:
+
+```ts
+// /middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getIronSession } from "iron-session/edge";
+
+export const middleware = async (req: NextRequest) => {
+  const res = NextResponse.next();
+  const session = await getIronSession(req, res, {
+    cookieName: "myapp_cookiename",
+    password: "complex_password_at_least_32_characters_long",
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+    },
+  });
+
+  // do anything with session here:
+  const { user } = session;
+
+  // like mutate user:
+  // user.something = someOtherThing;
+  // or:
+  // session.user = someoneElse;
+
+  // uncomment next line to commit changes:
+  // await session.save();
+  // or maybe you want to destroy session:
+  // await session.destroy();
+
+  console.log("from middleware", { user });
+
+  // demo:
+  if (user?.admin !== "true") {
+    return new NextResponse(null, { status: 403 }); // unauthorized to see pages inside admin/
+  }
+
+  return res;
+};
+
+export const config = {
+  matcher: "/admin",
+};
+```
+
+Note: There's a good probability that you can also use iron-session in the context of [Cloudflare Workers](https://workers.cloudflare.com/), try it and let us know.
+
+_Huge thanks to [Divyansh Singh](https://github.com/brc-dd) who ported [hapijs/iron](https://github.com/hapijs/iron) to the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) and implemented the required changes in iron-session._
 
 ## Advanced usage
 
@@ -323,7 +379,7 @@ export const getServerSideProps = withSessionSsr(
 
 `req.session` is automatically populated with the right types so .save() and .destroy() can be called on it.
 
-But you might want to go further and type your session data also. To do so, use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation):
+But you might want to go further and type your session data also. So you can get autocompletion on `session.user` for example. To do so, use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation):
 
 ```ts
 declare module "iron-session" {
