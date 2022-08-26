@@ -526,6 +526,8 @@ async function magicLoginRoute(req, res) {
 
 You might want to include error handling in the API routes. For example checking if `req.session.user` is already defined in login or handling bad seals.
 
+Please note that if you redirect based on an incoming request that is not the same origin as your server then the cookie may not be set if your cookie options do not have the `sameSite: 'none'` option enabled.
+
 ### Impersonation, login as someone else
 
 You may want to impersonate your own users, to check how they see your application. This can be extremely useful. For example you could have a page that list all your users and with links you can click to impersonate them.
