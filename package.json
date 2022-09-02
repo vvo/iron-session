@@ -8,8 +8,8 @@
     "cookies",
     "login",
     "auth",
+    "authentication",
     "Express",
-    "NestJS",
     "edge",
     "cloudflare workers"
   ],
