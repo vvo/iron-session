@@ -2,7 +2,7 @@
 
 <p align="center"><b>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></b></p>
 
-_🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework._
+_🛠 Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, and Node.js HTTP servers._
 
 The session data is stored in encrypted cookies ("seals"). And only your server can decode the session data. There are no session ids, making iron sessions "stateless" from the server point of view.
 
