@@ -257,12 +257,11 @@ export function createUnsealData(_crypto: Crypto) {
     const { sealWithoutVersion, tokenVersion } = parseSeal(seal);
 
     try {
-      const data = await Iron.unseal(
-        _crypto,
-        sealWithoutVersion,
-        passwordsAsMap,
-        { ...Iron.defaults, ttl: ttl * 1000 },
-      );
+      const data =
+        (await Iron.unseal(_crypto, sealWithoutVersion, passwordsAsMap, {
+          ...Iron.defaults,
+          ttl: ttl * 1000,
+        })) || {};
 
       if (tokenVersion === 2) {
         return data as T;
@@ -277,7 +276,7 @@ export function createUnsealData(_crypto: Crypto) {
         if (
           error.message === "Expired seal" ||
           error.message === "Bad hmac value" ||
-          error.message === "Cannot find password: " ||
+          error.message.startsWith("Cannot find password: ") ||
           error.message === "Incorrect number of sealed components"
         ) {
           // if seal expired or
