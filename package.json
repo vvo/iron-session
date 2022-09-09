@@ -136,7 +136,7 @@
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.41",
     "cookie": "^0.5.0",
-    "iron-webcrypto": "^0.1.0"
+    "iron-webcrypto": "^0.2.5"
   },
   "devDependencies": {
     "@swc/core": "1.2.242",
