@@ -77,12 +77,12 @@ export type IronSession = IronSessionData & {
   /**
    * Destroys the session data and removes the cookie.
    */
-  destroy: () => void;
+  destroy: (destroyOptions: IronSessionOptions) => void;
 
   /**
    * Encrypts the session data and sets the cookie.
    */
-  save: () => Promise<void>;
+  save: (saveOptions: IronSessionOptions) => Promise<void>;
 };
 
 declare module "http" {
@@ -179,20 +179,24 @@ export function createGetIronSession(
 
     Object.defineProperties(session, {
       save: {
-        value: async function save() {
+        value: async function save(saveOptions: IronSessionOptions) {
           if ("headersSent" in res && res.headersSent === true) {
             throw new Error(
               `iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()`,
             );
           }
+
+          // Use options as base and extend with function argument
+          saveOptions = Object.assign({}, saveOptions);
+
           const seal = await sealData(session, {
             password: passwordsAsMap,
-            ttl: options.ttl,
+            ttl: saveOptions.ttl,
           });
           const cookieValue = cookie.serialize(
-            options.cookieName,
+            saveOptions.cookieName,
             seal,
-            options.cookieOptions,
+            saveOptions.cookieOptions,
           );
 
           if (cookieValue.length > 4096) {
@@ -205,14 +209,17 @@ export function createGetIronSession(
         },
       },
       destroy: {
-        value: function destroy() {
+        value: function destroy(destroyOptions: IronSessionOptions) {
           Object.keys(session).forEach((key) => {
             // @ts-ignore See comment on the IronSessionData interface
             delete session[key];
           });
 
-          const cookieValue = cookie.serialize(options.cookieName, "", {
-            ...options.cookieOptions,
+          // Use options as base and extend with function argument
+          destroyOptions = Object.assign({}, options, destroyOptions);
+
+          const cookieValue = cookie.serialize(destroyOptions.cookieName, "", {
+            ...destroyOptions.cookieOptions,
             maxAge: 0,
           });
           addToCookies(cookieValue, res);
