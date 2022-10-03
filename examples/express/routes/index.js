@@ -21,6 +21,16 @@ router.get("/login", session, async function (req, res) {
   res.redirect("/profile");
 });
 
+router.get("/login-session", session, async function (req, res) {
+  req.session.user = { id: 20 };
+  await req.session.save({
+    cookieOptions: {
+      maxAge: undefined,
+    },
+  });
+  res.redirect("/profile");
+});
+
 router.get("/profile", session, async function (req, res) {
   if (req.session.user === undefined) {
     res.redirect("/restricted");
