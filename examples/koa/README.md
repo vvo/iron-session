@@ -2,7 +2,7 @@
 
 This is a small example application providing basic API
 
-The tl;dr; on how to use `iron-session` with Api is this:
+The tl;dr; on how to use `iron-session` with Koa is this:
 
 ```js
 import Koa from 'koa';
@@ -20,6 +20,18 @@ app.use(ironSession({
   },
 }));
 
+app.use(async (ctx, next) => { //Error handling
+  try {
+    await next();
+  } catch(e) {
+    ctx.status = e.statusCode || e.status || 500;
+    ctx.body = { message: e.message };
+    console.log('[!] error', ctx.body);
+    if (dev) {
+      console.log(e);
+    }
+  }
+});
 
 const router = new Router();
 router
@@ -32,8 +44,8 @@ router
     ctx.body = { message: 'ok' };
   })
   .get('/profile', async ctx => {
-    if (ctx?.session?.id) {
-      ctx.body = { id: ctx.session.id };
+    if (ctx.session.user) {
+      ctx.body = { user: ctx.session.user };
     }
     else {
       ctx.throw(500, { message: 'restricted' });

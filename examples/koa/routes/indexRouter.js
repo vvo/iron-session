@@ -12,7 +12,6 @@ router
     ctx.body = { message: 'ok' };
   })
   .get('/profile', async ctx => {
-    console.log(ctx.session);
     if (ctx.session.user) {
       ctx.body = { user: ctx.session.user };
     }
