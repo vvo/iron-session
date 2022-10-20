@@ -13,7 +13,7 @@ const app = new Koa();
 const dev = (process.env.NODE_ENV || app.env) != 'production';
 
 app.use(ironSession({
-  cookieName: 'iron-session/examples/express',
+  cookieName: 'iron-session/examples/koa',
   password: process.env.SECRET_COOKIE_PASSWORD,
   cookieOptions: {
     secure: !dev,
@@ -21,7 +21,7 @@ app.use(ironSession({
 }));
 
 
-const router = new Router({ prefix: '/' });
+const router = new Router();
 router
   .get('/', async ctx => {
     ctx.body = { hello: 'world' };
