@@ -59,7 +59,7 @@
   ],
   "scripts": {
     "build": "npm run build:clean && npm run build:src && npm run build:next && npm run build:express && npm run build:koa && npm run build:edge",
-    "build:clean": "rimraf dist/ next/dist express/dist edge/dist",
+    "build:clean": "rimraf dist/ next/dist express/dist edge/dist koa/dist",
     "build:edge": "tsup edge/index.ts -d edge/dist",
     "build:express": "tsup express/index.ts -d express/dist",
     "build:koa": "tsup koa/index.ts -d koa/dist",
@@ -67,7 +67,7 @@
     "build:src": "tsup src/index.ts",
     "installExamples": "(cd examples/express && npm ci) && (cd examples/koa && npm ci) && (cd examples/next.js && npm ci) && (cd examples/next.js-typescript && npm ci)",
     "lint": "eslint --ext ts,js,jsx,tsx src/ next/ express/ koa/ edge/ examples/",
-    "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp express/dist/* express/ && cp edge/dist/* edge/",
+    "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp edge/dist/* edge/ && cp koa/dist/* koa/",
     "postpublish": "rm next/*.d.ts next/*.js next/*.map next/*.mjs && rm express/*.d.ts express/*.js express/*.map express/*.mjs && rm koa/*.d.ts koa/*.js koa/*.map koa/*.mjs && rm edge/*.d.ts edge/*.js edge/*.map edge/*.mjs",
     "test": "jest --coverage --ci && npm run installExamples && npm run lint && tsc --noEmit && npm run build && npm run build:clean",
     "watch": "npm run build:clean && concurrently \"npm:watch:*\"",
