@@ -24,6 +24,7 @@ _Table of contents:_
   - [Session wrappers](#session-wrappers)
   - [Typing session data with TypeScript](#typing-session-data-with-typescript)
   - [Express](#express)
+  - [Koa](#koa)
   - [Handle password rotation/update the password](#handle-password-rotationupdate-the-password)
   - [Magic links](#magic-links)
   - [Impersonation, login as someone else](#impersonation-login-as-someone-else)
@@ -404,6 +405,10 @@ We've taken this technique from [express-session types](https://github.com/Defin
 ### Express
 
 See [examples/express](examples/express) for an example of how to use this with Express.
+
+### Koa
+
+See [examples/koa](examples/koa) for an example of how to use this with Koa.
 
 ### Handle password rotation/update the password
 

@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "6.2.1",
+  "version": "6.3.1",
   "description": "Node.js stateless session utility using signed and encrypted cookies to store data. Works with Next.js, Express, NestJs, Fastify, and any Node.js HTTP framework.",
   "keywords": [
     "Next.js",
@@ -10,6 +10,7 @@
     "auth",
     "authentication",
     "Express",
+    "Koa",
     "edge",
     "cloudflare workers"
   ],
@@ -35,6 +36,11 @@
       "require": "./express/dist/index.js",
       "types": "./express/dist/index.d.ts"
     },
+    "./koa": {
+      "import": "./koa/dist/index.mjs",
+      "require": "./koa/dist/index.js",
+      "types": "./koa/dist/index.d.ts"
+    },
     "./edge": {
       "import": "./edge/dist/index.mjs",
       "require": "./edge/dist/index.js",
@@ -48,23 +54,26 @@
     "dist/",
     "next/",
     "express/",
+    "koa/",
     "edge/"
   ],
   "scripts": {
-    "build": "npm run build:clean && npm run build:src && npm run build:next && npm run build:express && npm run build:edge",
-    "build:clean": "rimraf dist/ next/dist express/dist edge/dist",
+    "build": "npm run build:clean && npm run build:src && npm run build:next && npm run build:express && npm run build:koa && npm run build:edge",
+    "build:clean": "rimraf dist/ next/dist express/dist edge/dist koa/dist",
     "build:edge": "tsup edge/index.ts -d edge/dist",
     "build:express": "tsup express/index.ts -d express/dist",
+    "build:koa": "tsup koa/index.ts -d koa/dist",
     "build:next": "tsup next/index.ts -d next/dist",
     "build:src": "tsup src/index.ts",
-    "installExamples": "(cd examples/express && npm ci) && (cd examples/next.js && npm ci) && (cd examples/next.js-typescript && npm ci)",
-    "lint": "eslint --ext ts,js,jsx,tsx src/ next/ express/ edge/ examples/",
-    "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp edge/dist/* edge/",
-    "postpublish": "rm next/*.d.ts next/*.js next/*.map next/*.mjs && rm express/*.d.ts express/*.js express/*.map express/*.mjs && rm edge/*.d.ts edge/*.js edge/*.map edge/*.mjs",
+    "installExamples": "(cd examples/express && npm ci) && (cd examples/koa && npm ci) && (cd examples/next.js && npm ci) && (cd examples/next.js-typescript && npm ci)",
+    "lint": "eslint --ext ts,js,jsx,tsx src/ next/ express/ koa/ edge/ examples/",
+    "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp edge/dist/* edge/ && cp koa/dist/* koa/",
+    "postpublish": "rm next/*.d.ts next/*.js next/*.map next/*.mjs && rm express/*.d.ts express/*.js express/*.map express/*.mjs && rm koa/*.d.ts koa/*.js koa/*.map koa/*.mjs && rm edge/*.d.ts edge/*.js edge/*.map edge/*.mjs",
     "test": "jest --coverage --ci && npm run installExamples && npm run lint && tsc --noEmit && npm run build && npm run build:clean",
     "watch": "npm run build:clean && concurrently \"npm:watch:*\"",
     "watch:edge": "tsup edge/index.ts -d edge/dist --watch edge/index.ts",
     "watch:express": "tsup express/index.ts -d express/dist --watch express/index.ts",
+    "watch:koa": "tsup koa/index.ts -d koa/dist --watch koa/index.ts",
     "watch:next": "tsup next/index.ts -d next/dist --watch next/index.ts",
     "watch:src": "tsup src/index.ts --watch src/index.ts"
   },
@@ -134,11 +143,13 @@
     "@peculiar/webcrypto": "^1.4.0",
     "@types/cookie": "^0.5.1",
     "@types/express": "^4.17.13",
+    "@types/koa": "^2.13.5",
     "@types/node": "^17.0.41",
     "cookie": "^0.5.0",
     "iron-webcrypto": "^0.2.5"
   },
   "devDependencies": {
+    "@shopify/jest-koa-mocks": "^5.0.1",
     "@swc/core": "1.2.242",
     "@swc/jest": "0.2.22",
     "@tsconfig/node12": "1.0.11",
@@ -156,10 +167,14 @@
   },
   "peerDependencies": {
     "express": ">=4",
+    "koa": ">=2",
     "next": ">=10"
   },
   "peerDependenciesMeta": {
     "express": {
+      "optional": true
+    },
+    "koa": {
       "optional": true
     },
     "next": {
