@@ -225,7 +225,7 @@ export function createGetIronSession(
 }
 
 function addToCookies(cookieValue: string, res: ResponseType) {
-  if ("headers" in res) {
+  if ("headers" in res && "append" in res.headers) {
     res.headers.append("set-cookie", cookieValue);
     return;
   }
