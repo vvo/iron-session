@@ -156,7 +156,7 @@
     "@types/jest": "28.1.8",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.35.1",
-    "concurrently": "7.3.0",
+    "concurrently": "7.6.0",
     "eslint": "8.22.0",
     "jest": "28.1.3",
     "prettier": "2.7.1",
