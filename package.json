@@ -65,6 +65,7 @@
     "build:koa": "tsup koa/index.ts -d koa/dist",
     "build:next": "tsup next/index.ts -d next/dist",
     "build:src": "tsup src/index.ts",
+    "postinstall": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp edge/dist/* edge/ && cp koa/dist/* koa/",
     "installExamples": "(cd examples/express && npm ci) && (cd examples/koa && npm ci) && (cd examples/next.js && npm ci) && (cd examples/next.js-typescript && npm ci)",
     "lint": "eslint --ext ts,js,jsx,tsx src/ next/ express/ koa/ edge/ examples/",
     "prepublishOnly": "npm run build && cp next/dist/* next/ && cp express/dist/* express/ && cp edge/dist/* edge/ && cp koa/dist/* koa/",
