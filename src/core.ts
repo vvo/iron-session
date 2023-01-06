@@ -77,12 +77,12 @@ export type IronSession = IronSessionData & {
   /**
    * Destroys the session data and removes the cookie.
    */
-  destroy: (destroyOptions: IronSessionOptions) => void;
+  destroy: (destroyOptions?: IronSessionOptions) => void;
 
   /**
    * Encrypts the session data and sets the cookie.
    */
-  save: (saveOptions: IronSessionOptions) => Promise<void>;
+  save: (saveOptions?: IronSessionOptions) => Promise<void>;
 };
 
 declare module "http" {
@@ -179,7 +179,7 @@ export function createGetIronSession(
 
     Object.defineProperties(session, {
       save: {
-        value: async function save(saveOptions: IronSessionOptions) {
+        value: async function save(saveOptions?: IronSessionOptions) {
           if ("headersSent" in res && res.headersSent === true) {
             throw new Error(
               `iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()`,
@@ -187,7 +187,7 @@ export function createGetIronSession(
           }
 
           // Use options as base and extend with function argument
-          saveOptions = Object.assign({}, saveOptions);
+          saveOptions = Object.assign({}, options, saveOptions);
 
           const seal = await sealData(session, {
             password: passwordsAsMap,
@@ -209,7 +209,7 @@ export function createGetIronSession(
         },
       },
       destroy: {
-        value: function destroy(destroyOptions: IronSessionOptions) {
+        value: function destroy(destroyOptions?: IronSessionOptions) {
           Object.keys(session).forEach((key) => {
             // @ts-ignore See comment on the IronSessionData interface
             delete session[key];

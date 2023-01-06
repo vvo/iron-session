@@ -213,7 +213,7 @@ export const middleware = async (req: NextRequest) => {
   // demo:
   if (user?.admin !== "true") {
     // unauthorized to see pages inside admin/
-    return NextResponse.redirect(new URL('/unauthorized', req.url)) // redirect to /unauthorized page
+    return NextResponse.redirect(new URL("/unauthorized", req.url)); // redirect to /unauthorized page
   }
 
   return res;
@@ -750,7 +750,7 @@ import { ironSession } from "iron-session/express";
 app.use(ironSession(ironOptions));
 ```
 
-### session.save()
+### session.save(ironOptions?)
 
 Saves the session and sets the cookie header to be sent once the response is sent.
 
@@ -758,7 +758,7 @@ Saves the session and sets the cookie header to be sent once the response is sen
 await req.session.save();
 ```
 
-### session.destroy()
+### session.destroy(ironOptions?)
 
 Empties the session object and sets the cookie header to be sent once the response is sent. The browser will then remove the cookie automatically.
 
