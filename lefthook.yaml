@@ -20,11 +20,8 @@ post-checkout:
 pre-commit:
   piped: true
   commands:
-    1_replace:
-      glob: '*.{json,ts}'
-      run: pnpm replace "'{\n'" "'{ '" {all_files}
-    2_prettify:
+    1_prettify:
       run: pnpm prettier --write --ignore-unknown {all_files}
-    3_eslint:
+    2_eslint:
       glob: '*.ts'
       run: pnpm eslint --fix {all_files} --max-warnings 0

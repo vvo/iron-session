@@ -29,5 +29,5 @@ settings:
       alwaysTryTypes: true
       project: .
 rules:
-  import/no-extraneous-dependencies: off
+  import/no-extraneous-dependencies: off # bundling dev deps
   security/detect-object-injection: off # ts handles this
