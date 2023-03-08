@@ -6,7 +6,6 @@
     "esbenp.prettier-vscode",
     "foxundermoon.shell-format",
     "rohit-gohri.format-code-action",
-    "streetsidesoftware.code-spell-checker",
-    "visualstudioexptteam.vscodeintellicode"
+    "streetsidesoftware.code-spell-checker"
   ]
 }
