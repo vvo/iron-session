@@ -1,13 +1,6 @@
-import { createGetIronSession, createSealData, createUnsealData } from "./core";
-import { Crypto } from "@peculiar/webcrypto";
+import { createGetIronSession, createSealData, createUnsealData } from './core.js'
 
-const _crypto = new Crypto();
-
-export * from "./core";
-export const unsealData = createUnsealData(_crypto);
-export const sealData = createSealData(_crypto);
-export const getIronSession = createGetIronSession(
-  _crypto,
-  unsealData,
-  sealData,
-);
+export type { IronSession, IronSessionOptions } from './core.js'
+export const sealData = createSealData()
+export const unsealData = createUnsealData()
+export const getIronSession = createGetIronSession(sealData, unsealData)

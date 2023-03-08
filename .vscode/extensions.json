@@ -1,8 +1,12 @@
 {
   "recommendations": [
-    "esbenp.prettier-vscode",
-    "editorconfig.editorconfig",
+    "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
-    "wix.vscode-import-cost"
+    "editorconfig.editorconfig",
+    "esbenp.prettier-vscode",
+    "foxundermoon.shell-format",
+    "rohit-gohri.format-code-action",
+    "streetsidesoftware.code-spell-checker",
+    "visualstudioexptteam.vscodeintellicode"
   ]
 }

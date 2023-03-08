@@ -1,17 +1,32 @@
 {
-  "extends": "@tsconfig/node12/tsconfig.json",
-  "include": ["src", "next", "express", "edge"],
-  "exclude": ["node_modules", "./**/dist"],
   "compilerOptions": {
-    "paths": {
-      "iron-session": ["./src/index.ts"],
-      "iron-session/next": ["./next/index.ts"],
-      "iron-session/express": ["./express/index.ts"],
-      "iron-session/edge": ["./edge/index.ts"]
-    },
-    "declarationMap": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "baseUrl": "src",
+    "checkJs": true,
     "declaration": true,
+    "downlevelIteration": true,
     "esModuleInterop": true,
-    "lib": ["ES2019", "DOM"]
-  }
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "module": "esnext",
+    "moduleResolution": "nodenext",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "esnext"
+  },
+  "exclude": ["dist"]
 }
