@@ -117,6 +117,10 @@ function addToCookies(cookieValue: string, res: ResponseType): void {
   res.setHeader('set-cookie', [...existingSetCookie, cookieValue])
 }
 
+function BadUsage(message: string) {
+  return new Error(`iron-session: Bad usage. ${message}`)
+}
+
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
   return async function sealData(
     data: unknown,
@@ -191,23 +195,32 @@ export function createGetIronSession(
     res: ResponseType,
     userSessionOptions: IronSessionOptions
   ): Promise<IronSession<T>> {
-    if (
-      /* eslint-disable */
-      !req ||
-      !res ||
-      !userSessionOptions ||
-      !userSessionOptions.cookieName ||
-      !userSessionOptions.password
-      /* eslint-enable */
-    ) {
-      throw new Error(
-        "iron-session: Bad usage. Minimum usage is: const session = await getIronSession(req, res, { cookieName: '...', password: '...' }); Check the usage here: https://github.com/vvo/iron-session"
-      )
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!req) {
+      throw BadUsage('Missing request parameter.')
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!res) {
+      throw BadUsage('Missing response parameter.')
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!userSessionOptions) {
+      throw BadUsage('Missing options.')
+    }
+
+    if (!userSessionOptions.cookieName) {
+      throw BadUsage('Missing cookie name.')
+    }
+
+    if (!userSessionOptions.password) {
+      throw BadUsage('Missing password.')
     }
 
     const passwordsMap = normalizeStringPasswordToMap(userSessionOptions.password)
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error('iron-session: Bad usage. Password must be at least 32 characters long.')
+      throw BadUsage('Password must be at least 32 characters long.')
     }
 
     const options: Required<IronSessionOptions> = {

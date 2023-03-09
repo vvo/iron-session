@@ -24,4 +24,4 @@ pre-commit:
       run: pnpm prettier --write --ignore-unknown {all_files}
     2_eslint:
       glob: '*.ts'
-      run: pnpm eslint --fix {all_files} --max-warnings 0
+      run: pnpm eslint --fix {all_files} --max-warnings 0 --report-unused-disable-directives
