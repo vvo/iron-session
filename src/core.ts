@@ -117,10 +117,6 @@ function addToCookies(cookieValue: string, res: ResponseType): void {
   res.setHeader('set-cookie', [...existingSetCookie, cookieValue])
 }
 
-function BadUsage(message: string) {
-  return new Error(`iron-session: Bad usage. ${message}`)
-}
-
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
   return async function sealData(
     data: unknown,
@@ -197,30 +193,30 @@ export function createGetIronSession(
   ): Promise<IronSession<T>> {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!req) {
-      throw BadUsage('Missing request parameter.')
+      throw new Error('iron-session: Bad usage. Missing request parameter.')
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!res) {
-      throw BadUsage('Missing response parameter.')
+      throw new Error('iron-session: Bad usage. Missing response parameter.')
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userSessionOptions) {
-      throw BadUsage('Missing options.')
+      throw new Error('iron-session: Bad usage. Missing options.')
     }
 
     if (!userSessionOptions.cookieName) {
-      throw BadUsage('Missing cookie name.')
+      throw new Error('iron-session: Bad usage. Missing cookie name.')
     }
 
     if (!userSessionOptions.password) {
-      throw BadUsage('Missing password.')
+      throw new Error('iron-session: Bad usage. Missing password.')
     }
 
     const passwordsMap = normalizeStringPasswordToMap(userSessionOptions.password)
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw BadUsage('Password must be at least 32 characters long.')
+      throw new Error('iron-session: Bad usage. Password must be at least 32 characters long.')
     }
 
     const options: Required<IronSessionOptions> = {
