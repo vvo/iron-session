@@ -1,4 +1,8 @@
-import { createGetIronSession, createSealData, createUnsealData } from './core.js'
+import {
+  createGetIronSession,
+  createSealData,
+  createUnsealData,
+} from './core.js'
 
 export type { IronSession, IronSessionOptions } from './core.js'
 export const sealData = createSealData()
