@@ -1,9 +1,5 @@
 import { parse, serialize, type CookieSerializeOptions } from 'cookie'
-import {
-  defaults as ironDefaults,
-  seal as ironSeal,
-  unseal as ironUnseal,
-} from 'iron-webcrypto'
+import { defaults as ironDefaults, seal as ironSeal, unseal as ironUnseal } from 'iron-webcrypto'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 type PasswordsMap = Record<string, string>
@@ -77,9 +73,7 @@ const fourteenDaysInSeconds = 14 * 24 * 3600
 const currentMajorVersion = 2
 const versionDelimiter = '~'
 
-const defaultOptions: Required<
-  Pick<IronSessionOptions, 'cookieOptions' | 'ttl'>
-> = {
+const defaultOptions: Required<Pick<IronSessionOptions, 'cookieOptions' | 'ttl'>> = {
   ttl: fourteenDaysInSeconds,
   cookieOptions: { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
 }
@@ -92,10 +86,8 @@ function parseSeal(seal: string): {
   sealWithoutVersion: string
   tokenVersion: number | null
 } {
-  const [sealWithoutVersion, tokenVersionAsString] =
-    seal.split(versionDelimiter)
-  const tokenVersion =
-    tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10)
+  const [sealWithoutVersion, tokenVersionAsString] = seal.split(versionDelimiter)
+  const tokenVersion = tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { sealWithoutVersion: sealWithoutVersion!, tokenVersion }
@@ -121,9 +113,7 @@ function addToCookies(cookieValue: string, res: ResponseType): void {
     return
   }
 
-  let existingSetCookie = (res.getHeader('set-cookie') ?? []) as
-    | string[]
-    | string
+  let existingSetCookie = (res.getHeader('set-cookie') ?? []) as string[] | string
   if (typeof existingSetCookie === 'string') {
     existingSetCookie = [existingSetCookie]
   }
@@ -133,16 +123,11 @@ function addToCookies(cookieValue: string, res: ResponseType): void {
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
   return async function sealData(
     data: unknown,
-    {
-      password,
-      ttl = fourteenDaysInSeconds,
-    }: { password: Password; ttl?: number }
+    { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number }
   ): Promise<string> {
     const passwordsMap = normalizeStringPasswordToMap(password)
 
-    const mostRecentPasswordId = Math.max(
-      ...Object.keys(passwordsMap).map(Number)
-    )
+    const mostRecentPasswordId = Math.max(...Object.keys(passwordsMap).map(Number))
     const passwordForSeal = {
       id: mostRecentPasswordId.toString(),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -162,10 +147,7 @@ export function createUnsealData(_crypto: Crypto = globalThis.crypto) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function unsealData<T extends {} = {}>(
     seal: string,
-    {
-      password,
-      ttl = fourteenDaysInSeconds,
-    }: { password: Password; ttl?: number }
+    { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number }
   ): Promise<T> {
     const passwordsMap = normalizeStringPasswordToMap(password)
     const { sealWithoutVersion, tokenVersion } = parseSeal(seal)
@@ -235,13 +217,9 @@ export function createGetIronSession(
       throw new Error('iron-session: Bad usage. Missing password.')
     }
 
-    const passwordsMap = normalizeStringPasswordToMap(
-      userSessionOptions.password
-    )
+    const passwordsMap = normalizeStringPasswordToMap(userSessionOptions.password)
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error(
-        'iron-session: Bad usage. Password must be at least 32 characters long.'
-      )
+      throw new Error('iron-session: Bad usage. Password must be at least 32 characters long.')
     }
 
     const options: Required<IronSessionOptions> = {
@@ -253,10 +231,7 @@ export function createGetIronSession(
       },
     }
 
-    if (
-      userSessionOptions.cookieOptions &&
-      'maxAge' in userSessionOptions.cookieOptions
-    ) {
+    if (userSessionOptions.cookieOptions && 'maxAge' in userSessionOptions.cookieOptions) {
       if (userSessionOptions.cookieOptions.maxAge === undefined) {
         // session cookies, do not set maxAge, consider token as infinite
         options.ttl = 0
@@ -266,11 +241,9 @@ export function createGetIronSession(
     }
 
     const sealFromCookies =
-      parse(
-        ('credentials' in req
-          ? req.headers.get('cookie')
-          : req.headers.cookie) ?? ''
-      )[options.cookieName] ?? ''
+      parse(('credentials' in req ? req.headers.get('cookie') : req.headers.cookie) ?? '')[
+        options.cookieName
+      ] ?? ''
 
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, {
@@ -301,11 +274,7 @@ export function createGetIronSession(
             password: passwordsMap,
             ttl: mergedOptions.ttl,
           })
-          const cookieValue = serialize(
-            mergedOptions.cookieName,
-            seal,
-            mergedOptions.cookieOptions
-          )
+          const cookieValue = serialize(mergedOptions.cookieName, seal, mergedOptions.cookieOptions)
 
           if (cookieValue.length > 4096) {
             throw new Error(
