@@ -182,7 +182,7 @@ Since there's no pre-available `res` object in Next.js's middlewares, you need t
 // /middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getIronSession } from "iron-session/edge";
+import { getIronSession } from "iron-session";
 
 export const middleware = async (req: NextRequest) => {
   const res = NextResponse.next();
