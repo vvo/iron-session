@@ -1,0 +1,27 @@
+skip_output:
+  - meta
+  - execution
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
+
+post-commit:
+  commands:
+    status:
+      run: git status
+
+post-checkout:
+  commands:
+    install:
+      run: pnpm i
+
+pre-commit:
+  piped: true
+  commands:
+    1_prettify:
+      run: pnpm prettier --write --ignore-unknown {all_files}
+    2_eslint:
+      glob: '*.ts'
+      run: pnpm eslint --fix {all_files} --max-warnings 0 --report-unused-disable-directives

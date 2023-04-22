@@ -1,0 +1,10 @@
+proseWrap: always
+semi: false
+singleQuote: true
+printWidth: 100
+overrides:
+  - files: '*.md'
+    options:
+      printWidth: 80
+plugins:
+  - prettier-plugin-packagejson

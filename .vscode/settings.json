@@ -1,13 +1,7 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
-  "eslint.packageManager": "npm",
-  "eslint.alwaysShowStatus": true,
-  "[markdown]": {
-    "editor.formatOnSave": true
-  },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "[ignore][properties][shellscript]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": ["source.fixAll.format", "source.fixAll.eslint"],
+  "eslint.probe": ["typescript"]
 }
