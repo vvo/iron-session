@@ -40,7 +40,7 @@ router
     ctx.body = { user }
   })
   .get('/logout', async (ctx) => {
-    ctx.session.destroy()
+    await ctx.session.destroy()
     ctx.body = { message: 'Logged out' }
   })
 
