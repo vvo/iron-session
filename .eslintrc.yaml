@@ -6,9 +6,7 @@ extends:
   - plugin:import/typescript
   - plugin:security/recommended
   - eslint:recommended
-  - plugin:@typescript-eslint/recommended
-  - plugin:@typescript-eslint/recommended-requiring-type-checking
-  - plugin:@typescript-eslint/strict
+  - plugin:@typescript-eslint/all
   - airbnb-base
   - airbnb-typescript/base
   - plugin:prettier/recommended
@@ -29,7 +27,10 @@ settings:
       alwaysTryTypes: true
       project: .
 rules:
-  import/no-extraneous-dependencies: off # bundling dev deps
-  security/detect-object-injection: off # ts handles this
-  '@typescript-eslint/no-unused-vars': off # ts handles this
-  '@typescript-eslint/explicit-function-return-type': warn
+  import/extensions: off
+  import/no-extraneous-dependencies: off
+  import/prefer-default-export: off
+  security/detect-object-injection: off
+
+  '@typescript-eslint/no-type-alias': off
+  '@typescript-eslint/prefer-readonly-parameter-types': off

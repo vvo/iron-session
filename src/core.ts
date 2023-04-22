@@ -82,10 +82,7 @@ function normalizeStringPasswordToMap(password: Password): PasswordsMap {
   return typeof password === 'string' ? { 1: password } : password
 }
 
-function parseSeal(seal: string): {
-  sealWithoutVersion: string
-  tokenVersion: number | null
-} {
+function parseSeal(seal: string): { sealWithoutVersion: string; tokenVersion: number | null } {
   const [sealWithoutVersion, tokenVersionAsString] = seal.split(versionDelimiter)
   const tokenVersion = tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10)
 
@@ -194,17 +191,17 @@ export function createGetIronSession(
     res: ResponseType,
     userSessionOptions: IronSessionOptions
   ): Promise<IronSession<T>> {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!req) {
       throw new Error('iron-session: Bad usage. Missing request parameter.')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!res) {
       throw new Error('iron-session: Bad usage. Missing response parameter.')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions) {
       throw new Error('iron-session: Bad usage. Missing options.')
     }
@@ -213,6 +210,7 @@ export function createGetIronSession(
       throw new Error('iron-session: Bad usage. Missing cookie name.')
     }
 
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions.password) {
       throw new Error('iron-session: Bad usage. Missing password.')
     }
@@ -225,10 +223,7 @@ export function createGetIronSession(
     const options: Required<IronSessionOptions> = {
       ...defaultOptions,
       ...userSessionOptions,
-      cookieOptions: {
-        ...defaultOptions.cookieOptions,
-        ...userSessionOptions.cookieOptions,
-      },
+      cookieOptions: { ...defaultOptions.cookieOptions, ...userSessionOptions.cookieOptions },
     }
 
     if (userSessionOptions.cookieOptions && 'maxAge' in userSessionOptions.cookieOptions) {
@@ -246,10 +241,7 @@ export function createGetIronSession(
       ] ?? ''
 
     const session = sealFromCookies
-      ? await unsealData<T>(sealFromCookies, {
-          password: passwordsMap,
-          ttl: options.ttl,
-        })
+      ? await unsealData<T>(sealFromCookies, { password: passwordsMap, ttl: options.ttl })
       : ({} as T)
 
     Object.defineProperties(session, {
@@ -264,16 +256,10 @@ export function createGetIronSession(
           const mergedOptions: Required<IronSessionOptions> = {
             ...options,
             ...saveOptions,
-            cookieOptions: {
-              ...options.cookieOptions,
-              ...saveOptions?.cookieOptions,
-            },
+            cookieOptions: { ...options.cookieOptions, ...saveOptions?.cookieOptions },
           }
 
-          const seal = await sealData(session, {
-            password: passwordsMap,
-            ttl: mergedOptions.ttl,
-          })
+          const seal = await sealData(session, { password: passwordsMap, ttl: mergedOptions.ttl })
           const cookieValue = serialize(mergedOptions.cookieName, seal, mergedOptions.cookieOptions)
 
           if (cookieValue.length > 4096) {
@@ -297,10 +283,7 @@ export function createGetIronSession(
           const mergedOptions: Required<IronSessionOptions> = {
             ...options,
             ...destroyOptions,
-            cookieOptions: {
-              ...options.cookieOptions,
-              ...destroyOptions?.cookieOptions,
-            },
+            cookieOptions: { ...options.cookieOptions, ...destroyOptions?.cookieOptions },
           }
 
           const cookieValue = serialize(mergedOptions.cookieName, '', {

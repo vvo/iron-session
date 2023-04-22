@@ -10,8 +10,6 @@
     "downlevelIteration": true,
     "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true,
-    "importsNotUsedAsValues": "error",
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
     "module": "esnext",
@@ -26,7 +24,8 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "verbatimModuleSyntax": true
   },
   "exclude": ["dist"]
 }

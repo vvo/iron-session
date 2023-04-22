@@ -23,51 +23,55 @@
   "sideEffects": false,
   "type": "module",
   "exports": {
-    "types": "./dist/index.d.ts",
-    "deno": "./dist/index.js",
-    "browser": "./dist/index.js",
-    "import": "./dist/index.node.js",
-    "require": "./dist/index.node.cjs"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "deno": "./dist/index.js",
+      "browser": "./dist/index.js",
+      "default": "./dist/index.node.js"
+    },
+    "require": {
+      "types": "./dist/index.node.d.cts",
+      "default": "./dist/index.node.cjs"
+    }
   },
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.node.cjs",
   "files": [
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm i && tsup",
+    "build": "pnpm i && tsup && cp dist/index.d.ts dist/index.node.d.cts",
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.4.4",
-    "@commitlint/config-conventional": "^17.4.4",
+    "@commitlint/cli": "^17.6.1",
+    "@commitlint/config-conventional": "^17.6.1",
     "@release-it/conventional-changelog": "^5.1.1",
     "@types/cookie": "^0.5.1",
-    "@types/node": "^18.14.6",
-    "@typescript-eslint/eslint-plugin": "^5.54.1",
-    "@typescript-eslint/parser": "^5.54.1",
+    "@types/node": "^18.15.13",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
     "cookie": "^0.5.0",
-    "eslint": "^8.35.0",
+    "eslint": "^8.39.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.7.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-node": "^0.3.7",
-    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-security": "^1.7.1",
-    "iron-webcrypto": "^0.5.0",
-    "lefthook": "^1.3.3",
-    "prettier": "^2.8.4",
+    "iron-webcrypto": "^0.7.0",
+    "lefthook": "^1.3.10",
+    "prettier": "^2.8.7",
     "prettier-plugin-packagejson": "^2.4.3",
-    "publint": "^0.1.10",
-    "release-it": "^15.7.0",
-    "tsup": "^6.6.3",
-    "tsx": "^3.12.3",
-    "typescript": "^4.9.5"
+    "publint": "^0.1.11",
+    "release-it": "^15.10.1",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
   },
-  "packageManager": "pnpm@7.29.1",
+  "packageManager": "pnpm@8.3.1",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
