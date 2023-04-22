@@ -1,0 +1,18 @@
+{
+  "name": "koa-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch app.ts",
+    "start": "tsx app.js"
+  },
+  "dependencies": {
+    "@koa/router": "^12.0.0",
+    "iron-session": "workspace:*",
+    "koa": "^2.14.2"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.6",
+    "@types/koa__router": "^12.0.0"
+  }
+}

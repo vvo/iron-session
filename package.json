@@ -40,6 +40,8 @@
   ],
   "scripts": {
     "build": "pnpm i && tsup && cp dist/index.d.ts dist/index.node.d.cts",
+    "koa:build": "pnpm --filter=koa-example build",
+    "koa:dev": "pnpm --filter=koa-example dev",
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it"
@@ -69,6 +71,7 @@
     "publint": "^0.1.11",
     "release-it": "^15.10.1",
     "tsup": "^6.7.0",
+    "tsx": "^3.12.6",
     "typescript": "^5.0.4"
   },
   "packageManager": "pnpm@8.3.1",

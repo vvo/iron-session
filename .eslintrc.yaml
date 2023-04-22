@@ -12,6 +12,7 @@ extends:
   - plugin:prettier/recommended
 ignorePatterns:
   - dist
+  - examples
 parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2019
