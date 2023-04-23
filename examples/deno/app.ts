@@ -1,24 +1,5 @@
 import { serve } from 'https://deno.land/std@0.184.0/http/server.ts'
-// @deno-types="../../dist/index.d.ts"
-import { getIronSession, createResponse } from '../../dist/index.js'
-
-interface Data {
-  user?: {
-    id: number
-    name: string
-  }
-}
-
-const getSession = (req: Request, res: Response) => {
-  const session = getIronSession<Data>(req, res, {
-    password: 'ThisIsNotASecurePasswordPleaseChangeIt',
-    cookieName: 'session',
-    cookieOptions: {
-      secure: !!Deno.env.get('DENO_DEPLOYMENT_ID'),
-    },
-  })
-  return session
-}
+import { getSession, createResponse } from './lib/session.ts'
 
 const INDEX_ROUTE = new URLPattern({ pathname: '/' })
 const LOGIN_ROUTE = new URLPattern({ pathname: '/login' })
