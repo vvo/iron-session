@@ -10,10 +10,10 @@ use `iron-session` with [Koa](https://koajs.com/).
 
    export const getSession = (ctx) => {
      return getIronSession(ctx.req, ctx.res, {
-       password: 'ThisIsNotASecurePasswordPleaseChangeIt',
+       password: process.env.SESSION_SECRET,
        cookieName: 'session',
        cookieOptions: {
-         secure: process.env['NODE_ENV'] === 'production',
+         secure: process.env.NODE_ENV === 'production',
        },
      })
    }
