@@ -34,35 +34,31 @@ use `iron-session` with [Deno](https://deno.land/).
    import { createResponse } from 'https://esm.sh/iron-session@latest'
    import { getSession } from './lib/session.ts'
 
-   const INDEX_ROUTE = new URLPattern({ pathname: '/' })
-   const LOGIN_ROUTE = new URLPattern({ pathname: '/login' })
-   const USER_ROUTE = new URLPattern({ pathname: '/user' })
-   const LOGOUT_ROUTE = new URLPattern({ pathname: '/logout' })
-
    const handler = async (req: Request) => {
+     const url = new URL(req.url)
      const res = new Response()
-     const session = await getSession(req, res) // <-- create the session
+     const session = await getSession(req, res)
 
-     if (INDEX_ROUTE.test(req.url)) {
+     if (url.pathname === '/') {
        return createResponse(res, 'Hello world')
      }
 
-     if (LOGIN_ROUTE.test(req.url)) {
-       session.user = { id: 1, name: 'John Doe' } // <-- set the user in the session
-       await session.save() // <-- save the session
+     if (url.pathname === '/login') {
+       session.user = { id: 1, name: 'John Doe' }
+       await session.save()
        return createResponse(res, 'Logged in')
      }
 
-     if (USER_ROUTE.test(req.url)) {
-       const { user } = session // <-- get the user from the session
+     if (url.pathname === '/user') {
+       const { user } = session
        if (!user) {
          return createResponse(res, 'Not logged in', { status: 401 })
        }
        return createResponse(res, JSON.stringify({ user }))
      }
 
-     if (LOGOUT_ROUTE.test(req.url)) {
-       await session.destroy() // <-- destroy the session
+     if (url.pathname === '/logout') {
+       await session.destroy()
        return createResponse(res, 'Logged out')
      }
 

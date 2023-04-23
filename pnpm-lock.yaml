@@ -83,6 +83,16 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4
 
+  examples/bun:
+    dependencies:
+      iron-session:
+        specifier: workspace:*
+        version: link:../..
+    devDependencies:
+      bun-types:
+        specifier: ^0.5.8
+        version: 0.5.8
+
   examples/deno: {}
 
   examples/koa:
@@ -1415,6 +1425,10 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+    dev: true
+
+  /bun-types@0.5.8:
+    resolution: {integrity: sha512-VHwD0MAHo3wraYAeqTWH2NDmXOdGfC3wWWOnZvK93ytI6yq/LkgsCjDudWNmN7MlfPvJb2zoLMnkzhjxNwLsLw==}
     dev: true
 
   /bundle-name@3.0.0:

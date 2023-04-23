@@ -1,26 +1,22 @@
 import { serve } from 'https://deno.land/std@0.184.0/http/server.ts'
 import { getSession, createResponse } from './lib/session.ts'
 
-const INDEX_ROUTE = new URLPattern({ pathname: '/' })
-const LOGIN_ROUTE = new URLPattern({ pathname: '/login' })
-const USER_ROUTE = new URLPattern({ pathname: '/user' })
-const LOGOUT_ROUTE = new URLPattern({ pathname: '/logout' })
-
 const handler = async (req: Request) => {
+  const url = new URL(req.url)
   const res = new Response()
   const session = await getSession(req, res)
 
-  if (INDEX_ROUTE.test(req.url)) {
+  if (url.pathname === '/') {
     return createResponse(res, 'Hello world')
   }
 
-  if (LOGIN_ROUTE.test(req.url)) {
+  if (url.pathname === '/login') {
     session.user = { id: 1, name: 'John Doe' }
     await session.save()
     return createResponse(res, 'Logged in')
   }
 
-  if (USER_ROUTE.test(req.url)) {
+  if (url.pathname === '/user') {
     const { user } = session
     if (!user) {
       return createResponse(res, 'Not logged in', { status: 401 })
@@ -28,7 +24,7 @@ const handler = async (req: Request) => {
     return createResponse(res, JSON.stringify({ user }))
   }
 
-  if (LOGOUT_ROUTE.test(req.url)) {
+  if (url.pathname === '/logout') {
     await session.destroy()
     return createResponse(res, 'Logged out')
   }

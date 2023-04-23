@@ -1,0 +1,15 @@
+{
+  "name": "bun-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot app.ts",
+    "start": "bun app.ts"
+  },
+  "dependencies": {
+    "iron-session": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "^0.5.8"
+  }
+}

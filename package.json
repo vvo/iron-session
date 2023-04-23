@@ -40,6 +40,8 @@
   ],
   "scripts": {
     "build": "pnpm i && tsup && cp dist/index.d.ts dist/index.node.d.cts",
+    "bun:dev": "pnpm --filter=bun-example dev",
+    "bun:start": "pnpm --filter=bun-example start",
     "deno:dev": "pnpm --filter=deno-example dev",
     "deno:start": "pnpm --filter=deno-example start",
     "koa:dev": "pnpm --filter=koa-example dev",
