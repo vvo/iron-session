@@ -1,6 +1,6 @@
+import type { IncomingMessage, ServerResponse } from 'http'
 import { parse, serialize, type CookieSerializeOptions } from 'cookie'
 import { defaults as ironDefaults, seal as ironSeal, unseal as ironUnseal } from 'iron-webcrypto'
-import type { IncomingMessage, ServerResponse } from 'http'
 
 type PasswordsMap = Record<string, string>
 type Password = PasswordsMap | string
@@ -104,17 +104,26 @@ function computeCookieMaxAge(ttl: number): number {
   return ttl - timestampSkewSec
 }
 
-function addToCookies(cookieValue: string, res: ResponseType): void {
-  if ('headers' in res) {
+function getCookie(req: RequestType, cookieName: string): string {
+  return (
+    parse(
+      ('headers' in req && typeof req.headers.get === 'function'
+        ? req.headers.get('cookie')
+        : (req as IncomingMessage).headers.cookie) ?? ''
+    )[cookieName] ?? ''
+  )
+}
+
+function setCookie(res: ResponseType, cookieValue: string): void {
+  if ('headers' in res && typeof res.headers.append === 'function') {
     res.headers.append('set-cookie', cookieValue)
     return
   }
-
-  let existingSetCookie = (res.getHeader('set-cookie') ?? []) as string[] | string
-  if (typeof existingSetCookie === 'string') {
-    existingSetCookie = [existingSetCookie]
+  let existingSetCookie = (res as ServerResponse).getHeader('set-cookie') ?? []
+  if (!Array.isArray(existingSetCookie)) {
+    existingSetCookie = [existingSetCookie.toString()]
   }
-  res.setHeader('set-cookie', [...existingSetCookie, cookieValue])
+  ;(res as ServerResponse).setHeader('set-cookie', [...existingSetCookie, cookieValue])
 }
 
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
@@ -235,10 +244,7 @@ export function createGetIronSession(
       options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl)
     }
 
-    const sealFromCookies =
-      parse(('credentials' in req ? req.headers.get('cookie') : req.headers.cookie) ?? '')[
-        options.cookieName
-      ] ?? ''
+    const sealFromCookies = getCookie(req, options.cookieName)
 
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, { password: passwordsMap, ttl: options.ttl })
@@ -268,7 +274,7 @@ export function createGetIronSession(
             )
           }
 
-          addToCookies(cookieValue, res)
+          setCookie(res, cookieValue)
         },
       },
 
@@ -291,11 +297,33 @@ export function createGetIronSession(
             maxAge: 0,
           })
 
-          addToCookies(cookieValue, res)
+          setCookie(res, cookieValue)
         },
       },
     })
 
     return session as IronSession<T>
   }
+}
+
+export function mergeHeaders(...headersList: (HeadersInit | undefined)[]): Headers {
+  const mergedHeaders = new Headers()
+  headersList.forEach((headers) => {
+    new Headers(headers).forEach((value, key) => {
+      mergedHeaders.append(key, value)
+    })
+  })
+  return mergedHeaders
+}
+
+export function createResponse(
+  originalResponse: Response,
+  bodyString: string,
+  options?: ResponseInit
+): Response {
+  return new Response(bodyString, {
+    status: options?.status ?? originalResponse.status,
+    statusText: options?.statusText ?? originalResponse.statusText,
+    headers: mergeHeaders(options?.headers, originalResponse.headers),
+  })
 }

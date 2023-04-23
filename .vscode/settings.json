@@ -1,7 +1,10 @@
 {
+  "deno.enablePaths": ["./examples/deno"],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[ignore][properties][shellscript]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": ["source.fixAll.format", "source.fixAll.eslint"],
-  "eslint.probe": ["typescript"]
+  "eslint.probe": ["typescript"],
+  "eslint.quiet": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

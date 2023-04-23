@@ -1,0 +1,9 @@
+{
+  "name": "deno-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "deno run --watch --allow-net --allow-env app.ts",
+    "start": "deno run --allow-net --allow-env app.ts"
+  }
+}

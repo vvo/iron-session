@@ -40,8 +40,10 @@
   ],
   "scripts": {
     "build": "pnpm i && tsup && cp dist/index.d.ts dist/index.node.d.cts",
-    "koa:build": "pnpm --filter=koa-example build",
+    "deno:dev": "pnpm --filter=deno-example dev",
+    "deno:start": "pnpm --filter=deno-example start",
     "koa:dev": "pnpm --filter=koa-example dev",
+    "koa:start": "pnpm --filter=koa-example start",
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it"
