@@ -44,13 +44,13 @@ use `iron-session` with [Deno](https://deno.land/).
      }
 
      if (url.pathname === '/login') {
-       session.user = { id: 1, name: 'John Doe' }
-       await session.save()
+       session.user = { id: 1, name: 'John Doe' } // <-- set the user in the session
+       await session.save() // <-- save the session
        return createResponse(res, 'Logged in')
      }
 
      if (url.pathname === '/user') {
-       const { user } = session
+       const { user } = session // <-- get the user from the session
        if (!user) {
          return createResponse(res, 'Not logged in', { status: 401 })
        }
@@ -58,7 +58,7 @@ use `iron-session` with [Deno](https://deno.land/).
      }
 
      if (url.pathname === '/logout') {
-       await session.destroy()
+       await session.destroy() // <-- destroy the session
        return createResponse(res, 'Logged out')
      }
 
@@ -68,6 +68,6 @@ use `iron-session` with [Deno](https://deno.land/).
    serve(handler)
    ```
 
-Note: the `createResponse` function is used to create a new `Response` object
-from the existing `Response` object which contains the headers set by
-`iron-session`.
+<!-- prettier-ignore -->
+> **Note**
+> The `createResponse` function is used to create a new `Response` object from the existing `Response` object which contains the headers set by `iron-session`.

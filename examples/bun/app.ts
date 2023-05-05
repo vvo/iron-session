@@ -1,5 +1,5 @@
 /// <reference types="bun-types" />
-import { type Serve } from 'bun'
+import type { Serve } from 'bun'
 import { getSession, createResponse } from './lib/session.js'
 
 export default {

@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.184.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.186.0/http/server.ts'
 import { getSession, createResponse } from './lib/session.ts'
 
 const handler = async (req: Request) => {
