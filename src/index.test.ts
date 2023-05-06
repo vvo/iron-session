@@ -1,6 +1,6 @@
 import { deepEqual, doesNotMatch, match, rejects } from 'node:assert'
 import { mock, test } from 'node:test'
-import { getIronSession, sealData } from 'iron-session'
+import { getIronSession, sealData } from './index.node.js'
 
 const password = 'Gbm49ATjnqnkCCCdhV4uDBhbfnPqsCW0'
 const cookieName = 'test'

@@ -3,3 +3,4 @@ dist
 *.log
 *.tgz
 .DS_Store
+coverage*

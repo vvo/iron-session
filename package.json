@@ -49,8 +49,9 @@
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it",
-    "test": "pnpm --filter=tests start",
-    "test:watch": "pnpm --filter=tests dev"
+    "test": "c8 node --loader tsx --test src/index.test.ts",
+    "test:coverage": "pnpm test && c8 report -r html",
+    "test:watch": "node --loader tsx --test --watch src/index.test.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
@@ -60,6 +61,7 @@
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
+    "c8": "^7.13.0",
     "cookie": "^0.5.0",
     "eslint": "^8.39.0",
     "eslint-config-airbnb-base": "^15.0.0",
