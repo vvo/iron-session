@@ -49,8 +49,7 @@
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it",
-    "test": "c8 node --loader tsx --test src/index.test.ts",
-    "test:coverage": "pnpm test && c8 report -r lcov",
+    "test": "c8 -r lcov node --loader tsx --test src/index.test.ts",
     "test:watch": "node --loader tsx --test --watch src/index.test.ts"
   },
   "devDependencies": {
