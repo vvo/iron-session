@@ -49,8 +49,8 @@
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it",
-    "test": "c8 -r lcov node --loader tsx --test src/index.test.ts",
-    "test:watch": "node --loader tsx --test --watch src/index.test.ts"
+    "test": "c8 -r text -r lcov node --loader tsx --test src/*.test.ts",
+    "test:watch": "node --loader tsx --test --watch src/*.test.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
