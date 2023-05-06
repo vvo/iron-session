@@ -13,6 +13,7 @@ extends:
 ignorePatterns:
   - dist
   - examples
+  - tests
 parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2019

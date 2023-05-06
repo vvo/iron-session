@@ -1,0 +1,12 @@
+{
+  "name": "tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_OPTIONS='--loader tsx' node --test --watch index.test.ts",
+    "start": "NODE_OPTIONS='--loader tsx' node --test index.test.ts"
+  },
+  "dependencies": {
+    "iron-session": "workspace:*"
+  }
+}

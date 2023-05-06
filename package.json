@@ -48,7 +48,9 @@
     "koa:start": "pnpm --filter=koa-example start",
     "lint": "pnpm build && pnpm lint:only",
     "lint:only": "lefthook run pre-commit && publint",
-    "release": "pnpm lint && release-it"
+    "release": "pnpm lint && release-it",
+    "test": "pnpm --filter=tests start",
+    "test:watch": "pnpm --filter=tests dev"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
