@@ -50,7 +50,7 @@
     "lint:only": "lefthook run pre-commit && publint",
     "release": "pnpm lint && release-it",
     "test": "c8 node --loader tsx --test src/index.test.ts",
-    "test:coverage": "pnpm test && c8 report -r html",
+    "test:coverage": "pnpm test && c8 report -r lcov",
     "test:watch": "node --loader tsx --test --watch src/index.test.ts"
   },
   "devDependencies": {

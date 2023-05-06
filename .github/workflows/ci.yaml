@@ -19,5 +19,5 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm lint && [ -z "$(git status --porcelain)" ]
-      - run: pnpm test
+      - run: pnpm test:coverage
       - uses: codecov/codecov-action@v3
