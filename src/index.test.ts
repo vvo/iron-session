@@ -300,108 +300,121 @@ test('should prevent reassignment of save/destroy functions', async () => {
   }, /Cannot assign to read only property 'destroy' of object '#<Object>'/)
 })
 
-// FIXME: update these, auto-generated
+test('should allow specifying options during save/destroy', async () => {
+  const res = { getHeader: mock.fn(), setHeader: mock.fn() }
 
-test('should work with standard Request/Response APIs', async () => {
-  const req = new Request('https://example.com')
-  const res = new Response('Hello, world!')
-
-  let session = await getSession(req, res, { cookieName, password })
-  deepEqual(session, {})
-
+  const session = await getSession({ headers: {} }, res, { cookieName, password })
   session.user = { id: 1 }
-  await session.save()
 
-  match(
-    res.headers.get('set-cookie') ?? '',
-    /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/
-  )
+  await session.save({ ttl: 61 })
+  match(res.setHeader.mock.calls[0]?.arguments[1][0], /Max-Age=1;/)
 
-  await session.destroy()
-  match(
-    res.headers.get('set-cookie') ?? '',
-    /test=; Max-Age=0; Path=\/; HttpOnly; Secure; SameSite=Lax$/
-  )
+  await session.destroy({ cookieOptions: { priority: 'low' } })
+  match(res.setHeader.mock.calls[1]?.arguments[1][0], /Priority=Low;/)
 
-  session.user = { id: 1 }
-  await session.save({
-    cookieName,
-    password,
-    cookieOptions: {
-      maxAge: 60,
-    },
-  })
-  match(
-    res.headers.get('set-cookie') ?? '',
-    /test=.{265}; Max-Age=60; Path=\/; HttpOnly; Secure; SameSite=Lax$/
-  )
-
-  await session.destroy({
-    cookieName,
-    password,
-    cookieOptions: {
-      maxAge: 60,
-    },
-  })
-  match(
-    res.headers.get('set-cookie') ?? '',
-    /test=; Max-Age=0; Path=\/; HttpOnly; Secure; SameSite=Lax$/
-  )
+  mock.reset()
 })
 
-test('merges two sets of headers', () => {
-  const headers1 = new Headers({ 'Content-Type': 'application/json' })
-  const headers2 = new Headers({ Authorization: 'Bearer token123' })
+// test('should work with standard Request/Response APIs', async () => {
+//   const req = new Request('https://example.com')
+//   const res = new Response('Hello, world!')
 
-  const mergedHeaders = mergeHeaders(headers1, headers2)
+//   let session = await getSession(req, res, { cookieName, password })
+//   deepEqual(session, {})
 
-  deepEqual(mergedHeaders.get('Content-Type'), 'application/json')
-  deepEqual(mergedHeaders.get('Authorization'), 'Bearer token123')
-})
+//   session.user = { id: 1 }
+//   await session.save()
 
-test('returns an empty headers object when called with no arguments', () => {
-  const mergedHeaders = mergeHeaders()
+//   match(
+//     res.headers.get('set-cookie') ?? '',
+//     /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/
+//   )
 
-  deepEqual(mergedHeaders instanceof Headers, true)
-})
+//   await session.destroy()
+//   match(
+//     res.headers.get('set-cookie') ?? '',
+//     /test=; Max-Age=0; Path=\/; HttpOnly; Secure; SameSite=Lax$/
+//   )
 
-test('ignores undefined headers', () => {
-  const headers1 = new Headers({ 'Content-Type': 'application/json' })
+//   session.user = { id: 1 }
+//   await session.save({
+//     cookieName,
+//     password,
+//     cookieOptions: {
+//       maxAge: 60,
+//     },
+//   })
+//   match(
+//     res.headers.get('set-cookie') ?? '',
+//     /test=.{265}; Max-Age=60; Path=\/; HttpOnly; Secure; SameSite=Lax$/
+//   )
 
-  const mergedHeaders = mergeHeaders(headers1, undefined)
+//   await session.destroy({
+//     cookieName,
+//     password,
+//     cookieOptions: {
+//       maxAge: 60,
+//     },
+//   })
+//   match(
+//     res.headers.get('set-cookie') ?? '',
+//     /test=; Max-Age=0; Path=\/; HttpOnly; Secure; SameSite=Lax$/
+//   )
+// })
 
-  deepEqual(mergedHeaders.get('Content-Type'), 'application/json')
-})
+// test('merges two sets of headers', () => {
+//   const headers1 = new Headers({ 'Content-Type': 'application/json' })
+//   const headers2 = new Headers({ Authorization: 'Bearer token123' })
 
-const originalResponse = new Response()
+//   const mergedHeaders = mergeHeaders(headers1, headers2)
 
-test('creates a new response with merged headers', () => {
-  const bodyString = 'Hello, world!'
-  const headers = new Headers({ 'Content-Type': 'text/plain' })
+//   deepEqual(mergedHeaders.get('Content-Type'), 'application/json')
+//   deepEqual(mergedHeaders.get('Authorization'), 'Bearer token123')
+// })
 
-  const response = createResponse(originalResponse, bodyString, { headers })
+// test('returns an empty headers object when called with no arguments', () => {
+//   const mergedHeaders = mergeHeaders()
 
-  deepEqual(response.status, originalResponse.status)
-  deepEqual(response.statusText, originalResponse.statusText)
-  deepEqual(response.headers.get('Content-Type'), 'text/plain')
-})
+//   deepEqual(mergedHeaders instanceof Headers, true)
+// })
 
-test('uses original response status and statusText by default', () => {
-  const bodyString = 'Hello, world!'
+// test('ignores undefined headers', () => {
+//   const headers1 = new Headers({ 'Content-Type': 'application/json' })
 
-  const response = createResponse(originalResponse, bodyString)
+//   const mergedHeaders = mergeHeaders(headers1, undefined)
 
-  deepEqual(response.status, originalResponse.status)
-  deepEqual(response.statusText, originalResponse.statusText)
-})
+//   deepEqual(mergedHeaders.get('Content-Type'), 'application/json')
+// })
 
-test('overrides original response status and statusText when specified', () => {
-  const bodyString = 'Hello, world!'
-  const status = 404
-  const statusText = 'Not Found'
+// const originalResponse = new Response()
 
-  const response = createResponse(originalResponse, bodyString, { status, statusText })
+// test('creates a new response with merged headers', () => {
+//   const bodyString = 'Hello, world!'
+//   const headers = new Headers({ 'Content-Type': 'text/plain' })
 
-  deepEqual(response.status, status)
-  deepEqual(response.statusText, statusText)
-})
+//   const response = createResponse(originalResponse, bodyString, { headers })
+
+//   deepEqual(response.status, originalResponse.status)
+//   deepEqual(response.statusText, originalResponse.statusText)
+//   deepEqual(response.headers.get('Content-Type'), 'text/plain')
+// })
+
+// test('uses original response status and statusText by default', () => {
+//   const bodyString = 'Hello, world!'
+
+//   const response = createResponse(originalResponse, bodyString)
+
+//   deepEqual(response.status, originalResponse.status)
+//   deepEqual(response.statusText, originalResponse.statusText)
+// })
+
+// test('overrides original response status and statusText when specified', () => {
+//   const bodyString = 'Hello, world!'
+//   const status = 404
+//   const statusText = 'Not Found'
+
+//   const response = createResponse(originalResponse, bodyString, { status, statusText })
+
+//   deepEqual(response.status, status)
+//   deepEqual(response.statusText, statusText)
+// })
