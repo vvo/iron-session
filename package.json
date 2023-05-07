@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/package.json",
   "name": "iron-session",
   "version": "6.3.1",
-  "description": "Stateless session utility using signed and encrypted cookies to store data.",
+  "description": "A runtime-agnostic library for stateless session management through secure, signed, and encrypted cookies.",
   "keywords": [
     "session",
     "cookie",
@@ -10,7 +10,10 @@
     "security",
     "next.js",
     "express",
-    "koa"
+    "koa",
+    "node.js",
+    "deno",
+    "bun"
   ],
   "bugs": "https://github.com/vvo/iron-session/issues",
   "repository": "github:vvo/iron-session",
