@@ -165,7 +165,7 @@ export function createUnsealData(_crypto: Crypto = globalThis.crypto) {
         (await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
           ...ironDefaults,
           ttl: ttl * 1000,
-        })) ?? {}
+        })) /* c8 ignore next */ ?? {}
 
       if (tokenVersion === 2) {
         return data as T
@@ -187,6 +187,7 @@ export function createUnsealData(_crypto: Crypto = globalThis.crypto) {
         return {} as T
       }
 
+      /* c8 ignore next 2 */
       throw error
     }
   }
