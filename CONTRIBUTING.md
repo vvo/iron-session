@@ -1,4 +1,57 @@
-All sorts of contributions are welcome here!
+# Contribution Guide
+
+Hey there! We are really excited that you are interested in contributing. Before
+submitting your contribution, please make sure to take a moment and read through
+the following guide:
+
+## Repository Setup
+
+```sh
+nvm install # install Node.js version specified in .nvmrc
+corepack enable # enable Corepack
+pnpm install # install dependencies
+```
+
+Optionally, you might also want to install Deno or Bun if you are working on
+their examples.
+
+## Development
+
+```sh
+pnpm run build # build the project
+pnpm run test # run the tests
+pnpm run lint # lint the code
+```
+
+Before submitting your contribution, please make sure that all of the above
+commands pass successfully. Refer project's `package.json` for more commands.
+
+## Submitting a Contribution
+
+1. Fork the repository
+2. Create a new branch for your contribution
+3. Make your changes
+4. Submit a pull request
+
+Some points to keep in mind:
+
+- Before starting to work on a feature, please make sure to open an issue first
+  and discuss it with the maintainers.
+- If you are working on a bug fix, please provide a detailed description of the
+  bug in the pull request.
+- It's OK to have multiple small commits as you work on the PR - GitHub will
+  automatically squash them before merging.
+- Please make sure the PR title follows
+  [Conventional Commits](https://www.conventionalcommits.org/) format.
+- Please make sure to rebase your branch on top of the latest `main` branch
+  before submitting the PR.
+
+Recommendations (not required, may not apply to all PRs):
+
+- Add tests for your changes.
+- Update the documentation if necessary.
+
+## License
 
 When you submit code changes, your submissions are understood to be under
 [the same MIT license](LICENSE.md) that covers the project. Feel free to contact
