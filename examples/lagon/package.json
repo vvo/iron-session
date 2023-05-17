@@ -1,0 +1,13 @@
+{
+  "name": "lagon-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "lagon dev app.ts"
+  },
+  "dependencies": {
+    "@lagon/cli": "^0.7.1",
+    "esbuild": "^0.17.19",
+    "iron-session": "workspace:*"
+  }
+}

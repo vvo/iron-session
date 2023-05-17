@@ -10,6 +10,6 @@
     "iron-session": "workspace:*"
   },
   "devDependencies": {
-    "bun-types": "^0.5.8"
+    "bun-types": "^0.6.1"
   }
 }

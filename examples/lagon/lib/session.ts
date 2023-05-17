@@ -1,5 +1,4 @@
-import Koa from 'koa'
-import { getIronSession } from 'iron-session'
+import { getIronSession, createResponse } from 'iron-session'
 
 export interface Data {
   user?: {
@@ -8,8 +7,8 @@ export interface Data {
   }
 }
 
-export const getSession = (ctx: Koa.ParameterizedContext) => {
-  const session = getIronSession<Data>(ctx.req, ctx.res, {
+export const getSession = (req: Request, res: Response) => {
+  const session = getIronSession<Data>(req, res, {
     password: 'ThisIsNotASecurePasswordPleaseChangeIt',
     cookieName: 'session',
     cookieOptions: {
@@ -18,3 +17,5 @@ export const getSession = (ctx: Koa.ParameterizedContext) => {
   })
   return session
 }
+
+export { createResponse }
