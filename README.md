@@ -59,8 +59,8 @@ WIP
   web APIs.
 - [Hoang Vo](https://github.com/hoangvvo) for advice and guidance while building
   this module. Hoang built
-  [next-connect](https://github.com/hoangvvo/next-connect) and
-  [next-session](https://github.com/hoangvvo/next-session).
+  [`next-connect`](https://github.com/hoangvvo/next-connect) and
+  [`next-session`](https://github.com/hoangvvo/next-session).
 - All the
   [contributors](https://github.com/vvo/iron-session/graphs/contributors) for
   making this project better.
