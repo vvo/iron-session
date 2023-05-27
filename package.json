@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "iron-session",
-  "version": "6.3.1",
+  "version": "8.0.0-alpha.0",
   "description": "A runtime-agnostic library for stateless session management through secure, signed, and encrypted cookies.",
   "keywords": [
     "session",
