@@ -150,8 +150,8 @@
   },
   "devDependencies": {
     "@shopify/jest-koa-mocks": "^5.0.1",
-    "@swc/core": "1.2.242",
-    "@swc/jest": "0.2.22",
+    "@swc/core": "1.2.249",
+    "@swc/jest": "0.2.29",
     "@tsconfig/node12": "1.0.11",
     "@types/jest": "28.1.8",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
@@ -162,7 +162,7 @@
     "prettier": "2.7.1",
     "prettier-plugin-packagejson": "2.2.18",
     "rimraf": "3.0.2",
-    "tsup": "6.2.3",
+    "tsup": "6.2.2",
     "typescript": "4.7.4"
   },
   "peerDependencies": {
