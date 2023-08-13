@@ -106,17 +106,49 @@ function computeCookieMaxAge(ttl: number): number {
   return ttl - timestampSkewSec
 }
 
-function getCookie(req: RequestType, cookieName: string): string {
-  return (
-    parse(
-      ('headers' in req && typeof req.headers.get === 'function'
-        ? req.headers.get('cookie')
-        : (req as IncomingMessage).headers.cookie) ?? ''
-    )[cookieName] ?? ''
-  )
+function getCookie(req: RequestType, cookieName: string, cookieHandler?: CookieHandler): string {
+  if (cookieHandler) {
+    const cookie = cookieHandler.get(cookieName)
+    if (typeof cookie === 'string') {
+      return cookie
+    }
+  }
+
+  if ('headers' in req && typeof req.headers.get === 'function') {
+    const cookieValue = req.headers.get('cookie')
+    if (typeof cookieValue === 'string') {
+      return parse(cookieValue)[cookieName] ?? ''
+    }
+  }
+
+  return ''
 }
 
-function setCookie(res: ResponseType, cookieValue: string): void {
+function extractCookieComponents(
+  cookieValue: string
+): { cookieName: string; cookieData: string } | null {
+  const components = cookieValue.split(';')
+  if (components.length > 0) {
+    const firstPart = components[0]
+    if (typeof firstPart === 'string') {
+      const parts = firstPart.trim().split('=')
+      if (parts.length === 2 && typeof parts[0] === 'string' && typeof parts[1] === 'string') {
+        return { cookieName: parts[0], cookieData: parts[1] }
+      }
+    }
+  }
+  return null
+}
+
+function setCookie(res: ResponseType, cookieValue: string, cookieHandler?: CookieHandler): void {
+  if (cookieHandler) {
+    const extracted = extractCookieComponents(cookieValue)
+    if (extracted !== null) {
+      const { cookieName, cookieData } = extracted
+      cookieHandler.set(cookieName, cookieData)
+      return
+    }
+  }
   if ('headers' in res && typeof res.headers.append === 'function') {
     res.headers.append('set-cookie', cookieValue)
     return
@@ -220,9 +252,15 @@ function mergeOptions(
   return options
 }
 
+interface CookieHandler {
+  get: (name: string) => { name: string; value: string } | undefined
+  set: (name: string, value: string) => void
+}
+
 export function createGetIronSession(
   sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>
+  unsealData: ReturnType<typeof createUnsealData>,
+  cookieHandler?: CookieHandler
 ) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function getIronSession<T extends {} = {}>(
@@ -284,7 +322,7 @@ export function createGetIronSession(
             )
           }
 
-          setCookie(res, cookieValue)
+          setCookie(res, cookieValue, cookieHandler)
         },
       },
 
@@ -302,7 +340,7 @@ export function createGetIronSession(
             maxAge: 0,
           })
 
-          setCookie(res, cookieValue)
+          setCookie(res, cookieValue, cookieHandler)
         },
       },
     })
