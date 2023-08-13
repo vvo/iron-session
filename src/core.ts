@@ -259,14 +259,14 @@ interface CookieHandler {
 
 export function createGetIronSession(
   sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>,
-  cookieHandler?: CookieHandler
+  unsealData: ReturnType<typeof createUnsealData>
 ) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function getIronSession<T extends {} = {}>(
     req: RequestType,
     res: ResponseType,
-    userSessionOptions: IronSessionOptions
+    userSessionOptions: IronSessionOptions,
+    cookieHandler?: CookieHandler
   ): Promise<IronSession<T>> {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!req) {
