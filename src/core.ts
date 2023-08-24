@@ -127,7 +127,8 @@ function getCookie(req: RequestType, cookieName: string): string {
 }
 
 function getServerActionCookie(cookieName: string, cookieHandler: ICookieHandler): string {
-  const cookie = cookieHandler.get(cookieName)
+  const cookieObject = cookieHandler.get(cookieName)
+  const cookie = cookieObject?.value
   if (typeof cookie === 'string') {
     return cookie
   }
@@ -387,7 +388,7 @@ export function createGetServerActionIronSession(
     }
 
     const options = mergeOptions(userSessionOptions)
-    const sealFromCookies = getServerActionCookie(options.cookieName, cookieHandler) // is cookieHandler globally accessible??
+    const sealFromCookies = getServerActionCookie(options.cookieName, cookieHandler)
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, { password: passwordsMap, ttl: options.ttl })
       : ({} as T)
