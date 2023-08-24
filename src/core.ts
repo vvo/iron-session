@@ -116,14 +116,13 @@ function computeCookieMaxAge(ttl: number): number {
 }
 
 function getCookie(req: RequestType, cookieName: string): string {
-  if ('headers' in req && typeof req.headers.get === 'function') {
-    const cookieValue = req.headers.get('cookie')
-    if (typeof cookieValue === 'string') {
-      return parse(cookieValue)[cookieName] ?? ''
-    }
-  }
-
-  return ''
+  return (
+    parse(
+      ('headers' in req && typeof req.headers.get === 'function'
+        ? req.headers.get('cookie')
+        : (req as IncomingMessage).headers.cookie) ?? ''
+    )[cookieName] ?? ''
+  )
 }
 
 function getServerActionCookie(cookieName: string, cookieHandler: ICookieHandler): string {
