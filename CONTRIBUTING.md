@@ -7,9 +7,9 @@ the following guide:
 ## Repository Setup
 
 ```sh
-nvm install # install Node.js version specified in .nvmrc
-corepack enable # enable Corepack
-pnpm install # install dependencies
+fnm install
+corepack enable
+pnpm install
 ```
 
 Optionally, you might also want to install Deno or Bun if you are working on
