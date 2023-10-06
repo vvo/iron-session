@@ -1,3 +1,6 @@
 dist
+coverage
 pnpm-lock.yaml
 CHANGELOG.md
+node_modules
+.next

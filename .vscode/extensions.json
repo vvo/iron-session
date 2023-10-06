@@ -1,11 +1,8 @@
 {
   "recommendations": [
-    "davidanson.vscode-markdownlint",
-    "dbaeumer.vscode-eslint",
-    "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "foxundermoon.shell-format",
-    "rohit-gohri.format-code-action",
-    "streetsidesoftware.code-spell-checker"
+    "editorconfig.editorconfig",
+    "dbaeumer.vscode-eslint",
+    "wix.vscode-import-cost"
   ]
 }

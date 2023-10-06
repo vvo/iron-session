@@ -1,20 +1,24 @@
-import type { IncomingMessage, ServerResponse } from 'http'
-import { parse, serialize, type CookieSerializeOptions } from 'cookie'
-import { defaults as ironDefaults, seal as ironSeal, unseal as ironUnseal } from 'iron-webcrypto'
+import type { IncomingMessage, ServerResponse } from "http";
+import { parse, serialize, type CookieSerializeOptions } from "cookie";
+import {
+  defaults as ironDefaults,
+  seal as ironSeal,
+  unseal as ironUnseal,
+} from "iron-webcrypto";
 
-type PasswordsMap = Record<string, string>
-type Password = PasswordsMap | string
+type PasswordsMap = Record<string, string>;
+type Password = PasswordsMap | string;
 
-type RequestType = IncomingMessage | Request
-type ResponseType = Response | ServerResponse
+type RequestType = IncomingMessage | Request;
+type ResponseType = Response | ServerResponse;
 
 /**
  * The high-level type definition of the .get() and .set() methods
  * of { cookies() } from "next/headers"
  */
 export interface ICookieHandler {
-  get: (name: string) => { name: string; value: string } | undefined
-  set: (name: string, value: string) => void
+  get: (name: string) => { name: string; value: string } | undefined;
+  set: (name: string, value: string) => void;
 }
 
 export interface IronSessionOptions {
@@ -24,7 +28,7 @@ export interface IronSessionOptions {
    *
    * @example 'vercel-session'
    */
-  cookieName: string
+  cookieName: string;
 
   /**
    * The password(s) that will be used to encrypt the cookie. Can either be a string
@@ -36,7 +40,7 @@ export interface IronSessionOptions {
    *
    * @example { 1: 'password-1', 2: 'password-2' }
    */
-  password: Password
+  password: Password;
 
   /**
    * The time (in seconds) that the session will be valid for. Also sets the
@@ -47,7 +51,7 @@ export interface IronSessionOptions {
    *
    * @default 1209600
    */
-  ttl?: number
+  ttl?: number;
 
   /**
    * The options that will be passed to the cookie library.
@@ -57,48 +61,53 @@ export interface IronSessionOptions {
    *
    * @see https://github.com/jshttp/cookie#options-1
    */
-  cookieOptions?: CookieSerializeOptions
+  cookieOptions?: CookieSerializeOptions;
 }
 
-type OverridableOptions = Pick<IronSessionOptions, 'cookieOptions' | 'ttl'>
+type OverridableOptions = Pick<IronSessionOptions, "cookieOptions" | "ttl">;
 
 export type IronSession<T> = T & {
   /**
    * Destroys the session data and removes the cookie.
    */
-  readonly destroy: (destroyOptions?: OverridableOptions) => Promise<void>
+  readonly destroy: (destroyOptions?: OverridableOptions) => Promise<void>;
 
   /**
    * Encrypts the session data and sets the cookie.
    */
-  readonly save: (saveOptions?: OverridableOptions) => Promise<void>
-}
+  readonly save: (saveOptions?: OverridableOptions) => Promise<void>;
+};
 
 // default time allowed to check for iron seal validity when ttl passed
 // see https://hapi.dev/module/iron/api/?v=7.0.1#options
-const timestampSkewSec = 60
-const fourteenDaysInSeconds = 14 * 24 * 3600
+const timestampSkewSec = 60;
+const fourteenDaysInSeconds = 14 * 24 * 3600;
 
 // We store a token major version to handle data format changes so that the cookies
 // can be kept alive between upgrades, no need to disconnect everyone.
-const currentMajorVersion = 2
-const versionDelimiter = '~'
+const currentMajorVersion = 2;
+const versionDelimiter = "~";
 
 const defaultOptions: Required<OverridableOptions> = {
   ttl: fourteenDaysInSeconds,
-  cookieOptions: { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
-}
+  cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
+};
 
 function normalizeStringPasswordToMap(password: Password): PasswordsMap {
-  return typeof password === 'string' ? { 1: password } : password
+  return typeof password === "string" ? { 1: password } : password;
 }
 
-function parseSeal(seal: string): { sealWithoutVersion: string; tokenVersion: number | null } {
-  const [sealWithoutVersion, tokenVersionAsString] = seal.split(versionDelimiter)
-  const tokenVersion = tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10)
+function parseSeal(seal: string): {
+  sealWithoutVersion: string;
+  tokenVersion: number | null;
+} {
+  const [sealWithoutVersion, tokenVersionAsString] =
+    seal.split(versionDelimiter);
+  const tokenVersion =
+    tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10);
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return { sealWithoutVersion: sealWithoutVersion!, tokenVersion }
+  return { sealWithoutVersion: sealWithoutVersion!, tokenVersion };
 }
 
 function computeCookieMaxAge(ttl: number): number {
@@ -107,137 +116,158 @@ function computeCookieMaxAge(ttl: number): number {
     // but in reality cookies have to expire (can't have no max-age)
     // 2147483647 is the max value for max-age in cookies
     // see https://stackoverflow.com/a/11685301/147079
-    return 2147483647
+    return 2147483647;
   }
 
   // The next line makes sure browser will expire cookies before seals are considered expired by the server.
   // It also allows for clock difference of 60 seconds between server and clients.
-  return ttl - timestampSkewSec
+  return ttl - timestampSkewSec;
 }
 
 function getCookie(req: RequestType, cookieName: string): string {
   return (
     parse(
-      ('headers' in req && typeof req.headers.get === 'function'
-        ? req.headers.get('cookie')
-        : (req as IncomingMessage).headers.cookie) ?? ''
-    )[cookieName] ?? ''
-  )
+      ("headers" in req && typeof req.headers.get === "function"
+        ? req.headers.get("cookie")
+        : (req as IncomingMessage).headers.cookie) ?? "",
+    )[cookieName] ?? ""
+  );
 }
 
-function getServerActionCookie(cookieName: string, cookieHandler: ICookieHandler): string {
-  const cookieObject = cookieHandler.get(cookieName)
-  const cookie = cookieObject?.value
-  if (typeof cookie === 'string') {
-    return cookie
+function getServerActionCookie(
+  cookieName: string,
+  cookieHandler: ICookieHandler,
+): string {
+  const cookieObject = cookieHandler.get(cookieName);
+  const cookie = cookieObject?.value;
+  if (typeof cookie === "string") {
+    return cookie;
   }
-  return ''
+  return "";
 }
 
 function extractCookieComponents(
-  cookieValue: string
+  cookieValue: string,
 ): { cookieName: string; cookieData: string } | null {
-  const components = cookieValue.split(';')
+  const components = cookieValue.split(";");
   if (components.length > 0) {
-    const firstPart = components[0]
-    if (typeof firstPart === 'string') {
-      const parts = firstPart.trim().split('=')
-      if (parts.length === 2 && typeof parts[0] === 'string' && typeof parts[1] === 'string') {
-        return { cookieName: parts[0], cookieData: parts[1] }
+    const firstPart = components[0];
+    if (typeof firstPart === "string") {
+      const parts = firstPart.trim().split("=");
+      if (
+        parts.length === 2 &&
+        typeof parts[0] === "string" &&
+        typeof parts[1] === "string"
+      ) {
+        return { cookieName: parts[0], cookieData: parts[1] };
       }
     }
   }
-  return null
+  return null;
 }
 
 function setCookie(res: ResponseType, cookieValue: string): void {
-  if ('headers' in res && typeof res.headers.append === 'function') {
-    res.headers.append('set-cookie', cookieValue)
-    return
+  if ("headers" in res && typeof res.headers.append === "function") {
+    res.headers.append("set-cookie", cookieValue);
+    return;
   }
-  let existingSetCookie = (res as ServerResponse).getHeader('set-cookie') ?? []
+  let existingSetCookie = (res as ServerResponse).getHeader("set-cookie") ?? [];
   if (!Array.isArray(existingSetCookie)) {
-    existingSetCookie = [existingSetCookie.toString()]
+    existingSetCookie = [existingSetCookie.toString()];
   }
-  ;(res as ServerResponse).setHeader('set-cookie', [...existingSetCookie, cookieValue])
+  (res as ServerResponse).setHeader("set-cookie", [
+    ...existingSetCookie,
+    cookieValue,
+  ]);
 }
 
-function setServerActionCookie(cookieValue: string, cookieHandler: ICookieHandler): void {
-  const extracted = extractCookieComponents(cookieValue)
+function setServerActionCookie(
+  cookieValue: string,
+  cookieHandler: ICookieHandler,
+): void {
+  const extracted = extractCookieComponents(cookieValue);
   if (extracted !== null) {
-    const { cookieName, cookieData } = extracted
-    cookieHandler.set(cookieName, cookieData)
+    const { cookieName, cookieData } = extracted;
+    cookieHandler.set(cookieName, cookieData);
   }
 }
 
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
   return async function sealData(
     data: unknown,
-    { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number }
+    {
+      password,
+      ttl = fourteenDaysInSeconds,
+    }: { password: Password; ttl?: number },
   ): Promise<string> {
-    const passwordsMap = normalizeStringPasswordToMap(password)
+    const passwordsMap = normalizeStringPasswordToMap(password);
 
-    const mostRecentPasswordId = Math.max(...Object.keys(passwordsMap).map(Number))
+    const mostRecentPasswordId = Math.max(
+      ...Object.keys(passwordsMap).map(Number),
+    );
     const passwordForSeal = {
       id: mostRecentPasswordId.toString(),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       secret: passwordsMap[mostRecentPasswordId]!,
-    }
+    };
 
     const seal = await ironSeal(_crypto, data, passwordForSeal, {
       ...ironDefaults,
       ttl: ttl * 1000,
-    })
+    });
 
-    return `${seal}${versionDelimiter}${currentMajorVersion}`
-  }
+    return `${seal}${versionDelimiter}${currentMajorVersion}`;
+  };
 }
 
 export function createUnsealData(_crypto: Crypto = globalThis.crypto) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function unsealData<T extends {} = {}>(
     seal: string,
-    { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number }
+    {
+      password,
+      ttl = fourteenDaysInSeconds,
+    }: { password: Password; ttl?: number },
   ): Promise<T> {
-    const passwordsMap = normalizeStringPasswordToMap(password)
-    const { sealWithoutVersion, tokenVersion } = parseSeal(seal)
+    const passwordsMap = normalizeStringPasswordToMap(password);
+    const { sealWithoutVersion, tokenVersion } = parseSeal(seal);
 
     try {
       const data =
         (await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
           ...ironDefaults,
           ttl: ttl * 1000,
-        })) /* c8 ignore next */ ?? {}
+        })) /* c8 ignore next */ ?? {};
 
       if (tokenVersion === 2) {
-        return data as T
+        return data as T;
       }
 
       // @ts-expect-error `persistent` does not exist on newer tokens
-      return { ...data.persistent } as T
+      return { ...data.persistent } as T;
     } catch (error) {
       if (
         error instanceof Error &&
         /^(Expired seal|Bad hmac value|Cannot find password|Incorrect number of sealed components)/.test(
-          error.message
+          error.message,
         )
       ) {
         // if seal expired or
         // if seal is not valid (encrypted using a different password, when passwords are badly rotated) or
         // if we can't find back the password in the seal
         // then we just start a new session over
-        return {} as T
+        return {} as T;
       }
 
       /* c8 ignore next 2 */
-      throw error
+      throw error;
     }
-  }
+  };
 }
 
 function mergeOptions(
   userSessionOptions: IronSessionOptions,
-  overrides?: OverridableOptions
+  overrides?: OverridableOptions,
 ): Required<IronSessionOptions> {
   const options: Required<IronSessionOptions> = {
     ...defaultOptions,
@@ -248,85 +278,102 @@ function mergeOptions(
       ...userSessionOptions.cookieOptions,
       ...overrides?.cookieOptions,
     },
-  }
+  };
 
-  if (userSessionOptions.cookieOptions && 'maxAge' in userSessionOptions.cookieOptions) {
+  if (
+    userSessionOptions.cookieOptions &&
+    "maxAge" in userSessionOptions.cookieOptions
+  ) {
     if (userSessionOptions.cookieOptions.maxAge === undefined) {
       // session cookies, do not set maxAge, consider token as infinite
-      options.ttl = 0
+      options.ttl = 0;
     }
   } else {
-    options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl)
+    options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  return options
+  return options;
 }
 
 export function createGetIronSession(
   sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>
+  unsealData: ReturnType<typeof createUnsealData>,
 ) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function getIronSession<T extends {} = {}>(
     req: RequestType,
     res: ResponseType,
-    userSessionOptions: IronSessionOptions
+    userSessionOptions: IronSessionOptions,
   ): Promise<IronSession<T>> {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!req) {
-      throw new Error('iron-session: Bad usage. Missing request parameter.')
+      throw new Error("iron-session: Bad usage. Missing request parameter.");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!res) {
-      throw new Error('iron-session: Bad usage. Missing response parameter.')
+      throw new Error("iron-session: Bad usage. Missing response parameter.");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions) {
-      throw new Error('iron-session: Bad usage. Missing options.')
+      throw new Error("iron-session: Bad usage. Missing options.");
     }
 
     if (!userSessionOptions.cookieName) {
-      throw new Error('iron-session: Bad usage. Missing cookie name.')
+      throw new Error("iron-session: Bad usage. Missing cookie name.");
     }
 
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions.password) {
-      throw new Error('iron-session: Bad usage. Missing password.')
+      throw new Error("iron-session: Bad usage. Missing password.");
     }
 
-    const passwordsMap = normalizeStringPasswordToMap(userSessionOptions.password)
+    const passwordsMap = normalizeStringPasswordToMap(
+      userSessionOptions.password,
+    );
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error('iron-session: Bad usage. Password must be at least 32 characters long.')
+      throw new Error(
+        "iron-session: Bad usage. Password must be at least 32 characters long.",
+      );
     }
 
-    const options = mergeOptions(userSessionOptions)
-    const sealFromCookies = getCookie(req, options.cookieName)
+    const options = mergeOptions(userSessionOptions);
+    const sealFromCookies = getCookie(req, options.cookieName);
     const session = sealFromCookies
-      ? await unsealData<T>(sealFromCookies, { password: passwordsMap, ttl: options.ttl })
-      : ({} as T)
+      ? await unsealData<T>(sealFromCookies, {
+          password: passwordsMap,
+          ttl: options.ttl,
+        })
+      : ({} as T);
 
     Object.defineProperties(session, {
       save: {
         value: async function save(saveOptions?: OverridableOptions) {
-          if ('headersSent' in res && res.headersSent) {
+          if ("headersSent" in res && res.headersSent) {
             throw new Error(
-              'iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()'
-            )
+              "iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()",
+            );
           }
 
-          const mergedOptions = mergeOptions(userSessionOptions, saveOptions)
-          const seal = await sealData(session, { password: passwordsMap, ttl: mergedOptions.ttl })
-          const cookieValue = serialize(mergedOptions.cookieName, seal, mergedOptions.cookieOptions)
+          const mergedOptions = mergeOptions(userSessionOptions, saveOptions);
+          const seal = await sealData(session, {
+            password: passwordsMap,
+            ttl: mergedOptions.ttl,
+          });
+          const cookieValue = serialize(
+            mergedOptions.cookieName,
+            seal,
+            mergedOptions.cookieOptions,
+          );
 
           if (cookieValue.length > 4096) {
             throw new Error(
-              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`
-            )
+              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
+            );
           }
 
-          setCookie(res, cookieValue)
+          setCookie(res, cookieValue);
         },
       },
 
@@ -335,77 +382,99 @@ export function createGetIronSession(
           Object.keys(session).forEach((key) => {
             // @ts-expect-error ...
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-            delete session[key]
-          })
+            delete session[key];
+          });
 
-          const mergedOptions = mergeOptions(userSessionOptions, destroyOptions)
-          const cookieValue = serialize(mergedOptions.cookieName, '', {
+          const mergedOptions = mergeOptions(
+            userSessionOptions,
+            destroyOptions,
+          );
+          const cookieValue = serialize(mergedOptions.cookieName, "", {
             ...mergedOptions.cookieOptions,
             maxAge: 0,
-          })
+          });
 
-          setCookie(res, cookieValue)
+          setCookie(res, cookieValue);
         },
       },
-    })
+    });
 
-    return session as IronSession<T>
-  }
+    return session as IronSession<T>;
+  };
 }
 
 export function createGetServerActionIronSession(
   sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>
+  unsealData: ReturnType<typeof createUnsealData>,
 ) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function getServerActionIronSession<T extends {} = {}>(
     userSessionOptions: IronSessionOptions,
-    cookieHandler: ICookieHandler
+    cookieHandler: ICookieHandler,
   ): Promise<IronSession<T>> {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions) {
-      throw new Error('iron-session: Bad usage. Missing options.')
+      throw new Error("iron-session: Bad usage. Missing options.");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (!cookieHandler) {
-      throw new Error('iron-session: Bad usage. Missing NextJS cookies() handler.')
+      throw new Error(
+        "iron-session: Bad usage. Missing NextJS cookies() handler.",
+      );
     }
 
     if (!userSessionOptions.cookieName) {
-      throw new Error('iron-session: Bad usage. Missing cookie name.')
+      throw new Error("iron-session: Bad usage. Missing cookie name.");
     }
 
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!userSessionOptions.password) {
-      throw new Error('iron-session: Bad usage. Missing password.')
+      throw new Error("iron-session: Bad usage. Missing password.");
     }
 
-    const passwordsMap = normalizeStringPasswordToMap(userSessionOptions.password)
+    const passwordsMap = normalizeStringPasswordToMap(
+      userSessionOptions.password,
+    );
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error('iron-session: Bad usage. Password must be at least 32 characters long.')
+      throw new Error(
+        "iron-session: Bad usage. Password must be at least 32 characters long.",
+      );
     }
 
-    const options = mergeOptions(userSessionOptions)
-    const sealFromCookies = getServerActionCookie(options.cookieName, cookieHandler)
+    const options = mergeOptions(userSessionOptions);
+    const sealFromCookies = getServerActionCookie(
+      options.cookieName,
+      cookieHandler,
+    );
     const session = sealFromCookies
-      ? await unsealData<T>(sealFromCookies, { password: passwordsMap, ttl: options.ttl })
-      : ({} as T)
+      ? await unsealData<T>(sealFromCookies, {
+          password: passwordsMap,
+          ttl: options.ttl,
+        })
+      : ({} as T);
 
     Object.defineProperties(session, {
       save: {
         value: async function save(saveOptions?: OverridableOptions) {
-          const mergedOptions = mergeOptions(userSessionOptions, saveOptions)
-          const seal = await sealData(session, { password: passwordsMap, ttl: mergedOptions.ttl })
-          const cookieValue = serialize(mergedOptions.cookieName, seal, mergedOptions.cookieOptions)
+          const mergedOptions = mergeOptions(userSessionOptions, saveOptions);
+          const seal = await sealData(session, {
+            password: passwordsMap,
+            ttl: mergedOptions.ttl,
+          });
+          const cookieValue = serialize(
+            mergedOptions.cookieName,
+            seal,
+            mergedOptions.cookieOptions,
+          );
 
           if (cookieValue.length > 4096) {
             throw new Error(
-              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`
-            )
+              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
+            );
           }
 
-          setServerActionCookie(cookieValue, cookieHandler)
+          setServerActionCookie(cookieValue, cookieHandler);
         },
       },
 
@@ -414,41 +483,46 @@ export function createGetServerActionIronSession(
           Object.keys(session).forEach((key) => {
             // @ts-expect-error ...
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-            delete session[key]
-          })
-          const mergedOptions = mergeOptions(userSessionOptions, destroyOptions)
-          const cookieValue = serialize(mergedOptions.cookieName, '', {
+            delete session[key];
+          });
+          const mergedOptions = mergeOptions(
+            userSessionOptions,
+            destroyOptions,
+          );
+          const cookieValue = serialize(mergedOptions.cookieName, "", {
             ...mergedOptions.cookieOptions,
             maxAge: 0,
-          })
+          });
 
-          setServerActionCookie(cookieValue, cookieHandler)
+          setServerActionCookie(cookieValue, cookieHandler);
         },
       },
-    })
+    });
 
-    return session as IronSession<T>
-  }
+    return session as IronSession<T>;
+  };
 }
 
-export function mergeHeaders(...headersList: (HeadersInit | undefined)[]): Headers {
-  const mergedHeaders = new Headers()
+export function mergeHeaders(
+  ...headersList: (HeadersInit | undefined)[]
+): Headers {
+  const mergedHeaders = new Headers();
   headersList.forEach((headers) => {
     new Headers(headers).forEach((value, key) => {
-      mergedHeaders.append(key, value)
-    })
-  })
-  return mergedHeaders
+      mergedHeaders.append(key, value);
+    });
+  });
+  return mergedHeaders;
 }
 
 export function createResponse(
   originalResponse: Response,
   bodyString: string,
-  options?: ResponseInit
+  options?: ResponseInit,
 ): Response {
   return new Response(bodyString, {
     status: options?.status ?? originalResponse.status,
     statusText: options?.statusText ?? originalResponse.statusText,
     headers: mergeHeaders(options?.headers, originalResponse.headers),
-  })
+  });
 }

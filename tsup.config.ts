@@ -1,12 +1,12 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
 export default defineConfig([
   {
-    entry: ['src/index.ts'],
+    entry: ["src/index.ts"],
     clean: true,
     dts: { resolve: true },
-    format: ['esm'],
+    format: ["esm"],
     treeshake: true,
   },
-  { entry: ['src/index.node.ts'], format: ['esm', 'cjs'], treeshake: true },
-])
+  { entry: ["src/index.node.ts"], format: ["esm", "cjs"], treeshake: true },
+]);

@@ -50,15 +50,16 @@
     "koa:dev": "pnpm --filter=koa-example dev",
     "koa:start": "pnpm --filter=koa-example start",
     "lagon:dev": "pnpm --filter=lagon-example dev",
-    "lint": "pnpm build && pnpm lint:only",
+    "lint": "pnpm eslint . && pnpm build && pnpm lint:only",
     "lint:only": "publint",
     "release": "pnpm lint && release-it",
     "test": "c8 -r text -r lcov node --loader tsx --test src/*.test.ts",
     "test:watch": "node --loader tsx --test --watch src/*.test.ts"
   },
+  "prettier": {
+    "trailingComma": "all"
+  },
   "devDependencies": {
-    "@commitlint/cli": "^17.7.2",
-    "@commitlint/config-conventional": "^17.7.0",
     "@release-it/conventional-changelog": "^7.0.2",
     "@types/cookie": "^0.5.2",
     "@types/node": "^20.8.2",
