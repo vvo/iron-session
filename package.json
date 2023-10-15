@@ -146,7 +146,7 @@
     "@types/koa": "^2.13.5",
     "@types/node": "^17.0.41",
     "cookie": "^0.5.0",
-    "iron-webcrypto": "^0.2.5"
+    "iron-webcrypto": "^0.10.0"
   },
   "devDependencies": {
     "@shopify/jest-koa-mocks": "^5.0.1",
@@ -154,8 +154,8 @@
     "@swc/jest": "0.2.22",
     "@tsconfig/node12": "1.0.11",
     "@types/jest": "28.1.8",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
     "concurrently": "7.3.0",
     "eslint": "8.22.0",
     "jest": "28.1.3",
