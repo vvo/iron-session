@@ -2,14 +2,14 @@ To answer:
 - Why are iron-webcrypto and others parts of dev dependencies, are we building even for node?
 - Are we testing in different Node.js versions? Next.js versions?
 
-Test website must include:
+Test website must include, in a very clear way:
   ☐ Route handler examples (app router). Serverless and edge.
   ☐ Server actions. (can it be serverless and edge?)
   ☐ API routes examples (pages, legacy). Serverless and edge.
   ☐ getServerSideProps examples (pages, legacy). Serverless and edge.
 
-☐ Test bun when the package is released
-☐ Test deno when the package is released
+☐ Test bun when the package is released in beta
+☐ Test deno when the package is released in beta
 
 Answered:
 - Are we using workspaces?
