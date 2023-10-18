@@ -15,10 +15,11 @@ is the same technique used by frameworks like
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Options Definitions](#options-definitions)
 - [API](#api)
-  - [Options](#iron-session-options)
   - [Iron Session Object](#iron-session-object)
   - [Functions](#iron-session-functions)
+  - [Options](#iron-session-options)
   - [Example](#nextjs-example)
 - [FAQ](#faq)
   <!-- - [Contributing](#contributing) -->
@@ -53,16 +54,14 @@ Refer to the [examples](examples).
     - session.destroy(): Set cookie value in the browser cookie storage as an empty value to clear the cookie data
     - Read the session variables by decrypting the encrypted string from the cookie browser storage
 
-## API
-
-### Iron Session Options
+## Options Definitions
 
 Only two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies (~70 years).
-- [`cookieOptions`](https://github.com/jshttp/cookie#cookieserializename-value-options), _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options). Default to:
+- `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:
 
 ```js
 {
@@ -74,14 +73,18 @@ Only two options are required: `password` and `cookieName`. Everything else is a
   path: "/",
   // other options:
   // domain, if you want the cookie to be valid for the whole domain and subdomains, use domain: example.com
-  // encode, there should be no need to use this option, encoding is done by iron-session already
   // expires, there should be no need to use this option, maxAge takes precedence
+  // ...
 }
 ```
 
-#### Type Definitions from iron-session/dist/index.node.d.cts
+The final type definition for `CookieOptions` ends up to be
 
-##### IronSessionOptions
+`'domain' | 'path' | 'secure' | 'sameSite' | 'name' | 'value' | 'expires' | 'httpOnly' | 'maxAge' | 'priority'`
+
+### Type Definitions from iron-session/dist/index.node.d.cts
+
+#### IronSessionOptions
 
 ```ts
 interface IronSessionOptions {
@@ -121,9 +124,20 @@ interface IronSessionOptions {
      *
      * @see https://github.com/jshttp/cookie#options-1
      */
-    cookieOptions?: CookieSerializeOptions;
+    cookieOptions?: CookieOptions;
 }
+```
 
+##### CookieOptions
+
+```ts
+/**
+ * Set-Cookie Attributes do not include `encode`. We omit this from our `cookieOptions` type.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+ * @see https://developer.chrome.com/docs/devtools/application/cookies/
+ */
+type CookieOptions = Omit<CookieSerializeOptions, 'encode'>
 ```
 
 ##### CookieSerializeOptions
@@ -230,6 +244,8 @@ interface CookieSerializeOptions {
 
 ```
 
+## API
+
 ## Iron Session Object
 
 ### getIronSession(req: Request | IncomingMessage, res: Response | ServerResponse<IncomingMessage>, userSessionOptions: IronSessionOptions): Promise<IronSession<T>>
@@ -250,7 +266,7 @@ The `getServerActionIronSession` implementation uses the `cookies()` function fr
 
 ## Iron Session Functions
 
-### session.save()
+### session.save(saveOptions?: OverridableOptions)
 
 Saves the session and sets the cookie header to be sent once the response is sent.
 
@@ -258,7 +274,7 @@ Saves the session and sets the cookie header to be sent once the response is sen
 await session.save()
 ```
 
-### session.destroy()
+### session.destroy(destroyOptions?: OverridableOptions)
 
 Empties the session object and sets the cookie header to be sent once the response is sent. The browser will then set the cookie value as an empty value.
 
@@ -267,6 +283,38 @@ await session.destroy()
 ```
 
 Upon calling either `session.save()` or `session.destroy()` the session values are saved to the browser cookie storage.
+
+## Iron Session Options
+
+### Default Options
+
+```ts
+const defaultOptions: Required<OverridableOptions> = {
+  ttl: fourteenDaysInSeconds,
+  cookieOptions: { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
+}
+```
+
+### User Session Options
+
+You may apply options during the Iron Session object initialization. These options will superseded and override any options set in Default Options. For example: refer to `cookieOptions` in `lib/session.ts` in the below [NextJS Example](#nextjs-example).
+
+### Override Options
+
+You may apply options during the `.save()` or `.destroy()` function calls.  These options will superseded and override any options set in Default Options and User Session Options.
+
+For example:
+
+```ts
+type OverridableOptions = {
+    ttl?: number;
+    cookieOptions?: CookieOptions;
+}
+```
+
+```ts
+await session.save({ cookieOptions: { priority: 'high'} })
+```
 
 ## NextJS Example
 
@@ -279,7 +327,7 @@ import {
 
 import { cookies } from 'next/headers';
 
-getIronSessionexport const sessionOptions: IronSessionOptions = {
+export const sessionOptions: IronSessionOptions = {
   password: 'change-this-this-is-not-a-secure-password',
   cookieName: 'cookieNameInBrowser',
   cookieOptions: {

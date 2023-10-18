@@ -13,13 +13,48 @@ type RequestType = IncomingMessage | Request;
 type ResponseType = Response | ServerResponse;
 
 /**
+ * {@link https://wicg.github.io/cookie-store/#dictdef-cookielistitem CookieListItem}
+ * as specified by W3C.
+ */
+interface CookieListItem
+  extends Pick<
+    CookieSerializeOptions,
+    "domain" | "path" | "sameSite" | "secure"
+  > {
+  /** A string with the name of a cookie. */
+  name: string;
+  /** A string containing the value of the cookie. */
+  value: string;
+  /** A number of milliseconds or Date interface containing the expires of the cookie. */
+  expires?: CookieSerializeOptions["expires"] | number;
+}
+
+/**
+ * Superset of {@link CookieListItem} extending it with
+ * the `httpOnly`, `maxAge` and `priority` properties.
+ */
+type ResponseCookie = CookieListItem &
+  Pick<CookieSerializeOptions, "httpOnly" | "maxAge" | "priority">;
+
+/**
  * The high-level type definition of the .get() and .set() methods
  * of { cookies() } from "next/headers"
  */
 export interface ICookieHandler {
   get: (name: string) => { name: string; value: string } | undefined;
-  set: (name: string, value: string) => void;
+  set: {
+    (name: string, value: string, cookie?: Partial<ResponseCookie>): void;
+    (options: ResponseCookie): void;
+  };
 }
+
+/**
+ * Set-Cookie Attributes do not include `encode`. We omit this from our `cookieOptions` type.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+ * @see https://developer.chrome.com/docs/devtools/application/cookies/
+ */
+type CookieOptions = Omit<CookieSerializeOptions, "encode">;
 
 export interface IronSessionOptions {
   /**
@@ -61,7 +96,7 @@ export interface IronSessionOptions {
    *
    * @see https://github.com/jshttp/cookie#options-1
    */
-  cookieOptions?: CookieSerializeOptions;
+  cookieOptions?: CookieOptions;
 }
 
 type OverridableOptions = Pick<IronSessionOptions, "cookieOptions" | "ttl">;
@@ -146,26 +181,6 @@ function getServerActionCookie(
   return "";
 }
 
-function extractCookieComponents(
-  cookieValue: string,
-): { cookieName: string; cookieData: string } | null {
-  const components = cookieValue.split(";");
-  if (components.length > 0) {
-    const firstPart = components[0];
-    if (typeof firstPart === "string") {
-      const parts = firstPart.trim().split("=");
-      if (
-        parts.length === 2 &&
-        typeof parts[0] === "string" &&
-        typeof parts[1] === "string"
-      ) {
-        return { cookieName: parts[0], cookieData: parts[1] };
-      }
-    }
-  }
-  return null;
-}
-
 function setCookie(res: ResponseType, cookieValue: string): void {
   if ("headers" in res && typeof res.headers.append === "function") {
     res.headers.append("set-cookie", cookieValue);
@@ -179,17 +194,6 @@ function setCookie(res: ResponseType, cookieValue: string): void {
     ...existingSetCookie,
     cookieValue,
   ]);
-}
-
-function setServerActionCookie(
-  cookieValue: string,
-  cookieHandler: ICookieHandler,
-): void {
-  const extracted = extractCookieComponents(cookieValue);
-  if (extracted !== null) {
-    const { cookieName, cookieData } = extracted;
-    cookieHandler.set(cookieName, cookieData);
-  }
 }
 
 export function createSealData(_crypto: Crypto = globalThis.crypto) {
@@ -462,19 +466,23 @@ export function createGetServerActionIronSession(
             password: passwordsMap,
             ttl: mergedOptions.ttl,
           });
-          const cookieValue = serialize(
+
+          const cookieLength =
+            mergedOptions.cookieName.length +
+            seal.length +
+            JSON.stringify(mergedOptions.cookieOptions).length;
+
+          if (cookieLength > 4096) {
+            throw new Error(
+              `iron-session: Cookie length is too big (${cookieLength} bytes), browsers will refuse it. Try to remove some data.`,
+            );
+          }
+
+          cookieHandler.set(
             mergedOptions.cookieName,
             seal,
             mergedOptions.cookieOptions,
           );
-
-          if (cookieValue.length > 4096) {
-            throw new Error(
-              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
-            );
-          }
-
-          setServerActionCookie(cookieValue, cookieHandler);
         },
       },
 
@@ -489,12 +497,9 @@ export function createGetServerActionIronSession(
             userSessionOptions,
             destroyOptions,
           );
-          const cookieValue = serialize(mergedOptions.cookieName, "", {
-            ...mergedOptions.cookieOptions,
-            maxAge: 0,
-          });
+          const cookieOptions = { ...mergedOptions.cookieOptions, maxAge: 0 };
 
-          setServerActionCookie(cookieValue, cookieHandler);
+          cookieHandler.set(mergedOptions.cookieName, "", cookieOptions);
         },
       },
     });
