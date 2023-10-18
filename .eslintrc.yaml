@@ -12,16 +12,14 @@ extends:
   - plugin:prettier/recommended
 ignorePatterns:
   - dist
-  - examples
-  - '*.test.ts'
-parser: '@typescript-eslint/parser'
+parser: "@typescript-eslint/parser"
 parserOptions:
   ecmaVersion: 2019
   project:
     - tsconfig.json
   sourceType: module
 plugins:
-  - '@typescript-eslint'
+  - "@typescript-eslint"
   - security
 settings:
   import/resolver:
@@ -34,5 +32,5 @@ rules:
   import/prefer-default-export: off
   security/detect-object-injection: off
 
-  '@typescript-eslint/no-type-alias': off
-  '@typescript-eslint/prefer-readonly-parameter-types': off
+  "@typescript-eslint/no-type-alias": off
+  "@typescript-eslint/prefer-readonly-parameter-types": off

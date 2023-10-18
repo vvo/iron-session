@@ -1,21 +1,21 @@
-import { getIronSession, createResponse } from 'iron-session'
+import { getIronSession, createResponse } from "iron-session";
 
 export interface Data {
   user?: {
-    id: number
-    name: string
-  }
+    id: number;
+    name: string;
+  };
 }
 
-export const getSession = (req: Request, res: Response) => {
+export const getSession = async (req: Request, res: Response) => {
   const session = getIronSession<Data>(req, res, {
-    password: 'ThisIsNotASecurePasswordPleaseChangeIt',
-    cookieName: 'session',
+    password: "ThisIsNotASecurePasswordPleaseChangeIt",
+    cookieName: "session",
     cookieOptions: {
-      secure: process.env['NODE_ENV'] === 'production',
+      secure: process.env.NODE_ENV === "production",
     },
-  })
-  return session
-}
+  });
+  return session;
+};
 
-export { createResponse }
+export { createResponse };

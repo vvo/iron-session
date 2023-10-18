@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
   "name": "iron-session",
   "version": "8.0.0-alpha.0",
   "description": "A runtime-agnostic library for stateless session management through secure, signed, and encrypted cookies.",
@@ -27,22 +26,19 @@
   "type": "module",
   "exports": {
     "import": {
-      "types": "./dist/index.d.ts",
-      "deno": "./dist/index.js",
-      "browser": "./dist/index.js",
-      "default": "./dist/index.node.js"
+      "node": "./dist/index.node.js",
+      "default": "./dist/index.js"
     },
     "require": {
-      "types": "./dist/index.node.d.cts",
-      "default": "./dist/index.node.cjs"
+      "node": "./dist/index.node.cjs",
+      "default": "./dist/index.cjs"
     }
   },
-  "main": "./dist/index.node.cjs",
   "files": [
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm i && tsup && cp dist/index.d.ts dist/index.node.d.cts",
+    "build": "tsup",
     "bun:dev": "pnpm --filter=bun-example dev",
     "bun:start": "pnpm --filter=bun-example start",
     "deno:dev": "pnpm --filter=deno-example dev",
@@ -50,24 +46,27 @@
     "koa:dev": "pnpm --filter=koa-example dev",
     "koa:start": "pnpm --filter=koa-example start",
     "lagon:dev": "pnpm --filter=lagon-example dev",
-    "lint": "pnpm eslint . && pnpm build && pnpm lint:only",
-    "lint:only": "publint",
-    "release": "pnpm lint && release-it",
+    "lint": "pnpm eslint . && pnpm build && publint",
+    "prepare": "pnpm build",
+    "release": "pnpm lint",
     "test": "c8 -r text -r lcov node --loader tsx --test src/*.test.ts",
     "test:watch": "node --loader tsx --test --watch src/*.test.ts"
   },
   "prettier": {
+    "plugins": [
+      "prettier-plugin-packagejson"
+    ],
     "trailingComma": "all"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^7.0.2",
     "@types/cookie": "^0.5.2",
-    "@types/node": "^20.8.2",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
+    "@types/node": "^20.8.4",
+    "@typescript-eslint/eslint-plugin": "^6.7.5",
+    "@typescript-eslint/parser": "^6.7.5",
     "c8": "^8.0.1",
     "cookie": "^0.5.0",
-    "eslint": "^8.50.0",
+    "eslint": "^8.51.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-prettier": "^9.0.0",
@@ -79,13 +78,13 @@
     "iron-webcrypto": "^0.10.1",
     "prettier": "^3.0.3",
     "prettier-plugin-packagejson": "^2.4.6",
-    "publint": "^0.2.3",
+    "publint": "^0.2.4",
     "release-it": "^16.2.1",
     "tsup": "^7.2.0",
     "tsx": "^3.13.0",
     "typescript": "^5.2.2"
   },
-  "packageManager": "pnpm@8.5.1",
+  "packageManager": "pnpm@8.9.0",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

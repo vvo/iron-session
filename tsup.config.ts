@@ -4,9 +4,17 @@ export default defineConfig([
   {
     entry: ["src/index.ts"],
     clean: true,
+    // this setting inlines the types from dependencies we use, like `cookie`
     dts: { resolve: true },
-    format: ["esm"],
+    format: ["esm", "cjs"],
     treeshake: true,
+    sourcemap: true,
   },
-  { entry: ["src/index.node.ts"], format: ["esm", "cjs"], treeshake: true },
+  {
+    entry: ["src/index.node.ts"],
+    clean: true,
+    format: ["esm", "cjs"],
+    treeshake: true,
+    sourcemap: true,
+  },
 ]);
