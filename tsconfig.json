@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "baseUrl": "src",
     "rootDir": ".",
-    "checkJs": true,
     "declaration": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
@@ -18,7 +16,6 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -28,5 +25,5 @@
     "target": "esnext",
     "verbatimModuleSyntax": true
   },
-  "exclude": ["dist"]
+  "exclude": ["dist", "examples/next", "examples/bun", "examples/deno"]
 }

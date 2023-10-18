@@ -13,13 +13,15 @@ export interface Data {
 }
 
 export const getSession = async (req: Request, res: Response) => {
-  return getIronSession<Data>(req, res, {
+  const session = await getIronSession<Data>(req, res, {
     password: "ThisIsNotASecurePasswordPleaseChangeIt",
     cookieName: "session",
     cookieOptions: {
       secure: !!Deno.env.get("DENO_DEPLOYMENT_ID"),
     },
   });
+
+  return session;
 };
 
 export { createResponse };

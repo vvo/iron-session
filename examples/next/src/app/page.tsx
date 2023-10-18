@@ -1,34 +1,34 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import styles from './page.module.css'
-import { useState } from 'react'
+import Image from "next/image";
+import styles from "./page.module.css";
+import { useState } from "react";
 import {
   submitCookieToStorageServerAction,
   readCookieFromStorageServerAction,
-} from './serverActions'
+} from "./serverActions";
 import {
   submitCookieToStorageRouteHandler,
-  readCookieFromStorageRouteHandler
-} from './clientActions'
+  readCookieFromStorageRouteHandler,
+} from "./clientActions";
 
 export default function Home() {
-  const [currentCookie, setCurrentCookie] = useState('')
-  const [readCookieFromStorage, setReadCookieFromStorage] = useState('')
+  const [currentCookie, setCurrentCookie] = useState("");
+  const [readCookieFromStorage, setReadCookieFromStorage] = useState("");
   const handleSubmitCookieViaServerAction = async () => {
-    submitCookieToStorageServerAction(currentCookie)
-  }
+    submitCookieToStorageServerAction(currentCookie);
+  };
   const handleReadCookieViaServerAction = async () => {
-    const cookieFromStorage = await readCookieFromStorageServerAction()
-    setReadCookieFromStorage(cookieFromStorage)
-  }
+    const cookieFromStorage = await readCookieFromStorageServerAction();
+    setReadCookieFromStorage(cookieFromStorage);
+  };
   const handleSubmitCookieViaRouteHandler = async () => {
-    submitCookieToStorageRouteHandler(currentCookie)
-  }
+    submitCookieToStorageRouteHandler(currentCookie);
+  };
   const handleReadCookieViaRouteHandler = async () => {
-    const cookieFromStorage = await readCookieFromStorageRouteHandler()
-    setReadCookieFromStorage(cookieFromStorage)
-  }
+    const cookieFromStorage = await readCookieFromStorageRouteHandler();
+    setReadCookieFromStorage(cookieFromStorage);
+  };
   return (
     <main className={styles.main}>
       <div className={styles.description}>
@@ -49,7 +49,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -80,19 +80,19 @@ export default function Home() {
           <h2>
             Set Cookie via Server Action <span>-&gt;</span>
           </h2>
-          <p>Set Current Cookie:&nbsp;
+          <p>
+            Set Current Cookie:&nbsp;
             <b>{currentCookie || "Not Set Yet"} </b>
-            to storage</p>
+            to storage
+          </p>
         </div>
 
-        <div
-          className={styles.card}
-          onClick={handleReadCookieViaServerAction}
-        >
+        <div className={styles.card} onClick={handleReadCookieViaServerAction}>
           <h2>
             Read Cookie via Server Action <span>-&gt;</span>
           </h2>
-          <p>Read Cookie From Storage:&nbsp;
+          <p>
+            Read Cookie From Storage:&nbsp;
             <b>{readCookieFromStorage || "Not Read Yet"} </b>
           </p>
         </div>
@@ -103,23 +103,23 @@ export default function Home() {
           <h2>
             Set Cookie via API Route Handler <span>-&gt;</span>
           </h2>
-          <p>Set Current Cookie:&nbsp;
+          <p>
+            Set Current Cookie:&nbsp;
             <b>{currentCookie || "Not Set Yet"} </b>
-            to storage</p>
+            to storage
+          </p>
         </div>
 
-        <div
-          className={styles.card}
-          onClick={handleReadCookieViaRouteHandler}
-        >
+        <div className={styles.card} onClick={handleReadCookieViaRouteHandler}>
           <h2>
             Read Cookie via API Route Handler <span>-&gt;</span>
           </h2>
-          <p>Read Cookie From Storage:&nbsp;
+          <p>
+            Read Cookie From Storage:&nbsp;
             <b>{readCookieFromStorage || "Not Read Yet"} </b>
           </p>
         </div>
       </div>
     </main>
-  )
+  );
 }

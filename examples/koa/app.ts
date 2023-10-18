@@ -1,4 +1,4 @@
-import Koa from "koa";
+import Koa, { HttpError } from "koa";
 import Router from "@koa/router";
 import { getSession } from "./lib/session.js";
 
@@ -13,10 +13,14 @@ app
   .use(async (ctx, next) => {
     try {
       await next();
-    } catch (e: any) {
-      console.error(e);
-      ctx.status = e.statusCode ?? e.status ?? 500;
-      ctx.body = { message: e.message };
+    } catch (error) {
+      if (error instanceof HttpError) {
+        // eslint-disable-next-line no-console
+        ctx.status = error.statusCode;
+        ctx.body = { message: error.message };
+      }
+
+      throw error;
     }
   })
   .use(async (ctx, next) => {

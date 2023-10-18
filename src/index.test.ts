@@ -1,5 +1,7 @@
-import { deepEqual, doesNotMatch, match, rejects } from "node:assert";
+import { deepEqual, doesNotMatch, equal, match, rejects } from "node:assert";
 import { mock, test } from "node:test";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type { IronSessionOptions } from "iron-session";
 import {
   createResponse,
   getIronSession,
@@ -14,64 +16,82 @@ interface Data {
   user?: { id: number; meta?: string };
 }
 
-const getSession = async (req: any, res: any, options: any) =>
-  getIronSession<Data>(req, res, options);
+const getSession = async (
+  req: IncomingMessage | Request,
+  res: Response | ServerResponse,
+  options: IronSessionOptions,
+) => getIronSession<Data>(req, res, options);
 
-test("should throw if the request parameter is missing", async () => {
-  // @ts-expect-error
+await test("should throw if the request parameter is missing", async () => {
+  // @ts-expect-error we're verifying JavaScript runtime checks here (DX)
   await rejects(getSession(), /Missing request parameter/);
 });
 
-test("should throw if the response parameter is missing", async () => {
-  // @ts-expect-error
+await test("should throw if the response parameter is missing", async () => {
+  // @ts-expect-error we're verifying JavaScript runtime checks here (DX)
   await rejects(getSession({}), /Missing response parameter/);
 });
 
-test("should throw if the options parameter is missing", async () => {
-  // @ts-expect-error
+await test("should throw if the options parameter is missing", async () => {
+  // @ts-expect-error we're verifying JavaScript runtime checks here (DX)
   await rejects(getSession({}, {}), /Missing options/);
 });
 
-test("should throw if the cookie name is missing in options", async () => {
-  await rejects(getSession({}, {}, {}), /Missing cookie name/);
+await test("should throw if the cookie name is missing in options", async () => {
+  await rejects(
+    getSession({} as Request, {} as Response, {} as IronSessionOptions),
+    /Missing cookie name/,
+  );
 });
 
-test("should throw if password is missing in options", async () => {
-  await rejects(getSession({}, {}, { cookieName }), /Missing password/);
-});
-
-test("should throw if password is less than 32 characters", async () => {
+await test("should throw if password is missing in options", async () => {
   await rejects(
     getSession(
-      {},
-      {},
-      { cookieName, password: "123456789012345678901234567890" },
+      {} as Request,
+      {} as Response,
+      { cookieName } as IronSessionOptions,
     ),
+    /Missing password/,
+  );
+});
+
+await test("should throw if password is less than 32 characters", async () => {
+  await rejects(
+    getSession({} as Request, {} as Response, {
+      cookieName,
+      password: "123456789012345678901234567890",
+    }),
     /Password must be at least 32 characters long/,
   );
 });
 
-test("should return blank session if no cookie is set", async () => {
-  const session = await getSession(
-    { headers: {} },
-    {},
-    { cookieName, password },
-  );
-  deepEqual(session, {});
-});
-
-test("should set a cookie in the response object on save", async () => {
-  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
-
-  const session = await getSession({ headers: {} }, res, {
+await test("should return blank session if no cookie is set", async () => {
+  const session = await getSession({ headers: {} } as Request, {} as Response, {
     cookieName,
     password,
   });
+  deepEqual(session, {});
+});
+
+await test("should set a cookie in the response object on save", async () => {
+  const res = {
+    getHeader: mock.fn(),
+    setHeader: mock.fn(),
+  };
+
+  const session = await getSession(
+    { headers: {} } as Request,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
-  const [name, value] = res.setHeader.mock.calls[0]?.arguments || [];
-  deepEqual(name, "set-cookie");
+  const [name, value] = res.setHeader.mock.calls[0]?.arguments ?? [];
+  equal(name, "set-cookie");
   match(
     value[0],
     /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/,
@@ -80,44 +100,60 @@ test("should set a cookie in the response object on save", async () => {
   mock.reset();
 });
 
-test("should allow deleting then saving session data", async () => {
+await test("should allow deleting then saving session data", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
-  let session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  let session = await getSession(
+    { headers: {} } as Request,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
   let cookie = res.setHeader.mock.calls[0]?.arguments[1][0].split(";")[0];
-  session = await getSession({ headers: { cookie } }, res, {
-    cookieName,
-    password,
-  });
+  session = await getSession(
+    { headers: { cookie } } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   deepEqual(session, { user: { id: 1 } });
 
   delete session.user;
   await session.save();
 
   cookie = res.setHeader.mock.calls[1]?.arguments[1][0].split(";")[0];
-  session = await getSession({ headers: { cookie } }, res, {
-    cookieName,
-    password,
-  });
+  session = await getSession(
+    { headers: { cookie } } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   deepEqual(session, {});
 
   mock.reset();
 });
 
-test("should set max-age to a large number if ttl is 0", async () => {
+await test("should set max-age to a large number if ttl is 0", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-    ttl: 0,
-  });
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+      ttl: 0,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -127,11 +163,15 @@ test("should set max-age to a large number if ttl is 0", async () => {
   mock.reset();
 });
 
-test("should respect provided max-age in cookie options", async () => {
+await test("should respect provided max-age in cookie options", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
   const options = { cookieName, password, cookieOptions: { maxAge: 60 } };
 
-  const session = await getSession({ headers: {} }, res, options);
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    options,
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -141,7 +181,7 @@ test("should respect provided max-age in cookie options", async () => {
   mock.reset();
 });
 
-test("should not set max-age for session cookies", async () => {
+await test("should not set max-age for session cookies", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
   const options = {
     cookieName,
@@ -149,7 +189,11 @@ test("should not set max-age for session cookies", async () => {
     cookieOptions: { maxAge: undefined },
   };
 
-  const session = await getSession({ headers: {} }, res, options);
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    options,
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -159,13 +203,17 @@ test("should not set max-age for session cookies", async () => {
   mock.reset();
 });
 
-test("should expire the cookie on destroying the session", async () => {
+await test("should expire the cookie on destroying the session", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -182,32 +230,44 @@ test("should expire the cookie on destroying the session", async () => {
   mock.reset();
 });
 
-test("should reset the session if the seal is expired", async () => {
+await test("should reset the session if the seal is expired", async () => {
   const real = Date.now;
   Date.now = () => 0;
 
   const seal = await sealData({ user: { id: 1 } }, { password, ttl: 60 });
-  const req = { headers: { cookie: `${cookieName}=${seal}` } };
+  const req = {
+    headers: { cookie: `${cookieName}=${seal}` },
+  } as IncomingMessage;
 
-  let session = await getSession(req, {}, { cookieName, password });
+  let session = await getSession(req, {} as unknown as ServerResponse, {
+    cookieName,
+    password,
+  });
   deepEqual(session, { user: { id: 1 } });
 
   Date.now = () => 120_000; // = ttl + 60s skew
 
-  session = await getSession(req, {}, { cookieName, password });
+  session = await getSession(req, {} as unknown as ServerResponse, {
+    cookieName,
+    password,
+  });
   deepEqual(session, {});
 
   Date.now = real;
 });
 
-test("should refresh the session (ttl, max-age) on save", async () => {
+await test("should refresh the session (ttl, max-age) on save", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
   const options = { cookieName, password, ttl: 61 };
 
   const real = Date.now;
   Date.now = () => 0;
 
-  let session = await getSession({ headers: {} }, res, options);
+  let session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    options,
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -217,8 +277,8 @@ test("should refresh the session (ttl, max-age) on save", async () => {
   Date.now = () => 120_000; // < ttl + 60s skew
 
   session = await getSession(
-    { headers: { cookie: cookie.split(";")[0] } },
-    res,
+    { headers: { cookie: cookie.split(";")[0] } } as IncomingMessage,
+    res as unknown as ServerResponse,
     options,
   );
   deepEqual(session, { user: { id: 1 } });
@@ -231,8 +291,8 @@ test("should refresh the session (ttl, max-age) on save", async () => {
   Date.now = () => 240_000; // < earlier time + ttl + 60s skew
 
   session = await getSession(
-    { headers: { cookie: cookie.split(";")[0] } },
-    res,
+    { headers: { cookie: cookie.split(";")[0] } } as IncomingMessage,
+    res as unknown as ServerResponse,
     options,
   );
   deepEqual(session, { user: { id: 1 } }); // session is still valid
@@ -242,7 +302,7 @@ test("should refresh the session (ttl, max-age) on save", async () => {
   mock.reset();
 });
 
-test("should reset the session if password is changed", async () => {
+await test("should reset the session if password is changed", async () => {
   const firstPassword = password;
   const secondPassword = "12345678901234567890123456789012";
 
@@ -250,14 +310,14 @@ test("should reset the session if password is changed", async () => {
   const req = { headers: { cookie: `${cookieName}=${seal}` } };
 
   const session = await getSession(
-    req,
-    {},
+    req as IncomingMessage,
+    {} as unknown as ServerResponse,
     { cookieName, password: secondPassword },
   );
   deepEqual(session, {});
 });
 
-test("should decrypt cookie generated from older password", async () => {
+await test("should decrypt cookie generated from older password", async () => {
   const firstPassword = password;
   const secondPassword = "12345678901234567890123456789012";
 
@@ -266,30 +326,34 @@ test("should decrypt cookie generated from older password", async () => {
 
   const passwords = { 2: secondPassword, 1: firstPassword }; // rotation
   const session = await getSession(
-    req,
-    {},
+    req as IncomingMessage,
+    {} as unknown as ServerResponse,
     { cookieName, password: passwords },
   );
   deepEqual(session, { user: { id: 1 } });
 });
 
-test("should throw if the cookie length is too big", async () => {
+await test("should throw if the cookie length is too big", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1, meta: "0".repeat(3000) };
   await rejects(session.save(), /Cookie length is too big/);
 
   mock.reset();
 });
 
-test("should throw if trying to save after headers are sent", async () => {
+await test("should throw if trying to save after headers are sent", async () => {
   const session = await getSession(
-    { headers: {} },
-    { headersSent: true },
+    { headers: {} } as IncomingMessage,
+    { headersSent: true } as unknown as Response,
     { cookieName, password },
   );
   session.user = { id: 1 };
@@ -300,17 +364,21 @@ test("should throw if trying to save after headers are sent", async () => {
   );
 });
 
-test("should keep previously set cookie - single", async () => {
+await test("should keep previously set cookie - single", async () => {
   const existingCookie = "existing=cookie";
   const res = {
     getHeader: mock.fn(() => existingCookie),
     setHeader: mock.fn(),
   };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as Response,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -330,17 +398,21 @@ test("should keep previously set cookie - single", async () => {
   mock.reset();
 });
 
-test("should keep previously set cookies - multiple", async () => {
+await test("should keep previously set cookies - multiple", async () => {
   const existingCookies = ["existing=cookie", "existing2=cookie2"];
   const res = {
     getHeader: mock.fn(() => existingCookies),
     setHeader: mock.fn(),
   };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  const session = await getSession(
+    { headers: {} } as Request,
+    res as unknown as Response,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
   await session.save();
 
@@ -362,43 +434,50 @@ test("should keep previously set cookies - multiple", async () => {
   mock.reset();
 });
 
-test("should be backwards compatible with older cookie format", async () => {
+await test("should be backwards compatible with older cookie format", async () => {
   // this seal is in the old next-iron-session format (generated with ttl: 0)
   const cookie = `${cookieName}=Fe26.2*1*1e2bacee1edffaeb4a9ba4a07dc36c2c60d20415a60ac1b901033af1f107ead5*LAC9Fn3BJ9ifKMhVL3pP5w*JHhcByIzk4ThLt9rUW-fDMrOwUT7htHy1uyqeOTIqrVwDJ0Bz7TOAwIz_Cos-ug3**7dfa11868bbcc4f7e118342c0280ff49ba4a7cc84c70395bbc3d821a5f460174*6a8FkHxdg322jyym6PwJf3owz7pd6nq5ZIzyLHGVC0c`;
 
   const session = await getSession(
-    { headers: { cookie } },
-    {},
+    { headers: { cookie } } as IncomingMessage,
+    {} as Response,
     { cookieName, password },
   );
   deepEqual(session, { user: { id: 77 } });
 });
 
-test("should prevent reassignment of save/destroy functions", async () => {
+await test("should prevent reassignment of save/destroy functions", async () => {
   const session = await getSession(
-    { headers: {} },
-    {},
+    { headers: {} } as IncomingMessage,
+    {} as Response,
     { cookieName, password },
   );
 
   await rejects(async () => {
-    // @ts-expect-error
+    // @ts-expect-error Runtime check
     session.save = () => {};
   }, /Cannot assign to read only property 'save' of object '#<Object>'/);
 
   await rejects(async () => {
-    // @ts-expect-error
+    // @ts-expect-error Runtime check
     session.destroy = () => {};
   }, /Cannot assign to read only property 'destroy' of object '#<Object>'/);
 });
 
-test("should allow specifying options during save/destroy", async () => {
-  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
+await test("should allow specifying options during save/destroy", async () => {
+  const res = {
+    getHeader: mock.fn(),
+    setHeader: mock.fn(),
+  };
 
-  const session = await getSession({ headers: {} }, res, {
-    cookieName,
-    password,
-  });
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
   session.user = { id: 1 };
 
   await session.save({ ttl: 61 });
@@ -410,7 +489,7 @@ test("should allow specifying options during save/destroy", async () => {
   mock.reset();
 });
 
-test("should work with standard web Request/Response APIs", async () => {
+await test("should work with standard web Request/Response APIs", async () => {
   const req = new Request("https://example.com");
   const res = new Response("Hello, world!");
 
@@ -433,7 +512,7 @@ test("should work with standard web Request/Response APIs", async () => {
 
 // mergeHeaders (autogenerated)
 
-test("should properly merge two or more sets of headers", async () => {
+await test("should properly merge two or more sets of headers", async () => {
   const headers1 = new Headers({ "Content-Type": "application/json" });
   const headers2 = new Headers({ Authorization: "Bearer token123" });
 
@@ -444,7 +523,7 @@ test("should properly merge two or more sets of headers", async () => {
   deepEqual(mergedHeaders.get("Authorization"), "Bearer token123");
 });
 
-test("should ignore undefined headers while merging", async () => {
+await test("should ignore undefined headers while merging", async () => {
   const headers1 = new Headers({ "Content-Type": "application/json" });
 
   const mergedHeaders = mergeHeaders(headers1, undefined);
@@ -456,7 +535,7 @@ test("should ignore undefined headers while merging", async () => {
 
 const originalResponse = new Response();
 
-test("should create a new response with merged headers", () => {
+await test("should create a new response with merged headers", () => {
   const bodyString = "Hello, world!";
   const headers = new Headers({ "Content-Type": "text/plain" });
 
@@ -467,7 +546,7 @@ test("should create a new response with merged headers", () => {
   deepEqual(response.headers.get("Content-Type"), "text/plain");
 });
 
-test("should use original response status and statusText by default", () => {
+await test("should use original response status and statusText by default", () => {
   const bodyString = "Hello, world!";
 
   const response = createResponse(originalResponse, bodyString);
@@ -476,7 +555,7 @@ test("should use original response status and statusText by default", () => {
   deepEqual(response.statusText, originalResponse.statusText);
 });
 
-test("should override original response status and statusText when specified", () => {
+await test("should override original response status and statusText when specified", () => {
   const bodyString = "Hello, world!";
   const status = 404;
   const statusText = "Not Found";
