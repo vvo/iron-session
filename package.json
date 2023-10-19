@@ -38,7 +38,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsc --noEmit && tsup",
+    "build": "tsup",
     "bun:dev": "pnpm --filter=bun-example dev",
     "bun:start": "pnpm --filter=bun-example start",
     "deno:dev": "pnpm --filter=deno-example dev",
@@ -47,7 +47,7 @@
     "koa:start": "pnpm --filter=koa-example start",
     "lagon:dev": "pnpm --filter=lagon-example dev",
     "lint": "tsc --noEmit && tsc --noEmit -p examples/next/tsconfig.json && tsc --noEmit -p examples/bun/tsconfig.json && pnpm eslint . && deno lint examples/deno && publint",
-    "prepare": "pnpm build",
+    "prepare": "pnpm build && tsc --noEmit",
     "release": "pnpm lint",
     "test": "c8 -r text -r lcov node --loader tsx --test src/*.test.ts && pnpm build",
     "test:watch": "node --loader tsx --test --watch src/*.test.ts"
