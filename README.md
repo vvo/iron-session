@@ -63,6 +63,39 @@ Session duration is 14 days by default, check the API docs for more info.
 
 ⚠️ Always store passwords in encrypted environment variables on your platform. Vercel does this automatically.
 
+**Overview Sequence:**
+
+```mermaid
+sequenceDiagram
+    Note over Browser,Next.js Server: Session info stored as cookies with `session.save()`
+
+    Browser->>+Next.js Server: POST /api/login
+    Next.js Server->>Next.js Server: session.user = { ... }
+    Next.js Server->>Next.js Server: session.save()
+    Next.js Server-->>-Browser: Response with cookies
+
+    Note over Browser,Next.js Server: Subsequent requests include session info as cookies.
+
+    Browser->>+Next.js Server: GET /profile-ssr (SSR Page)
+    Next.js Server->>Next.js Server: Retrieve User Info from `session.user`
+    Next.js Server->>Next.js Server: Render Component with User Info
+    Next.js Server-->>-Browser: Rendered HTML with Logged-in User Info
+    Browser->>Browser: (SSR Page) Show Rendered HTML
+
+    Note over Browser,Next.js Server: In SG Page, retrieve User from session using API route.
+
+    Browser->>+Next.js Server: GET /api/user
+    Next.js Server->>Next.js Server: Retrieve User Info from `session.user`
+    Next.js Server-->>-Browser: User info
+    Browser->>Browser: (SG Page) Render Component with User Info
+
+    Note over Browser,Next.js Server: Session info discarded with `session.destroy()`
+
+    Browser->>+Next.js Server: POST /api/logout
+    Next.js Server->>Next.js Server: session.destroy()
+    Next.js Server-->>-Browser: Response with cookie (session info is empty and expired)
+```
+
 **Login API Route:**
 
 ```ts
