@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "8.0.0-beta.0",
+  "version": "8.0.0-beta.4",
   "description": "A runtime-agnostic library for stateless session management through secure, signed, and encrypted cookies.",
   "keywords": [
     "session",
@@ -25,15 +25,10 @@
   "sideEffects": false,
   "type": "module",
   "exports": {
-    "import": {
-      "node": "./dist/index.node.js",
-      "default": "./dist/index.js"
-    },
-    "require": {
-      "node": "./dist/index.node.cjs",
-      "default": "./dist/index.cjs"
-    }
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
   },
+  "main": "./dist/index.cjs",
   "files": [
     "dist/*"
   ],

@@ -196,7 +196,10 @@ function setCookie(res: ResponseType, cookieValue: string): void {
   ]);
 }
 
-export function createSealData(_crypto: Crypto = globalThis.crypto) {
+export function createSealData(
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  _crypto: Crypto = globalThis.crypto ?? require("node:crypto").webcrypto,
+) {
   return async function sealData(
     data: unknown,
     {
@@ -224,7 +227,10 @@ export function createSealData(_crypto: Crypto = globalThis.crypto) {
   };
 }
 
-export function createUnsealData(_crypto: Crypto = globalThis.crypto) {
+export function createUnsealData(
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  _crypto: Crypto = (globalThis.crypto ??= require("node:crypto").webcrypto),
+) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return async function unsealData<T extends {} = {}>(
     seal: string,
