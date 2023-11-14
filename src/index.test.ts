@@ -7,7 +7,7 @@ import {
   getIronSession,
   mergeHeaders,
   sealData,
-} from "./index.node.js";
+} from "./index.js";
 
 const password = "Gbm49ATjnqnkCCCdhV4uDBhbfnPqsCW0";
 const cookieName = "test";
