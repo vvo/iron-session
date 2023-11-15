@@ -1,9 +1,11 @@
 {
   "name": "iron-session",
   "version": "8.0.0-beta.5",
-  "description": "A runtime-agnostic library for stateless session management through secure, signed, and encrypted cookies.",
+  "description": "Secure, stateless, and cookie-based session library for JavaScript",
   "keywords": [
     "session",
+    "secure",
+    "stateless",
     "cookie",
     "encryption",
     "security",
@@ -38,6 +40,7 @@
     "bun:start": "pnpm --filter=bun-example start",
     "deno:dev": "pnpm --filter=deno-example dev",
     "deno:start": "pnpm --filter=deno-example start",
+    "dev": "pnpm build && concurrently \"pnpm build --watch\" \"pnpm --filter=next-example dev\" ",
     "koa:dev": "pnpm --filter=koa-example dev",
     "koa:start": "pnpm --filter=koa-example start",
     "lagon:dev": "pnpm --filter=lagon-example dev",
@@ -65,6 +68,7 @@
     "@typescript-eslint/eslint-plugin": "6.11.0",
     "@typescript-eslint/parser": "6.11.0",
     "c8": "8.0.1",
+    "concurrently": "8.2.2",
     "eslint": "8.53.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-import-resolver-node": "0.3.9",

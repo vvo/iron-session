@@ -1,3 +1,14 @@
+Example:
+  - Always link to code
+  - Start with raw website, bad design, then add design gradually
+  - app router example
+  - app router + swr
+  - server action (+ swr?)
+  - middleware example + show code. usecase?
+  - pages example + show code. usecase?
+  - getServerSideProps (legacy)
+  - read Next.js doc to find cases
+
 To answer:
 - Why are iron-webcrypto and others parts of dev dependencies, are we building even for node?
 - Are we testing in different Node.js versions? Next.js versions?
