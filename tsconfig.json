@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
     "jsx": "preserve",
-    "lib": ["esnext", "dom"],
+    "lib": ["ES2022", "dom"],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "noFallthroughCasesInSwitch": true,
@@ -22,7 +22,8 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext",
+    // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-18
+    "target": "ES2022",
     "verbatimModuleSyntax": true
   },
   "exclude": ["dist", "examples/next", "examples/bun", "examples/deno"]
