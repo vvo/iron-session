@@ -4,17 +4,19 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev --experimental-https",
     "lint": "next lint",
     "start": "next start"
   },
   "dependencies": {
+    "iron-session": "workspace:*",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@tailwindcss/forms": "^0.5.7",
+    "@types/node": "^18",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

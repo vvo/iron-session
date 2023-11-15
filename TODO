@@ -1,3 +1,8 @@
+Examples:
+  - app router + client component + route handlers + redirects + fetch
+
+  - app router + client component + route handlers + swr
+
 Example:
   - Always link to code
   - Start with raw website, bad design, then add design gradually
@@ -8,6 +13,7 @@ Example:
   - pages example + show code. usecase?
   - getServerSideProps (legacy)
   - read Next.js doc to find cases
+  - disable JavaScript, what happens?
 
 To answer:
 - Why are iron-webcrypto and others parts of dev dependencies, are we building even for node?
