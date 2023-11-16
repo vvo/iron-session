@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { getServerActionIronSession } from "iron-session";
-import { defaultSession, ironSessionOptions } from "../config";
+import { defaultSession, sessionOptions } from "../lib";
 import { SessionData } from "@/app/types";
 import { redirect } from "next/navigation";
+import { sleep } from "@/app/app-router/lib";
 
-// /app-router/login
+// /app-router-redirect/login
 export async function POST(
   request: NextRequest,
   { params }: { params: { action: string } },
@@ -15,24 +16,29 @@ export async function POST(
   }
 
   const session = await getServerActionIronSession<SessionData>(
-    ironSessionOptions,
+    sessionOptions,
     cookies(),
   );
 
   const formData = await request.formData();
 
   session.isLoggedIn = true;
-  session.username =
-    (formData.get("username") as string) ?? "No username provided";
+  session.username = (formData.get("username") as string) ?? "No username";
   await session.save();
+
+  // simulate looking up the user in db
+  await sleep(1000);
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
   // not using redirect() yet: https://github.com/vercel/next.js/issues/51592#issuecomment-1810212676
-  return Response.redirect(`${request.nextUrl.origin}/app-router`, 303);
+  return Response.redirect(
+    `${request.nextUrl.origin}/app-router-redirect`,
+    303,
+  );
 }
 
-// /app-router/session
-// /app-router/logout
+// /app-router-redirect/session
+// /app-router-redirect/logout
 export async function GET(
   request: NextRequest,
   { params }: { params: { action: string } },
@@ -42,14 +48,14 @@ export async function GET(
   }
 
   const session = await getServerActionIronSession<SessionData>(
-    ironSessionOptions,
+    sessionOptions,
     cookies(),
   );
 
-  // /app-router/logout
+  // /app-router-redirect/logout
   if (params.action === "logout") {
     await session.destroy();
-    return redirect("/app-router");
+    return redirect("/app-router-redirect");
   }
 
   if (session.isLoggedIn !== true) {

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -12,7 +11,19 @@ export default function Home() {
             href="/app-router"
           >
             App Router
-          </Link>
+          </Link>{" "}
+          <span className="text-gray-500">(server action)</span>
+        </li>
+        <li>
+          <Link
+            className="text-indigo-500 underline hover:no-underline"
+            href="/app-router-redirect"
+          >
+            App Router
+          </Link>{" "}
+          <span className="text-gray-500">
+            (client component | route handler | redirect | fetch)
+          </span>
         </li>
       </ul>
     </main>

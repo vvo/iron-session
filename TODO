@@ -1,7 +1,14 @@
 Examples:
-  - app router + client component + route handlers + redirects + fetch
-
-  - app router + client component + route handlers + swr
+  ✔ app router + client component + route handlers + redirects + fetch @done(23-11-16 00:05)
+  ☐ app router + server component + server action (the good stuff from lee, first example)
+  ☐ pages + redirects + fetch
+  ☐ pages + swr
+  ☐ pages + getServerSideProps
+  ☐ app router + client component + route handlers + swr (no redirect)
+  ☐ edit in codesandbox link
+  ☐ deploy to vercel link
+  ☐ +edge
+  ☐ +skeletons
 
 Example:
   - Always link to code

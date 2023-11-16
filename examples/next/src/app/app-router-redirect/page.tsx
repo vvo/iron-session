@@ -2,23 +2,23 @@ import Link from "next/link";
 
 import { Metadata } from "next";
 import { Form } from "./form";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "🔐 iron-session examples: App router and server actions",
+  title:
+    "🔐 iron-session examples: App router using client components, redirects, route handlers and fetch",
 };
 
-export default async function AppRouter() {
+export default function AppRouterRedirect() {
   return (
     <main className="p-10 space-y-5">
       <h1 className="text-2xl">
         🔐 iron-session examples: App router{" "}
-        <span className="text-gray-500">(server actions)</span>
+        <span className="text-gray-500">
+          (client component | route handler | redirect | fetch)
+        </span>
       </h1>
 
-      <Suspense fallback={<p className="text-lg">Loading...</p>}>
-        <Form />
-      </Suspense>
+      <Form />
       <HowItWorks />
       <p>
         <Link href="/" className="text-indigo-500 text-lg">
@@ -38,7 +38,7 @@ function HowItWorks() {
         <li>
           The form is submitted to /app-router-redirect/login (route handler)
           via a POST call (non-fetch). The route handler sets the session data
-          and redirects back to /app-router-redirect (this page).
+          and redirects back to /app-router (this page).
         </li>
         <li>
           The page gets the session data via a fetch call to
