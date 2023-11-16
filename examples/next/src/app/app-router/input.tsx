@@ -10,7 +10,6 @@ export function Input() {
   return (
     <input
       type="text"
-      aria-disabled={pending}
       disabled={pending}
       name="username"
       className={css.input}

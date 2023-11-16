@@ -1,6 +1,7 @@
 Examples:
   ✔ app router + client component + route handlers + redirects + fetch @done(23-11-16 00:05)
-  ☐ app router + server component + server action (the good stuff from lee, first example)
+  ✔ app router + server component + server action (the good stuff from lee, first example) @done(23-11-16 13:50)
+  ☐ app router + server action + route handlers + fetch + revalidate (same as previous but use fetch and revalidate)
   ☐ pages + redirects + fetch
   ☐ pages + swr
   ☐ pages + getServerSideProps

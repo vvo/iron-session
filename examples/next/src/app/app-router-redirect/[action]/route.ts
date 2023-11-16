@@ -27,7 +27,7 @@ export async function POST(
   await session.save();
 
   // simulate looking up the user in db
-  await sleep(1000);
+  await sleep(250);
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
   // not using redirect() yet: https://github.com/vercel/next.js/issues/51592#issuecomment-1810212676
@@ -57,6 +57,9 @@ export async function GET(
     await session.destroy();
     return redirect("/app-router-redirect");
   }
+
+  // simulate looking up the user in db
+  await sleep(250);
 
   if (session.isLoggedIn !== true) {
     return Response.json(defaultSession);

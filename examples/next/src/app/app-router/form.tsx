@@ -8,7 +8,9 @@ import { revalidatePath } from "next/cache";
 import { SubmitButton } from "./submit-button";
 import { Input } from "./input";
 
-async function getSession(): Promise<IronSession<SessionData>> {
+async function getSession(
+  shouldSleep = true,
+): Promise<IronSession<SessionData>> {
   const session = await getServerActionIronSession<SessionData>(
     sessionOptions,
     cookies(),
@@ -17,6 +19,11 @@ async function getSession(): Promise<IronSession<SessionData>> {
   if (!session.isLoggedIn) {
     session.isLoggedIn = defaultSession.isLoggedIn;
     session.username = defaultSession.username;
+  }
+
+  if (shouldSleep) {
+    // simulate looking up the user in db
+    await sleep(250);
   }
 
   return getServerActionIronSession<SessionData>(sessionOptions, cookies());
@@ -44,9 +51,6 @@ function LoginForm() {
     "use server";
     const session = await getSession();
 
-    // simulate looking up the user in db
-    await sleep(1000);
-
     session.username = (formData.get("username") as string) ?? "No username";
     session.isLoggedIn = true;
     await session.save();
@@ -61,7 +65,7 @@ function LoginForm() {
         <Input />
       </label>
       <div>
-        <SubmitButton />
+        <SubmitButton value="Login" />
       </div>
     </form>
   );
@@ -70,14 +74,15 @@ function LoginForm() {
 function LogoutButton() {
   async function logout(formData: FormData) {
     "use server";
-    const session = await getSession();
+    // false => no db call for logout
+    const session = await getSession(false);
     await session.destroy();
   }
 
   return (
     <form action={logout} className={css.form}>
       <div>
-        <input type="submit" value="Logout" className={css.button} />
+        <SubmitButton value="Logout" />
       </div>
     </form>
   );

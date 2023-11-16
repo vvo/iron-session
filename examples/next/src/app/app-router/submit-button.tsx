@@ -4,15 +4,14 @@
 import { useFormStatus } from "react-dom";
 import * as css from "@/app/css";
 
-export function SubmitButton() {
+export function SubmitButton({ value }: { value: string }) {
   const { pending } = useFormStatus();
 
   return (
     <input
       type="submit"
-      value={pending ? "Loading..." : "Login"}
+      value={pending ? "Loading…" : value}
       disabled={pending}
-      aria-disabled={pending}
       className={css.button}
     />
   );

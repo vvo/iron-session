@@ -9,6 +9,7 @@ export default function Home() {
           <Link
             className="text-indigo-500 underline hover:no-underline"
             href="/app-router"
+            prefetch={false}
           >
             App Router
           </Link>{" "}

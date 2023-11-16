@@ -19,3 +19,7 @@ export const sessionOptions: IronSessionOptions = {
     secure: true,
   },
 };
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
