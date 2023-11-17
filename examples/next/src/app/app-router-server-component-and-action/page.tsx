@@ -48,17 +48,13 @@ function HowItWorks() {
       <summary className="cursor-pointer text-gray-700">How it works</summary>
 
       <ol className="list-decimal list-inside">
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>During login, the page uses a server action.</li>
+        <li>During logout, the page uses a server action.</li>
+        <li>
+          When displaying session data, the server component gets the data and
+          pass it to the page.
+        </li>
       </ol>
-
-      <p>
-        <strong>Pros</strong>:
-      </p>
-      <p>
-        <strong>Cons</strong>:
-      </p>
     </details>
   );
 }

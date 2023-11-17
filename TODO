@@ -1,10 +1,10 @@
 Examples:
   ✔ Finish middleware @done(23-11-17 16:16)
   ✔ Show name in protected pages @done(23-11-17 16:16)
-  ☐ Add explanations/fix examples basic
-  ☐ showcase swr example in first
+  ✔ Add explanations/fix examples basic @done(23-11-17 16:33)
+  ✔ showcase swr example in first @done(23-11-17 17:08)
   ☐ Link to code in all examples
-  ☐ Link to GitHub in homepage
+  ✔ Link to GitHub in homepage @done(23-11-17 17:12)
   ☐ Check preview deployment works
   ☐ Merge both getIronSession APIs
   ☐ Merge to main

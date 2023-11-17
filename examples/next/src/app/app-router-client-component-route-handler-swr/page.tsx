@@ -30,11 +30,11 @@ export default function AppRouterRedirect() {
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
         <Form />
-        <div className="text-md text-gray-700 space-y-2">
+        <div className="text-gray-700 space-y-2">
           <hr />
           <p>
             The following pages are protected and will redirect back here if
-            you&quot;re not logged in:
+            you&apos;re not logged in:
           </p>
           {/* convert the following paragraphs into a ul li */}
           <ul className="list-disc list-inside">
@@ -87,17 +87,33 @@ function HowItWorks() {
       <summary className="cursor-pointer text-gray-700">How it works</summary>
 
       <ol className="list-decimal list-inside">
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>
+          During login, the form is submitted with swr&apos;s{" "}
+          <a
+            href="https://swr.vercel.app/docs/mutation#useswrmutation"
+            className={css.link}
+          >
+            useSWRMutation
+          </a>
+          . This makes a POST /session request using fetch.
+        </li>
+        <li>
+          {" "}
+          During logout, the form is submitted with swr&apos;s{" "}
+          <a
+            href="https://swr.vercel.app/docs/mutation#useswrmutation"
+            className={css.link}
+          >
+            useSWRMutation
+          </a>
+          . This makes a DELETE /session request using fetch.
+        </li>
+        <li>
+          In all other places, the content of the session is optimistally
+          rendered using the most recent value, and never gets outdated. This is
+          automatically handled by swr using mutations and revalidation.
+        </li>
       </ol>
-
-      <p>
-        <strong>Pros</strong>:
-      </p>
-      <p>
-        <strong>Cons</strong>:
-      </p>
     </details>
   );
 }
