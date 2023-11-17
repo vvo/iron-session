@@ -12,7 +12,7 @@ export const defaultSession: SessionData = {
 
 export const sessionOptions: IronSessionOptions = {
   password: "complex_password_at_least_32_characters_long",
-  cookieName: "iron-examples-app-router-redirect",
+  cookieName: "iron-examples-app-router-server-component-and-action",
   cookieOptions: {
     // secure only works in `https` environments
     // if your localhost is not on `https`, then use: `secure: process.env.NODE_ENV === "production"`

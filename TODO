@@ -1,7 +1,35 @@
 Examples:
-  ✔ app router + client component + route handlers + redirects + fetch @done(23-11-16 00:05)
-  ✔ app router + server component + server action (the good stuff from lee, first example) @done(23-11-16 13:50)
-  ☐ app router + server action + route handlers + fetch + revalidate (same as previous but use fetch and revalidate)
+  ✔ Finish middleware @done(23-11-17 16:16)
+  ✔ Show name in protected pages @done(23-11-17 16:16)
+  ☐ Add explanations/fix examples basic
+  ☐ showcase swr example in first
+  ☐ Link to code in all examples
+  ☐ Link to GitHub in homepage
+  ☐ Check preview deployment works
+  ☐ Merge both getIronSession APIs
+  ☐ Merge to main
+  ☐ Release
+  ☐ Move all remaining confirmed work to a single issue
+    ☐ add default data option?
+    ☐ change action to session (POST, GET, DELETE) in app-router-client-component-redirect-route-handler-fetch, as swr
+  ☐ Check Notion page
+
+  ☐ add protected page link anyone can access (+ redirect to login, perhaps use server components for this)
+    ☐ add middleware example to check for protected pages
+  ☐ change all calls to /session only
+  ☐ optimistic updates in all examples if feasible easily
+  ☐ add prefetch when possible
+    ☐ add prefetch where relevant https://swr.vercel.app/docs/prefetching (index page)
+  ☐ add example with magic link (+ explain where it can be used)
+
+  ☐ app router + server component where relevant + client components where relevant (check partial prerendering)
+  ☐ app router + client component + server action and optimistic updates https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#optimistic-updates
+  ☐ add text below each example to show what's slow to load
+  ☐ change all calls to POST DELETE /session (no more /login)
+  ☐ provide a way to set default session data and update all examples with it
+  ☐ ask community to complete other examples
+
+  ☐ optimistic updates in general in the various examples, how?
   ☐ pages + redirects + fetch
   ☐ pages + swr
   ☐ pages + getServerSideProps
@@ -10,6 +38,8 @@ Examples:
   ☐ deploy to vercel link
   ☐ +edge
   ☐ +skeletons
+  ☐ +link to gh
+  ☐ +pages examples to be done by community/later
 
 Example:
   - Always link to code
@@ -39,3 +69,8 @@ Test website must include, in a very clear way:
 Answered:
 - Are we using workspaces?
   Yes
+
+Archive:
+  ✔ app router + client component + route handlers + redirects + fetch @done(23-11-16 00:05) @project(Examples)
+  ✔ app router + server component + server action (the good stuff from lee, first example) @done(23-11-16 13:50) @project(Examples)
+  ✔ check learn nextjs quickly @done(23-11-17 11:13) @project(Examples)

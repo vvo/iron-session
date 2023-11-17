@@ -1,4 +1,5 @@
 import Link from "next/link";
+import * as css from "@/app/css";
 
 import { Metadata } from "next";
 import { Form } from "./form";
@@ -11,17 +12,27 @@ export const metadata: Metadata = {
 export default function AppRouterRedirect() {
   return (
     <main className="p-10 space-y-5">
-      <h1 className="text-2xl">
-        🔐 iron-session examples: App router{" "}
-        <span className="text-gray-500">
-          (client component | route handler | redirect | fetch)
-        </span>
-      </h1>
+      <div>
+        <h1 className="text-2xl">
+          🔐{" "}
+          <Link className={css.link} href="/">
+            iron-session
+          </Link>{" "}
+          examples: App router{" "}
+        </h1>
+        <h2 className="text-xl text-gray-500">
+          + client components, route handlers, redirects, and fetch
+        </h2>
+      </div>
 
-      <Form />
+      <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
+        <Form />
+      </div>
+
       <HowItWorks />
+
       <p>
-        <Link href="/" className="text-indigo-500 text-lg">
+        <Link href="/" className={css.link}>
           ← All examples
         </Link>
       </p>
@@ -36,20 +47,22 @@ function HowItWorks() {
 
       <ol className="list-decimal list-inside">
         <li>
-          The form is submitted to /app-router-redirect/login (route handler)
-          via a POST call (non-fetch). The route handler sets the session data
-          and redirects back to /app-router (this page).
+          The form is submitted to
+          /app-router-client-component-redirect-route-handler-fetch/login (route
+          handler) via a POST call (non-fetch). The route handler sets the
+          session data and redirects back to /app-router (this page).
         </li>
         <li>
           The page gets the session data via a fetch call to
-          /app-router-redirect/session (route handler). The route handler either
-          return the session data (logged in) or a default session (not logged
-          in).
+          /app-router-client-component-redirect-route-handler-fetch/session
+          (route handler). The route handler either return the session data
+          (logged in) or a default session (not logged in).
         </li>
         <li>
-          The logout is a regular link navigating to /app-router-redirect/logout
-          which destroy the session and redirects back to /app-router-redirect
-          (this page).
+          The logout is a regular link navigating to
+          /app-router-client-component-redirect-route-handler-fetch/logout which
+          destroy the session and redirects back to
+          /app-router-client-component-redirect-route-handler-fetch (this page).
         </li>
       </ol>
 

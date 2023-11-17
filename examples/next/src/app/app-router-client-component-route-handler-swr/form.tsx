@@ -1,23 +1,11 @@
 "use client";
 
 import * as css from "@/app/css";
-
-import { useEffect, useState } from "react";
-import { SessionData } from "../types";
+import useSession from "./use-session";
 import { defaultSession } from "./lib";
 
 export function Form() {
-  const [session, setSession] = useState<SessionData>(defaultSession);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/app-router-redirect/session")
-      .then((res) => res.json())
-      .then((session) => {
-        setSession(session);
-        setIsLoading(false);
-      });
-  }, []);
+  const { session, isLoading } = useSession();
 
   if (isLoading) {
     return <p className="text-lg">Loading...</p>;
@@ -38,9 +26,21 @@ export function Form() {
 }
 
 function LoginForm() {
+  const { login } = useSession();
+
   return (
     <form
-      action="/app-router-redirect/login"
+      onSubmit={function (event) {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const username = formData.get("username") as string;
+        login(username, {
+          optimisticData: {
+            isLoggedIn: true,
+            username,
+          },
+        });
+      }}
       method="POST"
       className={css.form}
     >
@@ -66,9 +66,19 @@ function LoginForm() {
 }
 
 function LogoutButton() {
+  const { logout } = useSession();
+
   return (
     <p>
-      <a href="/app-router-redirect/logout" className={css.button}>
+      <a
+        className={css.button}
+        onClick={(event) => {
+          event.preventDefault();
+          logout(null, {
+            optimisticData: defaultSession,
+          });
+        }}
+      >
         Logout
       </a>
     </p>

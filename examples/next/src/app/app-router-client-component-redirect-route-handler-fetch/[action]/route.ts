@@ -2,11 +2,10 @@ import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { getServerActionIronSession } from "iron-session";
 import { defaultSession, sessionOptions } from "../lib";
-import { SessionData } from "@/app/types";
 import { redirect } from "next/navigation";
-import { sleep } from "@/app/app-router/lib";
+import { sleep, SessionData } from "../lib";
 
-// /app-router-redirect/login
+// /app-router-client-component-redirect-route-handler-fetch/login
 export async function POST(
   request: NextRequest,
   { params }: { params: { action: string } },
@@ -32,15 +31,15 @@ export async function POST(
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
   // not using redirect() yet: https://github.com/vercel/next.js/issues/51592#issuecomment-1810212676
   return Response.redirect(
-    `${request.nextUrl.origin}/app-router-redirect`,
+    `${request.nextUrl.origin}/app-router-client-component-redirect-route-handler-fetch`,
     303,
   );
 }
 
-// /app-router-redirect/session
-// /app-router-redirect/logout
+// /app-router-client-component-redirect-route-handler-fetch/session
+// /app-router-client-component-redirect-route-handler-fetch/logout
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { action: string } },
 ) {
   if (params.action !== "session" && params.action !== "logout") {
@@ -52,10 +51,12 @@ export async function GET(
     cookies(),
   );
 
-  // /app-router-redirect/logout
+  // /app-router-client-component-redirect-route-handler-fetch/logout
   if (params.action === "logout") {
     await session.destroy();
-    return redirect("/app-router-redirect");
+    return redirect(
+      "/app-router-client-component-redirect-route-handler-fetch",
+    );
   }
 
   // simulate looking up the user in db
