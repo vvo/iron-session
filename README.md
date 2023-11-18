@@ -32,7 +32,7 @@ pnpm add iron-session
 To get a session, there's a single method to know: `getIronSession`.
 
 ```ts
-// Next.js Pages with API Route and Node.js/Express/Connect.
+// Next.js Pages with API Routes or Node.js/Express/Connect.
 import { getIronSession } from 'iron-session';
 
 export function get(req, res) {
@@ -47,7 +47,7 @@ export function post(req, res) {
 ```
 
 ```ts
-// Next.js App Router with route handlers
+// Next.js App Router with Route Handlers
 import { cookies } from 'next/header';
 import { getIronSession } from 'iron-session';
 
@@ -63,7 +63,7 @@ export function POST() {
 ```
 
 ```ts
-// Next.js App Router with server component or server action
+// Next.js App Router with Server Components or Server Actions
 import { cookies } from 'next/header';
 import { getIronSession } from 'iron-session';
 
