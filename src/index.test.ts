@@ -1,7 +1,7 @@
 import { deepEqual, doesNotMatch, equal, match, rejects } from "node:assert";
 import { mock, test } from "node:test";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { SessionOptions } from "iron-session";
+import type { SessionOptions } from "./index.js";
 import { getIronSession, sealData } from "./index.js";
 
 const password = "Gbm49ATjnqnkCCCdhV4uDBhbfnPqsCW0";
