@@ -18,13 +18,8 @@ their examples.
 ## Development
 
 ```sh
-pnpm run build # build the project
-pnpm run test # run the tests
-pnpm run lint # lint the code
+pnpm dev
 ```
-
-Before submitting your contribution, please make sure that all of the above
-commands pass successfully. Refer project's `package.json` for more commands.
 
 ## Submitting a Contribution
 
