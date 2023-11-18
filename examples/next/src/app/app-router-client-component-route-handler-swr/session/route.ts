@@ -1,14 +1,11 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { getServerActionIronSession } from "iron-session";
+import { getIronSession } from "iron-session";
 import { defaultSession, sessionOptions } from "../lib";
 import { sleep, SessionData } from "../lib";
 
 export async function POST(request: NextRequest) {
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   const { username = "No username" } = (await request.json()) as {
     username: string;
@@ -25,10 +22,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   // simulate looking up the user in db
   await sleep(250);
@@ -41,10 +35,7 @@ export async function GET() {
 }
 
 export async function DELETE() {
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   // /app-router-client-component-route-handler-swr/logout
   await session.destroy();

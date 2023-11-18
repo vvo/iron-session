@@ -1,17 +1,11 @@
 import { SessionData } from "./lib";
 import { defaultSession, sessionOptions, sleep } from "./lib";
-import { getServerActionIronSession } from "iron-session";
+import { getIronSession, IronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { IronSession } from "iron-session";
 import { revalidatePath } from "next/cache";
 
-export async function getSession(
-  shouldSleep = true,
-): Promise<IronSession<SessionData>> {
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+export async function getSession(shouldSleep = true) {
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   if (!session.isLoggedIn) {
     session.isLoggedIn = defaultSession.isLoggedIn;
@@ -23,10 +17,10 @@ export async function getSession(
     await sleep(250);
   }
 
-  return getServerActionIronSession<SessionData>(sessionOptions, cookies());
+  return session;
 }
 
-export async function logout(formData: FormData) {
+export async function logout() {
   "use server";
 
   // false => no db call for logout

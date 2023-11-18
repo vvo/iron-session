@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function ProtectedClient() {
   return (
-    <main className="p-10 space-y-5 max-w-xl">
+    <main className="p-10 space-y-5">
       <Title subtitle="Protected page" />
       <Content />
       <p>
@@ -39,7 +39,7 @@ function Content() {
   }
 
   return (
-    <>
+    <div className="max-w-xl space-y-2">
       <p>
         Hello <strong>{session.username}!</strong>
       </p>
@@ -56,6 +56,6 @@ function Content() {
         : if you open the page in different tabs/windows, and logout from one
         place, every other tab/window will be synced and logged out.
       </p>
-    </>
+    </div>
   );
 }

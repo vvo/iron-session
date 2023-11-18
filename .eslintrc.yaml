@@ -9,8 +9,6 @@ extends:
   - plugin:prettier/recommended
 ignorePatterns:
   - dist
-  - examples/deno
-  - examples/bun
   - coverage
 parser: "@typescript-eslint/parser"
 parserOptions:

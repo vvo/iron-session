@@ -1,7 +1,3 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.unstable": false,
-  "deno.enablePaths": ["./examples/deno"]
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

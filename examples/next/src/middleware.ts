@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import {
-  sessionOptions as appRouterClientComponentRouteHandlerSwrIronOptions,
-  defaultSession,
-} from "./app/app-router-client-component-route-handler-swr/lib";
+import { sessionOptions as appRouterClientComponentRouteHandlerSwrIronOptions } from "./app/app-router-client-component-route-handler-swr/lib";
 import { cookies } from "next/headers";
-import { IronSessionOptions, getServerActionIronSession } from "iron-session";
+import { SessionOptions, getIronSession } from "iron-session";
 
 // Only here for the multi examples demo, in your app this would be imported from elsewhere
 interface SessionData {
@@ -14,16 +11,16 @@ interface SessionData {
   isLoggedIn: boolean;
 }
 
-const sessionOptions: Record<string, IronSessionOptions> = {
+const sessionOptions: Record<string, SessionOptions> = {
   "/app-router-client-component-route-handler-swr/protected-middleware":
     appRouterClientComponentRouteHandlerSwrIronOptions,
 };
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions[request.nextUrl.pathname],
+  const session = await getIronSession<SessionData>(
     cookies(),
+    sessionOptions[request.nextUrl.pathname],
   );
 
   if (!session.isLoggedIn) {

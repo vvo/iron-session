@@ -1,13 +1,8 @@
 import { deepEqual, doesNotMatch, equal, match, rejects } from "node:assert";
 import { mock, test } from "node:test";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { IronSessionOptions } from "iron-session";
-import {
-  createResponse,
-  getIronSession,
-  mergeHeaders,
-  sealData,
-} from "./index.js";
+import type { SessionOptions } from "iron-session";
+import { getSession, sealData } from "./index.js";
 
 const password = "Gbm49ATjnqnkCCCdhV4uDBhbfnPqsCW0";
 const cookieName = "test";
@@ -19,8 +14,8 @@ interface Data {
 const getSession = async (
   req: IncomingMessage | Request,
   res: Response | ServerResponse,
-  options: IronSessionOptions,
-) => getIronSession<Data>(req, res, options);
+  options: SessionOptions,
+) => getSession<Data>(req, res, options);
 
 await test("should throw if the request parameter is missing", async () => {
   // @ts-expect-error we're verifying JavaScript runtime checks here (DX)
@@ -39,18 +34,14 @@ await test("should throw if the options parameter is missing", async () => {
 
 await test("should throw if the cookie name is missing in options", async () => {
   await rejects(
-    getSession({} as Request, {} as Response, {} as IronSessionOptions),
+    getSession({} as Request, {} as Response, {} as SessionOptions),
     /Missing cookie name/,
   );
 });
 
 await test("should throw if password is missing in options", async () => {
   await rejects(
-    getSession(
-      {} as Request,
-      {} as Response,
-      { cookieName } as IronSessionOptions,
-    ),
+    getSession({} as Request, {} as Response, { cookieName } as SessionOptions),
     /Missing password/,
   );
 });

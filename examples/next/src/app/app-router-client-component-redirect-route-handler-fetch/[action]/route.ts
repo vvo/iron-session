@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { getServerActionIronSession } from "iron-session";
+import { getIronSession } from "iron-session";
 import { defaultSession, sessionOptions } from "../lib";
 import { redirect } from "next/navigation";
 import { sleep, SessionData } from "../lib";
@@ -14,10 +14,7 @@ export async function POST(
     return new Response("Unknown path", { status: 404 });
   }
 
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   const formData = await request.formData();
 
@@ -46,10 +43,7 @@ export async function GET(
     return new Response("Unknown path", { status: 404 });
   }
 
-  const session = await getServerActionIronSession<SessionData>(
-    sessionOptions,
-    cookies(),
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   // /app-router-client-component-redirect-route-handler-fetch/logout
   if (params.action === "logout") {
