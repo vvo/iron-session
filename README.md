@@ -56,7 +56,7 @@ export function GET() {
 }
 
 export function POST() {
-  const session = getIronSession(req, res, { password: "...", cookieName: "..." });
+  const session = getIronSession(cookies(), { password: "...", cookieName: "..." });
   session.username = "Alison";
   await session.save();
 }
