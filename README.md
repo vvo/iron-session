@@ -62,7 +62,7 @@ export function POST() {
 }
 ```
 
-```ts
+```tsx
 // Next.js App Router with Server Components or Server Actions
 import { cookies } from 'next/header';
 import { getIronSession } from 'iron-session';
