@@ -2,7 +2,9 @@
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
 
-The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no I/O involved). This is the same technique used by frameworks like
+<p align="center">Online demo: <a href="https://iron-session-demo.vercel.app/">https://iron-session-demo.vercel.app</a> 👀</p>
+
+The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
 
 <p align="center"><i>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></i></p>
@@ -12,12 +14,21 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Examples](#examples)
+- [Project status](#project-status)
 - [Session options](#session-options)
 - [API](#api)
   - [`getIronSession<T>(req, res, sessionOptions): Promise<IronSession<T>>`](#getironsessiontreq-res-sessionoptions-promiseironsessiont)
   - [`getIronSession<T>(cookieStore, sessionOptions): Promise<IronSession<T>>`](#getironsessiontcookiestore-sessionoptions-promiseironsessiont)
-  - [session.save()](#sessionsave)
-  - [session.destroy()](#sessiondestroy)
+  - [`session.save(): Promise<void>`](#sessionsave-promisevoid)
+  - [`session.destroy(): void`](#sessiondestroy-void)
+  - [`sealData(data: unknown, { password, ttl }): Promise<string>`](#sealdatadata-unknown--password-ttl--promisestring)
+  - [`unSealData<T>(seal: string, { password, ttl }): Promise<T>`](#unsealdatatseal-string--password-ttl--promiset)
+- [FAQ](#faq)
+  - [Why use pure cookies for sessions?](#why-use-pure-cookies-for-sessions)
+  - [How to invalidate sessions?](#how-to-invalidate-sessions)
+  - [Can I use something else than cookies?](#can-i-use-something-else-than-cookies)
+  - [How is this different from JWT?](#how-is-this-different-from-jwt)
 - [Credits](#credits)
 - [Good Reads](#good-reads)
 
@@ -32,7 +43,7 @@ pnpm add iron-session
 To get a session, there's a single method to know: `getIronSession`.
 
 ```ts
-// Next.js Pages with API Routes or Node.js/Express/Connect.
+// Next.js API Routes and Node.js/Express/Connect.
 import { getIronSession } from 'iron-session';
 
 export function get(req, res) {
@@ -47,7 +58,7 @@ export function post(req, res) {
 ```
 
 ```ts
-// Next.js App Router with Route Handlers
+// Next.js Route Handlers (App Router)
 import { cookies } from 'next/header';
 import { getIronSession } from 'iron-session';
 
@@ -63,7 +74,7 @@ export function POST() {
 ```
 
 ```tsx
-// Next.js App Router with Server Components or Server Actions
+// Next.js Server Components and Server Actions (App Router)
 import { cookies } from 'next/header';
 import { getIronSession } from 'iron-session';
 
@@ -78,10 +89,17 @@ function Profile() {
 }
 ```
 
+## Examples
+
+We have many different patterns and examples on the online demo, have a look: https://iron-session-demo.vercel.app/.
+
+## Project status
+
+✅ Production ready and maintained.
 
 ## Session options
 
-Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.
+Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.****
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
 - `cookieName`, **required**: Name of the cookie to be stored
@@ -112,21 +130,57 @@ const session = getIronSession<SessionData>(req, res, sessionOptions);
 const session = getIronSession<SessionData>(cookies(), sessionOptions);
 ```
 
-### session.save()
+### `session.save(): Promise<void>`
 
-Saves the session.
+Saves the session. This is an asynchronous operation. It must be done and awaited before headers are sent to the client.
 
 ```ts
 await session.save()
 ```
 
-### session.destroy()
+### `session.destroy(): void`
 
-Destroys the session.
+Destroys the session. This is a synchronous operation as it only removes the cookie. It must be done before headers are sent to the client.
 
 ```ts
 await session.destroy()
 ```
+
+### `sealData(data: unknown, { password, ttl }): Promise<string>`
+
+This is the underlying method and seal mechanism that powers `iron-session`. You can use it to seal any `data` you want and pass it around. One usecase are magic links: you generate a seal that contains a user id to login and send it to a route on your website (like `/magic-login`). Once received, you can safely decode the seal with `unsealData` and log the user in.
+
+### `unSealData<T>(seal: string, { password, ttl }): Promise<T>`
+
+This is the opposite of `sealData` and allow you to decode a seal to get the original data back.
+
+## FAQ
+
+### Why use pure cookies for sessions?
+
+This makes your sessions stateless: since the data is passed around in cookies, you do not need any server or service to store session data.
+
+More information can also be found on the [Ruby On Rails website](https://guides.rubyonrails.org/security.html#session-storage) which uses the same technique.
+
+### How to invalidate sessions?
+
+Sessions cannot be instantly invalidated (or "disconnect this customer") as there is typically no state stored about sessions on the server by default. However, in most applications, the first step upon receiving an authenticated request is to validate the user and their permissions in the database. So, to easily disconnect customers (or invalidate sessions), you can add an `isBlocked`` state in the database and create a UI to block customers.
+
+Then, every time a request is received that involves reading or altering sensitive data, make sure to check this flag.
+
+### Can I use something else than cookies?
+
+Yes, we expose `sealData` and `unsealData` which are not tied to cookies. This way you can seal and unseal any object in your application and move seals around to login users.
+
+### How is this different from [JWT](https://jwt.io/)?
+
+Not so much:
+
+- JWT is a standard, it stores metadata in the JWT token themselves to ensure communication between different systems is flawless.
+- JWT tokens are not encrypted, the payload is visible by customers if they manage to inspect the seal. You would have to use [JWE](https://tools.ietf.org/html/rfc7516) to achieve the same.
+- @hapi/iron mechanism is not a standard, it's a way to sign and encrypt data into seals
+
+Depending on your own needs and preferences, `iron-session` may or may not fit you.
 
 ## Credits
 

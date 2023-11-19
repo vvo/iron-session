@@ -98,18 +98,21 @@ export interface SessionOptions {
   cookieOptions?: CookieOptions;
 }
 
-type OverridableOptions = Pick<SessionOptions, "cookieOptions" | "ttl">;
-
 export type IronSession<T> = T & {
-  /**
-   * Destroys the session data and removes the cookie.
-   */
-  readonly destroy: (destroyOptions?: OverridableOptions) => Promise<void>;
-
   /**
    * Encrypts the session data and sets the cookie.
    */
-  readonly save: (saveOptions?: OverridableOptions) => Promise<void>;
+  readonly save: () => Promise<void>;
+
+  /**
+   * Destroys the session data and removes the cookie.
+   */
+  readonly destroy: () => Promise<void>;
+
+  /**
+   * Update the session configuration. You still need to call save() to send the new cookie.
+   */
+  readonly updateConfig: (newSessionOptions: SessionOptions) => void;
 };
 
 // default time allowed to check for iron seal validity when ttl passed
@@ -122,10 +125,11 @@ const fourteenDaysInSeconds = 14 * 24 * 3600;
 const currentMajorVersion = 2;
 const versionDelimiter = "~";
 
-const defaultOptions: Required<OverridableOptions> = {
-  ttl: fourteenDaysInSeconds,
-  cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
-};
+const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions">> =
+  {
+    ttl: fourteenDaysInSeconds,
+    cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
+  };
 
 function normalizeStringPasswordToMap(password: Password): PasswordsMap {
   return typeof password === "string" ? { 1: password } : password;
@@ -210,7 +214,6 @@ export function createSealData(_crypto: Crypto) {
     );
     const passwordForSeal = {
       id: mostRecentPasswordId.toString(),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       secret: passwordsMap[mostRecentPasswordId]!,
     };
 
@@ -239,7 +242,7 @@ export function createUnsealData(_crypto: Crypto) {
         (await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
           ...ironDefaults,
           ttl: ttl * 1000,
-        })) /* c8 ignore next */ ?? {};
+        })) ?? {};
 
       if (tokenVersion === 2) {
         return data as T;
@@ -261,24 +264,20 @@ export function createUnsealData(_crypto: Crypto) {
         return {} as T;
       }
 
-      /* c8 ignore next 2 */
       throw error;
     }
   };
 }
 
-function mergeOptions(
+function getSessionConfig(
   sessionOptions: SessionOptions,
-  overrides?: OverridableOptions,
 ): Required<SessionOptions> {
-  const options: Required<SessionOptions> = {
+  const options = {
     ...defaultOptions,
     ...sessionOptions,
-    ...overrides,
     cookieOptions: {
       ...defaultOptions.cookieOptions,
-      ...sessionOptions.cookieOptions,
-      ...overrides?.cookieOptions,
+      ...(sessionOptions.cookieOptions || {}),
     },
   };
 
@@ -298,7 +297,7 @@ function mergeOptions(
 }
 
 const badUsageMessage =
-  "iron-session: Bad usage: use getIronSession(req, res, options) or getIronSession(cookies, options).";
+  "iron-session: Bad usage: use getIronSession(req, res, options) or getIronSession(cookieStore, options).";
 
 export function createGetIronSession(
   sealData: ReturnType<typeof createSealData>,
@@ -341,7 +340,7 @@ export function createGetIronSession(
     const res = resOrsessionOptions as ResponseType;
 
     if (!sessionOptions) {
-      throw new Error("iron-session: Bad usage. Missing options.");
+      throw new Error(badUsageMessage);
     }
 
     if (!sessionOptions.cookieName) {
@@ -360,33 +359,38 @@ export function createGetIronSession(
       );
     }
 
-    const options = mergeOptions(sessionOptions);
-    const sealFromCookies = getCookie(req, options.cookieName);
+    let sessionConfig = getSessionConfig(sessionOptions);
+
+    const sealFromCookies = getCookie(req, sessionConfig.cookieName);
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, {
           password: passwordsMap,
-          ttl: options.ttl,
+          ttl: sessionConfig.ttl,
         })
       : ({} as T);
 
     Object.defineProperties(session, {
+      updateConfig: {
+        value: function updateConfig(newSessionOptions: SessionOptions) {
+          sessionConfig = getSessionConfig(newSessionOptions);
+        },
+      },
       save: {
-        value: async function save(saveOptions?: OverridableOptions) {
+        value: async function save() {
           if ("headersSent" in res && res.headersSent) {
             throw new Error(
               "iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()",
             );
           }
 
-          const mergedOptions = mergeOptions(sessionOptions, saveOptions);
           const seal = await sealData(session, {
             password: passwordsMap,
-            ttl: mergedOptions.ttl,
+            ttl: sessionConfig.ttl,
           });
           const cookieValue = serialize(
-            mergedOptions.cookieName,
+            sessionConfig.cookieName,
             seal,
-            mergedOptions.cookieOptions,
+            sessionConfig.cookieOptions,
           );
 
           if (cookieValue.length > 4096) {
@@ -400,14 +404,12 @@ export function createGetIronSession(
       },
 
       destroy: {
-        value: async function destroy(destroyOptions?: OverridableOptions) {
+        value: function destroy() {
           Object.keys(session).forEach((key) => {
             delete (session as Record<string, unknown>)[key];
           });
-
-          const mergedOptions = mergeOptions(sessionOptions, destroyOptions);
-          const cookieValue = serialize(mergedOptions.cookieName, "", {
-            ...mergedOptions.cookieOptions,
+          const cookieValue = serialize(sessionConfig.cookieName, "", {
+            ...sessionConfig.cookieOptions,
             maxAge: 0,
           });
 
@@ -426,10 +428,6 @@ async function getIronSessionFromCookieStore<T extends object>(
   sealData: ReturnType<typeof createSealData>,
   unsealData: ReturnType<typeof createUnsealData>,
 ): Promise<IronSession<T>> {
-  if (!sessionOptions) {
-    throw new Error("iron-session: Bad usage. Missing options.");
-  }
-
   if (!sessionOptions.cookieName) {
     throw new Error("iron-session: Bad usage. Missing cookie name.");
   }
@@ -446,31 +444,30 @@ async function getIronSessionFromCookieStore<T extends object>(
     );
   }
 
-  const options = mergeOptions(sessionOptions);
+  const sessionConfig = getSessionConfig(sessionOptions);
   const sealFromCookies = getServerActionCookie(
-    options.cookieName,
+    sessionConfig.cookieName,
     cookieStore,
   );
   const session = sealFromCookies
     ? await unsealData<T>(sealFromCookies, {
         password: passwordsMap,
-        ttl: options.ttl,
+        ttl: sessionConfig.ttl,
       })
     : ({} as T);
 
   Object.defineProperties(session, {
     save: {
-      value: async function save(saveOptions?: OverridableOptions) {
-        const mergedOptions = mergeOptions(sessionOptions, saveOptions);
+      value: async function save() {
         const seal = await sealData(session, {
           password: passwordsMap,
-          ttl: mergedOptions.ttl,
+          ttl: sessionConfig.ttl,
         });
 
         const cookieLength =
-          mergedOptions.cookieName.length +
+          sessionConfig.cookieName.length +
           seal.length +
-          JSON.stringify(mergedOptions.cookieOptions).length;
+          JSON.stringify(sessionConfig.cookieOptions).length;
 
         if (cookieLength > 4096) {
           throw new Error(
@@ -479,22 +476,21 @@ async function getIronSessionFromCookieStore<T extends object>(
         }
 
         cookieStore.set(
-          mergedOptions.cookieName,
+          sessionConfig.cookieName,
           seal,
-          mergedOptions.cookieOptions,
+          sessionConfig.cookieOptions,
         );
       },
     },
 
     destroy: {
-      value: async function destroy(destroyOptions: OverridableOptions) {
+      value: function destroy() {
         Object.keys(session).forEach((key) => {
           delete (session as Record<string, unknown>)[key];
         });
-        const mergedOptions = mergeOptions(sessionOptions, destroyOptions);
-        const cookieOptions = { ...mergedOptions.cookieOptions, maxAge: 0 };
 
-        cookieStore.set(mergedOptions.cookieName, "", cookieOptions);
+        const cookieOptions = { ...sessionConfig.cookieOptions, maxAge: 0 };
+        cookieStore.set(sessionConfig.cookieName, "", cookieOptions);
       },
     },
   });

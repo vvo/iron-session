@@ -456,7 +456,7 @@ await test("should prevent reassignment of save/destroy functions", async () => 
   }, /Cannot assign to read only property 'destroy' of object '#<Object>'/);
 });
 
-await test("should allow specifying options during save/destroy", async () => {
+await test("allow to update session configuration", async () => {
   const res = {
     getHeader: mock.fn(),
     setHeader: mock.fn(),
@@ -472,11 +472,10 @@ await test("should allow specifying options during save/destroy", async () => {
   );
   session.user = { id: 1 };
 
-  await session.save({ ttl: 61 });
-  match(res.setHeader.mock.calls[0]?.arguments[1][0], /Max-Age=1;/);
+  session.updateConfig({ ttl: 61, cookieName: "test2", password: "ok" });
 
-  await session.destroy({ cookieOptions: { priority: "low" } });
-  match(res.setHeader.mock.calls[1]?.arguments[1][0], /Priority=Low;/);
+  await session.save();
+  match(res.setHeader.mock.calls[0]?.arguments[1][0], /Max-Age=1;/);
 
   mock.reset();
 });

@@ -4,8 +4,11 @@ Examples:
   ✔ Add explanations/fix examples basic @done(23-11-17 16:33)
   ✔ showcase swr example in first @done(23-11-17 17:08)
   ✔ Link to GitHub in homepage @done(23-11-17 17:12)
-  ☐ Merge both getIronSession APIs
+  ☐ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase
+  ✔ Merge both getIronSession APIs @done(23-11-18 15:17)
   ☐ Deploy the website
+  ☐ refactor the code to share more code between cookies() and req/res
+  ☐ <details> in readme to show how to have req.session
   ☐ Link to code in all examples
   ☐ Merge to main
   ☐ Release
@@ -17,6 +20,7 @@ Examples:
     ☐ why do we need export interface CookieStore?
     ☐ what are mergeHeaders, createResponse?? why do we need them here?
     ☐ why do we need OverridableOptions??
+  ☐ Add blurb about the technique, as previously done
   ☐ Check Notion page
   ☐ Make preview deployment working
 
