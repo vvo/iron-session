@@ -4,10 +4,10 @@ import * as css from "@/app/css";
 import { Metadata } from "next";
 import { Form } from "./form";
 import { Title } from "@/app/title";
+import { GetTheCode } from "../get-the-code";
 
 export const metadata: Metadata = {
-  title:
-    "🔐 iron-session examples: App router using client components, redirects, route handlers and fetch",
+  title: "🛠 iron-session examples: Client components, route handlers and swr",
 };
 
 export default function AppRouterRedirect() {
@@ -70,6 +70,7 @@ export default function AppRouterRedirect() {
         </div>
       </div>
 
+      <GetTheCode path="app/app-router-client-component-route-handler-swr" />
       <HowItWorks />
 
       <p>

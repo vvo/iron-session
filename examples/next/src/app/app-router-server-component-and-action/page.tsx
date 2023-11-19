@@ -4,26 +4,17 @@ import { Metadata } from "next";
 import { Form } from "./form";
 import { Suspense } from "react";
 import * as css from "@/app/css";
+import { Title } from "../title";
+import { GetTheCode } from "../get-the-code";
 
 export const metadata: Metadata = {
-  title: "🔐 iron-session examples: App router and server actions",
+  title: "🛠 iron-session examples: Server components, and server actions",
 };
 
 export default async function AppRouter() {
   return (
     <main className="p-10 space-y-5">
-      <div>
-        <h1 className="text-2xl">
-          🔐{" "}
-          <Link className={css.link} href="/">
-            iron-session
-          </Link>{" "}
-          examples: App router{" "}
-        </h1>
-        <h2 className="text-xl text-gray-500">
-          + server components, and server actions
-        </h2>
-      </div>
+      <Title subtitle="+ server components, and server actions" />
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
         <Suspense fallback={<p className="text-lg">Loading...</p>}>
@@ -31,6 +22,7 @@ export default async function AppRouter() {
         </Suspense>
       </div>
 
+      <GetTheCode path="app/app-router-server-component-and-action" />
       <HowItWorks />
 
       <p>

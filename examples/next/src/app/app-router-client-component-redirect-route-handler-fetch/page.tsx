@@ -3,32 +3,24 @@ import * as css from "@/app/css";
 
 import { Metadata } from "next";
 import { Form } from "./form";
+import { Title } from "../title";
+import { GetTheCode } from "../get-the-code";
 
 export const metadata: Metadata = {
   title:
-    "🔐 iron-session examples: App router using client components, redirects, route handlers and fetch",
+    "🛠 iron-session examples: Client components, route handlers, redirects and fetch",
 };
 
 export default function AppRouterRedirect() {
   return (
     <main className="p-10 space-y-5">
-      <div>
-        <h1 className="text-2xl">
-          🔐{" "}
-          <Link className={css.link} href="/">
-            iron-session
-          </Link>{" "}
-          examples: App router{" "}
-        </h1>
-        <h2 className="text-xl text-gray-500">
-          + client components, route handlers, redirects, and fetch
-        </h2>
-      </div>
+      <Title subtitle="+ client components, route handlers, redirects, and fetch" />
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
         <Form />
       </div>
 
+      <GetTheCode path="app/app-router-client-component-redirect-route-handler-fetch" />
       <HowItWorks />
 
       <p>
@@ -48,9 +40,9 @@ function HowItWorks() {
       <ol className="list-decimal list-inside">
         <li>
           The form is submitted to
-          /app-router-client-component-redirect-route-handler-fetch/login (route
-          handler) via a POST call (non-fetch). The route handler sets the
-          session data and redirects back to /app-router (this page).
+          /app-router-client-component-redirect-route-handler-fetch/session
+          (route handler) via a POST call (non-fetch). The route handler sets
+          the session data and redirects back to /app-router (this page).
         </li>
         <li>
           The page gets the session data via a fetch call to

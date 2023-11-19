@@ -5,12 +5,12 @@ import { defaultSession, sessionOptions } from "../lib";
 import { redirect } from "next/navigation";
 import { sleep, SessionData } from "../lib";
 
-// /app-router-client-component-redirect-route-handler-fetch/login
+// /app-router-client-component-redirect-route-handler-fetch/session
 export async function POST(
   request: NextRequest,
   { params }: { params: { action: string } },
 ) {
-  if (params.action !== "login") {
+  if (params.action !== "session") {
     return new Response("Unknown path", { status: 404 });
   }
 

@@ -40,7 +40,7 @@ export function Form() {
 function LoginForm() {
   return (
     <form
-      action="/app-router-client-component-redirect-route-handler-fetch/login"
+      action="/app-router-client-component-redirect-route-handler-fetch/session"
       method="POST"
       className={css.form}
     >

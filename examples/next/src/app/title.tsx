@@ -14,7 +14,7 @@ export function Title({
       <h1>
         <div className="flex items-center gap-2">
           <div className="text-2xl">
-            🔐{" "}
+            🛠{" "}
             <Link className={css.link} href="/">
               iron-session
             </Link>{" "}

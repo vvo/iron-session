@@ -4,23 +4,22 @@ Examples:
   ✔ Add explanations/fix examples basic @done(23-11-17 16:33)
   ✔ showcase swr example in first @done(23-11-17 17:08)
   ✔ Link to GitHub in homepage @done(23-11-17 17:12)
-  ☐ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase
+  ✔ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase @done(23-11-19 23:50)
   ✔ Merge both getIronSession APIs @done(23-11-18 15:17)
   ☐ Deploy the website
-  ☐ refactor the code to share more code between cookies() and req/res
-  ☐ <details> in readme to show how to have req.session
-  ☐ Link to code in all examples
+  ✘ refactor the code to share more code between cookies() and req/res @cancelled(23-11-19 23:50)
+  ✘ <details> in readme to show how to have req.session @cancelled(23-11-19 23:50)
+  ✔ Link to code in all examples @done(23-11-20 00:07)
   ☐ Merge to main
   ☐ Release
   ☐ Move all remaining confirmed work to a single issue
     ☐ add default data option?
-    ☐ change action to session (POST, GET, DELETE) in app-router-client-component-redirect-route-handler-fetch, as swr
-    ☐ eslint unused variables
-    ☐ eslint imports reorder
-    ☐ why do we need export interface CookieStore?
-    ☐ what are mergeHeaders, createResponse?? why do we need them here?
-    ☐ why do we need OverridableOptions??
-  ☐ Add blurb about the technique, as previously done
+    ✔ change action to session (POST, GET, DELETE) in app-router-client-component-redirect-route-handler-fetch, as swr @done(23-11-20 00:09)
+    ☐ eslint setup doesn't seem to work well (unused variables, imports reorder, ..)
+    ✔ why do we need export interface CookieStore? @done(23-11-20 00:09)
+    ✔ what are mergeHeaders, createResponse?? why do we need them here? @done(23-11-20 00:09)
+    ✔ why do we need OverridableOptions?? @done(23-11-20 00:09)
+  ✔ Add blurb about the technique, as previously done @done(23-11-20 00:09)
   ☐ Check Notion page
   ☐ Make preview deployment working
 

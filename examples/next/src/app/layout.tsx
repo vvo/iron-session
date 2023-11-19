@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "🔐 iron-session examples",
+  title: "🛠 iron-session examples",
   description: "Set of examples for iron-session",
 };
 

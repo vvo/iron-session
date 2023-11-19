@@ -1,6 +1,5 @@
 import Link from "next/link";
 import * as css from "@/app/css";
-import Image from "next/image";
 import { Title } from "./title";
 
 export default function Home() {
@@ -43,9 +42,12 @@ export default function Home() {
             App router + client components, route handlers, redirects, and fetch
           </Link>
         </li>
-        <li>Pages + API routes, redirects, and fetch (Help needed!)</li>
-        <li>Pages + API routes, and swr (Help needed!)</li>
-        <li>Pages + getServerSideProps, and redirects (Help needed!)</li>
+        <li>OAuth login example (swr) (Help needed)</li>
+        <li>Pages + API routes, redirects, and fetch (Help needed)</li>
+        <li>Pages + API routes, and swr (Help needed)</li>
+        <li>Pages + getServerSideProps, and redirects (Help needed)</li>
+        <li>Magic links (Help needed)</li>
+        <li>req.session wrappers (Help needed)</li>
       </ul>
     </main>
   );

@@ -12,13 +12,16 @@ corepack enable
 pnpm install
 ```
 
-Optionally, you might also want to install Deno or Bun if you are working on
-their examples.
-
 ## Development
 
 ```sh
 pnpm dev
+```
+
+## Tests
+
+```sh
+pnpm test
 ```
 
 ## Submitting a Contribution
