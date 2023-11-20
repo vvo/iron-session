@@ -1,87 +1,84 @@
-Examples:
-  ✔ Finish middleware @done(23-11-17 16:16)
-  ✔ Show name in protected pages @done(23-11-17 16:16)
-  ✔ Add explanations/fix examples basic @done(23-11-17 16:33)
-  ✔ showcase swr example in first @done(23-11-17 17:08)
-  ✔ Link to GitHub in homepage @done(23-11-17 17:12)
-  ✔ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase @done(23-11-19 23:50)
-  ✔ Merge both getIronSession APIs @done(23-11-18 15:17)
-  ☐ Deploy the website
-  ☐ redirect old website to new website
-  ☐ add a top comment on the github repo for the new version, link to the previous version too
-  ✘ refactor the code to share more code between cookies() and req/res @cancelled(23-11-19 23:50)
-  ✘ <details> in readme to show how to have req.session @cancelled(23-11-19 23:50)
-  ✔ Link to code in all examples @done(23-11-20 00:07)
-  ☐ Merge to main
-  ☐ Release
-  ☐ Move all remaining confirmed work to a single issue
-    ☐ add default data option?
-    ✔ change action to session (POST, GET, DELETE) in app-router-client-component-redirect-route-handler-fetch, as swr @done(23-11-20 00:09)
-    ☐ eslint setup doesn't seem to work well (unused variables, imports reorder, ..)
-    ✔ why do we need export interface CookieStore? @done(23-11-20 00:09)
-    ✔ what are mergeHeaders, createResponse?? why do we need them here? @done(23-11-20 00:09)
-    ✔ why do we need OverridableOptions?? @done(23-11-20 00:09)
-  ✔ Add blurb about the technique, as previously done @done(23-11-20 00:09)
-  ☐ Check Notion page
-  ☐ Make preview deployment working
-
-  ☐ add protected page link anyone can access (+ redirect to login, perhaps use server components for this)
-    ☐ add middleware example to check for protected pages
-  ☐ change all calls to /session only
-  ☐ optimistic updates in all examples if feasible easily
-  ☐ add prefetch when possible
-    ☐ add prefetch where relevant https://swr.vercel.app/docs/prefetching (index page)
+☐ Deploy the website
+☐ redirect old website to new website
+☐ add a top comment on the github repo for the new version, link to the previous version too
+☐ Move all remaining confirmed work to a single issue
+  ☐ add default data option?
+  ☐ eslint setup doesn't seem to work well (unused variables, imports reorder, ..)
   ☐ add example with magic link (+ explain where it can be used)
-
-  ☐ app router + server component where relevant + client components where relevant (check partial prerendering)
-  ☐ app router + client component + server action and optimistic updates https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#optimistic-updates
-  ☐ add text below each example to show what's slow to load
-  ☐ change all calls to POST DELETE /session (no more /login)
-  ☐ provide a way to set default session data and update all examples with it
   ☐ ask community to complete other examples
 
-  ☐ optimistic updates in general in the various examples, how?
-  ☐ pages + redirects + fetch
-  ☐ pages + swr
-  ☐ pages + getServerSideProps
-  ☐ app router + client component + route handlers + swr (no redirect)
-  ☐ edit in codesandbox link
-  ☐ deploy to vercel link
-  ☐ +edge
-  ☐ +skeletons
-  ☐ +link to gh
-  ☐ +pages examples to be done by community/later
-
-Example:
-  - Always link to code
-  - Start with raw website, bad design, then add design gradually
-  - app router example
-  - app router + swr
-  - server action (+ swr?)
-  - middleware example + show code. usecase?
-  - pages example + show code. usecase?
-  - getServerSideProps (legacy)
-  - read Next.js doc to find cases
-  - disable JavaScript, what happens?
-
-To answer:
-- Why are iron-webcrypto and others parts of dev dependencies, are we building even for node?
-- Are we testing in different Node.js versions? Next.js versions?
-
-Test website must include, in a very clear way:
-  ☐ Route handler examples (app router). Serverless and edge.
-  ☐ Server actions. (can it be serverless and edge?)
-  ☐ API routes examples (pages, legacy). Serverless and edge.
-  ☐ getServerSideProps examples (pages, legacy). Serverless and edge.
-
-☐ Test bun when the package is released in beta
-☐ Test deno when the package is released in beta
-
-Answered:
-- Are we using workspaces?
-  Yes
+☐ optimistic updates in all examples if feasible easily
+☐ add prefetch when possible
+  ☐ add prefetch where relevant https://swr.vercel.app/docs/prefetching (index page)
 
 Archive:
+  ✔ Examples: @done(23-11-20 01:23)
+  ✔ Answered: @done(23-11-20 01:23)
+  ✔ Finish middleware @done(23-11-17 16:16) @project(Examples)
+  ✔ Show name in protected pages @done(23-11-17 16:16) @project(Examples)
+  ✔ Add explanations/fix examples basic @done(23-11-17 16:33) @project(Examples)
+  ✔ showcase swr example in first @done(23-11-17 17:08) @project(Examples)
+  ✔ Link to GitHub in homepage @done(23-11-17 17:12) @project(Examples)
+  ✔ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase @done(23-11-19 23:50) @project(Examples)
+  ✔ Merge both getIronSession APIs @done(23-11-18 15:17) @project(Examples)
+  ✘ refactor the code to share more code between cookies() and req/res @cancelled(23-11-19 23:50) @project(Examples)
+  ✘ <details> in readme to show how to have req.session @cancelled(23-11-19 23:50) @project(Examples)
+  ✔ Link to code in all examples @done(23-11-20 00:07) @project(Examples)
+  ✔ Merge to main @done(23-11-20 01:21) @project(Examples)
+  ✔ Release @done(23-11-20 01:21) @project(Examples)
+  ✔ change action to session (POST, GET, DELETE) in app-router-client-component-redirect-route-handler-fetch, as swr @done(23-11-20 00:09) @project(Examples)
+  ✔ why do we need export interface CookieStore? @done(23-11-20 00:09) @project(Examples)
+  ✔ what are mergeHeaders, createResponse?? why do we need them here? @done(23-11-20 00:09) @project(Examples)
+  ✔ why do we need OverridableOptions?? @done(23-11-20 00:09) @project(Examples)
+  ✔ Add blurb about the technique, as previously done @done(23-11-20 00:09) @project(Examples)
+  ✔ Check Notion page @done(23-11-20 01:21) @project(Examples)
+  ✔ Make preview deployment working @done(23-11-20 01:21) @project(Examples)
+  ✔ add protected page link anyone can access (+ redirect to login, perhaps use server components for this) @done(23-11-20 01:21) @project(Examples)
+  ✔ add middleware example to check for protected pages @done(23-11-20 01:21) @project(Examples)
+  ✔ change all calls to /session only @done(23-11-20 01:21) @project(Examples)
+  ✔ app router + server component where relevant + client components where relevant (check partial prerendering) @done(23-11-20 01:22) @project(Examples)
+  ✔ app router + client component + server action and optimistic updates https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#optimistic-updates @done(23-11-20 01:22) @project(Examples)
+  ✔ add text below each example to show what's slow to load @done(23-11-20 01:22) @project(Examples)
+  ✔ change all calls to POST DELETE /session (no more /login) @done(23-11-20 01:22) @project(Examples)
+  ✔ provide a way to set default session data and update all examples with it @done(23-11-20 01:22) @project(Examples)
+  ✔ optimistic updates in general in the various examples, how? @done(23-11-20 01:22) @project(Examples)
+  ✔ pages + redirects + fetch @done(23-11-20 01:22) @project(Examples)
+  ✔ pages + swr @done(23-11-20 01:22) @project(Examples)
+  ✔ pages + getServerSideProps @done(23-11-20 01:22) @project(Examples)
+  ✔ app router + client component + route handlers + swr (no redirect) @done(23-11-20 01:23) @project(Examples)
+  ✔ edit in codesandbox link @done(23-11-20 01:23) @project(Examples)
+  ✔ deploy to vercel link @done(23-11-20 01:23) @project(Examples)
+  ✔ +edge @done(23-11-20 01:23) @project(Examples)
+  ✔ +skeletons @done(23-11-20 01:23) @project(Examples)
+  ✔ +link to gh @done(23-11-20 01:23) @project(Examples)
+  ✔ +pages examples to be done by community/later @done(23-11-20 01:23) @project(Examples)
+  ✔ Example: @done(23-11-20 01:23)
+  ✔ Always link to code @done(23-11-20 01:23)
+  ✔ Start with raw website, bad design, then add design gradually @done(23-11-20 01:23)
+  ✔ app router example @done(23-11-20 01:23)
+  ✔ app router + swr @done(23-11-20 01:23)
+  ✔ server action (+ swr?) @done(23-11-20 01:23)
+  ✔ middleware example + show code. usecase? @done(23-11-20 01:23)
+  ✔ pages example + show code. usecase? @done(23-11-20 01:23)
+  ✔ getServerSideProps (legacy) @done(23-11-20 01:23)
+  ✔ read Next.js doc to find cases @done(23-11-20 01:23)
+  ✔ disable JavaScript, what happens? @done(23-11-20 01:23)
+  ✔ @done(23-11-20 01:23)
+  ✔ To answer: @done(23-11-20 01:23)
+  ✔ Why are iron-webcrypto and others parts of dev dependencies, are we building even for node? @done(23-11-20 01:23)
+  ✔ Are we testing in different Node.js versions? Next.js versions? @done(23-11-20 01:23)
+  ✔ @done(23-11-20 01:23)
+  ✔ Test website must include, in a very clear way: @done(23-11-20 01:23)
+  ✔ Route handler examples (app router). Serverless and edge. @done(23-11-20 01:23)
+  ✔ Server actions. (can it be serverless and edge?) @done(23-11-20 01:23)
+  ✔ API routes examples (pages, legacy). Serverless and edge. @done(23-11-20 01:23)
+  ✔ getServerSideProps examples (pages, legacy). Serverless and edge. @done(23-11-20 01:23)
+  ✔ @done(23-11-20 01:23)
+  ✔ Test bun when the package is released in beta @done(23-11-20 01:23)
+  ✔ Test deno when the package is released in beta @done(23-11-20 01:23)
+  ✔ @done(23-11-20 01:23)
+  ✔ Are we using workspaces? @done(23-11-20 01:23)
+    Yes
   ✔ app router + client component + route handlers + redirects + fetch @done(23-11-16 00:05) @project(Examples)
   ✔ app router + server component + server action (the good stuff from lee, first example) @done(23-11-16 13:50) @project(Examples)
   ✔ check learn nextjs quickly @done(23-11-17 11:13) @project(Examples)

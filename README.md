@@ -1,3 +1,5 @@
+<small><i>Psst: This README is for `iron-session` v8 which brings full Next.js App Router compatibility. The previous documentation is [here](https://github.com/vvo/iron-session/tree/v6)</i></small>
+
 # iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session)
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
