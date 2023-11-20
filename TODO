@@ -7,6 +7,8 @@ Examples:
   ✔ remove merging options, let's rollback with previous code and discuss with community to add it back for the right reasons/usecase @done(23-11-19 23:50)
   ✔ Merge both getIronSession APIs @done(23-11-18 15:17)
   ☐ Deploy the website
+  ☐ redirect old website to new website
+  ☐ add a top comment on the github repo for the new version, link to the previous version too
   ✘ refactor the code to share more code between cookies() and req/res @cancelled(23-11-19 23:50)
   ✘ <details> in readme to show how to have req.session @cancelled(23-11-19 23:50)
   ✔ Link to code in all examples @done(23-11-20 00:07)
