@@ -25,7 +25,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
   - [`session.save(): Promise<void>`](#sessionsave-promisevoid)
   - [`session.destroy(): void`](#sessiondestroy-void)
   - [`sealData(data: unknown, { password, ttl }): Promise<string>`](#sealdatadata-unknown--password-ttl--promisestring)
-  - [`unSealData<T>(seal: string, { password, ttl }): Promise<T>`](#unsealdatatseal-string--password-ttl--promiset)
+  - [`unsealData<T>(seal: string, { password, ttl }): Promise<T>`](#unsealdatatseal-string--password-ttl--promiset)
 - [FAQ](#faq)
   - [Why use pure cookies for sessions?](#why-use-pure-cookies-for-sessions)
   - [How to invalidate sessions?](#how-to-invalidate-sessions)
@@ -152,7 +152,7 @@ await session.destroy()
 
 This is the underlying method and seal mechanism that powers `iron-session`. You can use it to seal any `data` you want and pass it around. One usecase are magic links: you generate a seal that contains a user id to login and send it to a route on your website (like `/magic-login`). Once received, you can safely decode the seal with `unsealData` and log the user in.
 
-### `unSealData<T>(seal: string, { password, ttl }): Promise<T>`
+### `unsealData<T>(seal: string, { password, ttl }): Promise<T>`
 
 This is the opposite of `sealData` and allow you to decode a seal to get the original data back.
 
