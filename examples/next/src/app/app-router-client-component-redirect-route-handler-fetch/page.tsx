@@ -16,6 +16,10 @@ export default function AppRouterRedirect() {
     <main className="p-10 space-y-5">
       <Title subtitle="+ client components, route handlers, redirects, and fetch" />
 
+      <p className="italic max-w-xl">
+        How to test: login and refresh the page to see iron-session in action.
+      </p>
+
       <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
         <Form />
       </div>
