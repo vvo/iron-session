@@ -2,7 +2,7 @@
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
 
-<p align="center">Online demo: <a href="https://iron-session-demo.vercel.app/">https://iron-session-demo.vercel.app</a> 👀</p>
+<p align="center">Online demo: <a href="https://get-iron-session.vercel.app/">https://get-iron-session.vercel.app</a> 👀</p>
 
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
@@ -91,7 +91,7 @@ function Profile() {
 
 ## Examples
 
-We have many different patterns and examples on the online demo, have a look: https://iron-session-demo.vercel.app/.
+We have many different patterns and examples on the online demo, have a look: https://get-iron-session.vercel.app/.
 
 ## Project status
 
