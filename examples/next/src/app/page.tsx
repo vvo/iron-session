@@ -15,7 +15,7 @@ export default function Home() {
             className={css.link.concat(" text-lg")}
             href="/app-router-client-component-route-handler-swr"
           >
-            App router + client components, route handlers, and swr
+            App router + client components, route handlers, and SWR
           </Link>{" "}
           🤩
           <ul className="list-disc list-inside indent-10 text-md text-gray-700">
@@ -42,9 +42,9 @@ export default function Home() {
             App router + client components, route handlers, redirects, and fetch
           </Link>
         </li>
-        <li>OAuth login example (swr) (Help needed)</li>
+        <li>OAuth login example (SWR) (Help needed)</li>
         <li>Pages + API routes, redirects, and fetch (Help needed)</li>
-        <li>Pages + API routes, and swr (Help needed)</li>
+        <li>Pages + API routes, and SWR (Help needed)</li>
         <li>Pages + getServerSideProps, and redirects (Help needed)</li>
         <li>Magic links (Help needed)</li>
         <li>req.session wrappers (Help needed)</li>

@@ -7,7 +7,7 @@ import { Title } from "@/app/title";
 import { GetTheCode } from "../get-the-code";
 
 export const metadata: Metadata = {
-  title: "🛠 iron-session examples: Client components, route handlers and swr",
+  title: "🛠 iron-session examples: Client components, route handlers and SWR",
 };
 
 export default function AppRouterRedirect() {
@@ -22,7 +22,7 @@ export default function AppRouterRedirect() {
               href="https://swr.vercel.app"
               target="_blank"
             >
-              swr
+              SWR
             </a>
           </>
         }
@@ -89,7 +89,7 @@ function HowItWorks() {
 
       <ol className="list-decimal list-inside">
         <li>
-          During login, the form is submitted with swr&apos;s{" "}
+          During login, the form is submitted with SWR&apos;s{" "}
           <a
             href="https://swr.vercel.app/docs/mutation#useswrmutation"
             className={css.link}
@@ -100,7 +100,7 @@ function HowItWorks() {
         </li>
         <li>
           {" "}
-          During logout, the form is submitted with swr&apos;s{" "}
+          During logout, the form is submitted with SWR&apos;s{" "}
           <a
             href="https://swr.vercel.app/docs/mutation#useswrmutation"
             className={css.link}
@@ -112,7 +112,7 @@ function HowItWorks() {
         <li>
           In all other places, the content of the session is optimistally
           rendered using the most recent value, and never gets outdated. This is
-          automatically handled by swr using mutations and revalidation.
+          automatically handled by SWR using mutations and revalidation.
         </li>
       </ol>
     </details>

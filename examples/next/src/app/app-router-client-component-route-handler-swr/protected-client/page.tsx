@@ -51,7 +51,7 @@ function Content() {
       <p>
         One benefit of using{" "}
         <a href="https://swr.vercel.app" target="_blank" className={css.link}>
-          swr
+          SWR
         </a>
         : if you open the page in different tabs/windows, and logout from one
         place, every other tab/window will be synced and logged out.
