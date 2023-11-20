@@ -8,6 +8,8 @@ export default function Home() {
       <Title subtitle="" category="Home" />
       <p>
         This website showcase different ways to use the iron-session library.
+        Note: We&apos;ve added some delay to simulate database requests on
+        login.
       </p>
       <ul className="list-disc list-inside">
         <li>
