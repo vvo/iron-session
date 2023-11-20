@@ -17,7 +17,8 @@ export default async function AppRouter() {
       <Title subtitle="+ server components, and server actions" />
 
       <p className="italic max-w-xl">
-        How to test: login and refresh the page to see iron-session in action.
+        <u>How to test</u>: Login and refresh the page to see iron-session in
+        action.
       </p>
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
