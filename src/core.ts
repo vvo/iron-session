@@ -107,7 +107,7 @@ export type IronSession<T> = T & {
   /**
    * Destroys the session data and removes the cookie.
    */
-  readonly destroy: () => Promise<void>;
+  readonly destroy: () => void;
 
   /**
    * Update the session configuration. You still need to call save() to send the new cookie.

@@ -25,7 +25,7 @@ function LoginForm() {
   return (
     <form action={login} className={css.form}>
       <label className="block text-lg">
-        <span className="text-gray-700">Username</span>
+        <span className={css.label}>Username</span>
         <Input />
       </label>
       <div>

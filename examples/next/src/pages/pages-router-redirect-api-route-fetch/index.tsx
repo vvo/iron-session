@@ -1,20 +1,23 @@
-import Link from "next/link";
+import { GetTheCode } from "@/get-the-code";
+import { Title } from "@/app/title";
 import * as css from "@/app/css";
-
-import { Metadata } from "next";
+import Link from "next/link";
 import { Form } from "./form";
-import { Title } from "../title";
-import { GetTheCode } from "../../get-the-code";
+import Head from "next/head";
 
-export const metadata: Metadata = {
-  title:
-    "🛠 iron-session examples: Client components, route handlers, redirects and fetch",
-};
-
-export default function AppRouterRedirect() {
+export default function PagesRouterRedirect() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="+ client components, route handlers, redirects, and fetch" />
+      <Head>
+        <title>
+          🛠 iron-session examples: Pages Router, API routes, redirects and
+          fetch
+        </title>
+      </Head>
+      <Title
+        category="Pages Router"
+        subtitle="+ API routes, redirects, and fetch"
+      />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in
@@ -25,7 +28,7 @@ export default function AppRouterRedirect() {
         <Form />
       </div>
 
-      <GetTheCode path="app/app-router-client-component-redirect-route-handler-fetch" />
+      <GetTheCode path="pages/pages-router-redirect-api-route-fetch" />
       <HowItWorks />
 
       <p>
@@ -45,22 +48,21 @@ function HowItWorks() {
       <ol className="list-decimal list-inside">
         <li>
           The form is submitted to
-          /app-router-client-component-redirect-route-handler-fetch/session (API
-          route) via a POST call (non-fetch). The API route sets the session
-          data and redirects back to
-          /app-router-client-component-redirect-route-handler-fetch (this page).
+          /api/pages-router-redirect-api-route-fetch/session (API route) via a
+          POST call (non-fetch). The API route sets the session data and
+          redirects back to /pages-router-redirect-api-route-fetch (this page).
         </li>
         <li>
           The page gets the session data via a fetch call to
-          /app-router-client-component-redirect-route-handler-fetch/session (API
-          route). The API route either return the session data (logged in) or a
-          default session (not logged in).
+          /api/pages-router-redirect-api-route-fetch/session (API route). The
+          API route either return the session data (logged in) or a default
+          session (not logged in).
         </li>
         <li>
           The logout is a regular link navigating to
-          /app-router-client-component-redirect-route-handler-fetch/logout which
+          /api/pages-router-redirect-api-route-fetch/session?action=logout which
           destroy the session and redirects back to
-          /app-router-client-component-redirect-route-handler-fetch (this page).
+          /pages-router-redirect-api-route-fetch (this page).
         </li>
       </ol>
 

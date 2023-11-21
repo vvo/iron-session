@@ -25,7 +25,7 @@ export async function logout() {
 
   // false => no db call for logout
   const session = await getSession(false);
-  await session.destroy();
+  session.destroy();
   revalidatePath("/app-router-server-component-and-action");
 }
 

@@ -213,7 +213,7 @@ await test("should expire the cookie on destroying the session", async () => {
   match(cookie, /Max-Age=1209540;/);
 
   deepEqual(session, { user: { id: 1 } });
-  await session.destroy();
+  session.destroy();
   deepEqual(session, {});
 
   cookie = res.setHeader.mock.calls[1]?.arguments[1][0];
@@ -378,7 +378,7 @@ await test("should keep previously set cookie - single", async () => {
   deepEqual(cookies[0], existingCookie);
   deepEqual(cookies.length, 2);
 
-  await session.destroy();
+  session.destroy();
 
   cookies = res.setHeader.mock.calls[1]?.arguments[1];
   deepEqual(cookies[0], existingCookie);
@@ -413,7 +413,7 @@ await test("should keep previously set cookies - multiple", async () => {
   deepEqual(cookies[1], existingCookies[1]);
   deepEqual(cookies.length, 3);
 
-  await session.destroy();
+  session.destroy();
 
   cookies = res.setHeader.mock.calls[1]?.arguments[1];
   deepEqual(cookies[0], existingCookies[0]);

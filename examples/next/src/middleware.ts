@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { sessionOptions as appRouterClientComponentRouteHandlerSwrIronOptions } from "./app/app-router-client-component-route-handler-swr/lib";
+import { sessionOptions as pagesRouterApiRouteSwrIronOptions } from "./pages/pages-router-api-route-swr/lib";
 import { cookies } from "next/headers";
 import { SessionOptions, getIronSession } from "iron-session";
 
@@ -14,6 +15,8 @@ interface SessionData {
 const sessionOptions: Record<string, SessionOptions> = {
   "/app-router-client-component-route-handler-swr/protected-middleware":
     appRouterClientComponentRouteHandlerSwrIronOptions,
+  "/pages-router-api-route-swr/protected-middleware":
+    pagesRouterApiRouteSwrIronOptions,
 };
 
 // This function can be marked `async` if using `await` inside
