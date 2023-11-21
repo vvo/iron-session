@@ -25,6 +25,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
   - [`getIronSession<T>(cookieStore, sessionOptions): Promise<IronSession<T>>`](#getironsessiontcookiestore-sessionoptions-promiseironsessiont)
   - [`session.save(): Promise<void>`](#sessionsave-promisevoid)
   - [`session.destroy(): void`](#sessiondestroy-void)
+  - [`session.updateConfig(sessionOptions: SessionOptions): void`](#sessionupdateconfigsessionoptions-sessionoptions-void)
   - [`sealData(data: unknown, { password, ttl }): Promise<string>`](#sealdatadata-unknown--password-ttl--promisestring)
   - [`unsealData<T>(seal: string, { password, ttl }): Promise<T>`](#unsealdatatseal-string--password-ttl--promiset)
 - [FAQ](#faq)
@@ -148,6 +149,10 @@ Destroys the session. This is a synchronous operation as it only removes the coo
 ```ts
 session.destroy()
 ```
+
+### `session.updateConfig(sessionOptions: SessionOptions): void`
+
+Updates the configuration of the session with new session options. You still need to call save() if you want them to be applied.
 
 ### `sealData(data: unknown, { password, ttl }): Promise<string>`
 
