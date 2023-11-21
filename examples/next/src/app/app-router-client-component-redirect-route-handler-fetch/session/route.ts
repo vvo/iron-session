@@ -6,14 +6,7 @@ import { redirect } from "next/navigation";
 import { sleep, SessionData } from "../lib";
 
 // /app-router-client-component-redirect-route-handler-fetch/session
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { action: string } },
-) {
-  if (params.action !== "session") {
-    return new Response("Unknown path", { status: 404 });
-  }
-
+export async function POST(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   const formData = await request.formData();
@@ -34,20 +27,15 @@ export async function POST(
 }
 
 // /app-router-client-component-redirect-route-handler-fetch/session
-// /app-router-client-component-redirect-route-handler-fetch/logout
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { action: string } },
-) {
-  if (params.action !== "session" && params.action !== "logout") {
-    return new Response("Unknown path", { status: 404 });
-  }
-
+// /app-router-client-component-redirect-route-handler-fetch/session?action=logout
+export async function GET(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
-  // /app-router-client-component-redirect-route-handler-fetch/logout
-  if (params.action === "logout") {
-    await session.destroy();
+  console.log(new URL(request.url).searchParams);
+  const action = new URL(request.url).searchParams.get("action");
+  // /app-router-client-component-redirect-route-handler-fetch/session?action=logout
+  if (action === "logout") {
+    session.destroy();
     return redirect(
       "/app-router-client-component-redirect-route-handler-fetch",
     );

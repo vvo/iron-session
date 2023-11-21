@@ -1,22 +1,23 @@
 import Link from "next/link";
 import * as css from "@/app/css";
 
-import { Metadata } from "next";
-import { Form } from "./form";
+import { Form } from "@/pages-components/pages-router-api-route-swr/form";
 import { Title } from "@/app/title";
-import { GetTheCode } from "../../get-the-code";
-
-export const metadata: Metadata = {
-  title: "🛠 iron-session examples: Client components, route handlers and SWR",
-};
+import { GetTheCode } from "@/get-the-code";
+import Head from "next/head";
 
 export default function AppRouterSWR() {
   return (
     <main className="p-10 space-y-5">
+      <Head>
+        <title>
+          🛠 iron-session examples: Pages Router, API routes, and SWR
+        </title>
+      </Head>
       <Title
         subtitle={
           <>
-            + client components, route handlers, and{" "}
+            + API routes, and{" "}
             <a
               className={css.link}
               href="https://swr.vercel.app"
@@ -46,37 +47,33 @@ export default function AppRouterSWR() {
           <ul className="list-disc list-inside">
             <li>
               <Link
-                href="/app-router-client-component-route-handler-swr/protected-client"
+                href="/pages-router-api-route-swr/protected-client"
                 className={css.link}
               >
-                Protected page via client component →
+                Protected page via client call →
               </Link>
             </li>
             <li>
               <Link
-                href="/app-router-client-component-route-handler-swr/protected-server"
+                href="/pages-router-api-route-swr/protected-server"
                 className={css.link}
-                // required to avoid caching issues when navigating between tabs/windows
-                prefetch={false}
               >
-                Protected page via server component →
+                Protected page via getServerSideProps →
               </Link>{" "}
-              <small>(broken: cache issue)</small>
             </li>
             <li>
               <Link
-                href="/app-router-client-component-route-handler-swr/protected-middleware"
+                href="/pages-router-api-route-swr/protected-middleware"
                 className={css.link}
               >
                 Protected page via middleware →
               </Link>{" "}
-              <small>(broken: cache issue)</small>
             </li>
           </ul>
         </div>
       </div>
 
-      <GetTheCode path="app/app-router-client-component-route-handler-swr" />
+      <GetTheCode path="pages/pages-router-api-route-swr" />
       <HowItWorks />
 
       <p>

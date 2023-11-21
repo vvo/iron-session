@@ -5,7 +5,7 @@ import { Form } from "./form";
 import { Suspense } from "react";
 import * as css from "@/app/css";
 import { Title } from "../title";
-import { GetTheCode } from "../get-the-code";
+import { GetTheCode } from "../../get-the-code";
 
 export const metadata: Metadata = {
   title: "🛠 iron-session examples: Server components, and server actions",
@@ -21,7 +21,7 @@ export default async function AppRouter() {
         action.
       </p>
 
-      <div className="grid grid-cols-1 gap-4 p-10 border border-gray-500 rounded-md max-w-xl">
+      <div className="grid grid-cols-1 gap-4 p-10 border border-slate-500 rounded-md max-w-xl">
         <Suspense fallback={<p className="text-lg">Loading...</p>}>
           <Form />
         </Suspense>
@@ -42,7 +42,7 @@ export default async function AppRouter() {
 function HowItWorks() {
   return (
     <details className="max-w-2xl space-y-4">
-      <summary className="cursor-pointer text-gray-700">How it works</summary>
+      <summary className="cursor-pointer">How it works</summary>
 
       <ol className="list-decimal list-inside">
         <li>During login, the page uses a server action.</li>

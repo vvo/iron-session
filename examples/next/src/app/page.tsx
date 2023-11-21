@@ -11,24 +11,41 @@ export default function Home() {
         Note: We&apos;ve added some delay to simulate database requests on
         login.
       </p>
+      <h2 className="text-slate-700 dark:text-slate-300 text-xl">
+        Main Examples:
+      </h2>
       <ul className="list-disc list-inside">
         <li>
           <Link
-            className={css.link.concat(" text-lg")}
+            // rewrite className with template literal
+            className={`${css.link} text-lg`}
             href="/app-router-client-component-route-handler-swr"
           >
             App router + client components, route handlers, and SWR
           </Link>{" "}
           🤩
-          <ul className="list-disc list-inside indent-10 text-md text-gray-700">
-            <li>
-              This the most advanced example and the one we currently recommend.
-            </li>
-          </ul>
         </li>
         <li>
           <Link
-            className={css.link.concat(" text-lg")}
+            href="/pages-router-api-route-swr"
+            className={`${css.link} text-lg`}
+          >
+            Pages Router + API routes, getServerSideProps, and SWR
+          </Link>{" "}
+          🤩
+        </li>
+      </ul>
+      <p className="indent-10 text-md text-slate-700 dark:text-slate-400">
+        ☝️ These two examples are the most advanced and the ones we recommend at
+        the moment.
+      </p>
+      <h2 className="text-slate-700 dark:text-slate-300 text-xl">
+        Other Examples:
+      </h2>
+      <ul className="list-disc list-inside">
+        <li>
+          <Link
+            className={`${css.link} text-lg`}
             href="/app-router-server-component-and-action"
             // prefetch = false to avoid caching issues when navigating between tabs/windows
             prefetch={false}
@@ -38,18 +55,27 @@ export default function Home() {
         </li>
         <li>
           <Link
-            className={css.link.concat(" text-lg")}
+            className={`${css.link} text-lg`}
             href="/app-router-client-component-redirect-route-handler-fetch"
           >
             App router + client components, route handlers, redirects, and fetch
           </Link>
         </li>
-        <li>OAuth login example (SWR) (Help needed)</li>
-        <li>Pages + API routes, redirects, and fetch (Help needed)</li>
-        <li>Pages + API routes, and SWR (Help needed)</li>
-        <li>Pages + getServerSideProps, and redirects (Help needed)</li>
-        <li>Magic links (Help needed)</li>
-        <li>req.session wrappers (Help needed)</li>
+        <li>
+          <Link
+            href="/pages-router-redirect-api-route-fetch"
+            className={`${css.link} text-lg`}
+          >
+            Pages Router + API routes, redirects, and fetch
+          </Link>
+        </li>
+        <li className="text-slate-500">Magic links (Help needed)</li>
+        <li className="text-slate-500">
+          OAuth login example (SWR) (Help needed)
+        </li>
+        <li className="text-slate-500">
+          Pages Router (and App Router?) req.session wrappers (Help needed)
+        </li>
       </ul>
     </main>
   );

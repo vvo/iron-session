@@ -1,6 +1,6 @@
 import Link from "next/link";
 import * as css from "@/app/css";
-import Image from "next/image";
+import GitHubLogo from "./GitHubLogo";
 
 export function Title({
   category = "App router",
@@ -14,25 +14,26 @@ export function Title({
       <h1>
         <div className="flex items-center gap-2">
           <div className="text-2xl">
-            🛠{" "}
+            <span className="hidden dark:inline">🌝</span>
+            <span className="dark:hidden">🛠</span>{" "}
             <Link className={css.link} href="/">
               iron-session
             </Link>{" "}
-            <span className="text-gray-700">examples: {category}</span>
+            <span className="text-slate-700 dark:text-slate-300">
+              examples: {category}
+            </span>
           </div>
-          <span className="text-gray-300 text-xl"> | </span>
+          <span className="text-slate-300 dark:text-slate-700 text-xl">
+            {" "}
+            |{" "}
+          </span>
           <div>
             <div className="flex items-center gap-2 text-md">
-              <Image
-                src="/github-mark.svg"
-                alt="GitHub Logo"
-                width={20}
-                height={20}
-              />{" "}
+              <GitHubLogo />{" "}
               <a
                 href="https://github.com/vvo/iron-session"
                 target="_blank"
-                className="text-gray-700 underline hover:no-underline"
+                className="text-slate-700 dark:text-slate-300 underline hover:no-underline"
               >
                 vvo/iron-session
               </a>
@@ -40,7 +41,7 @@ export function Title({
           </div>
         </div>
       </h1>
-      <h2 className="text-lg text-gray-500">{subtitle}</h2>
+      <h2 className="text-lg text-slate-500 dark:text-slate-400">{subtitle}</h2>
     </div>
   );
 }

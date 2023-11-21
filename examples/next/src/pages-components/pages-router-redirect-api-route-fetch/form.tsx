@@ -1,11 +1,22 @@
-"use client";
-
 import * as css from "@/app/css";
-import useSession from "./use-session";
+
+import { useEffect, useState } from "react";
+import { SessionData } from "./lib";
 import { defaultSession } from "./lib";
+import Link from "next/link";
 
 export function Form() {
-  const { session, isLoading } = useSession();
+  const [session, setSession] = useState<SessionData>(defaultSession);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/pages-router-redirect-api-route-fetch/session")
+      .then((res) => res.json())
+      .then((session) => {
+        setSession(session);
+        setIsLoading(false);
+      });
+  }, []);
 
   if (isLoading) {
     return <p className="text-lg">Loading...</p>;
@@ -26,21 +37,9 @@ export function Form() {
 }
 
 function LoginForm() {
-  const { login } = useSession();
-
   return (
     <form
-      onSubmit={function (event) {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const username = formData.get("username") as string;
-        login(username, {
-          optimisticData: {
-            isLoggedIn: true,
-            username,
-          },
-        });
-      }}
+      action="/api/pages-router-redirect-api-route-fetch/session"
       method="POST"
       className={css.form}
     >
@@ -66,21 +65,14 @@ function LoginForm() {
 }
 
 function LogoutButton() {
-  const { logout } = useSession();
-
   return (
     <p>
-      <a
+      <Link
+        href="/api/pages-router-redirect-api-route-fetch/session?action=logout"
         className={css.button}
-        onClick={(event) => {
-          event.preventDefault();
-          logout(null, {
-            optimisticData: defaultSession,
-          });
-        }}
       >
         Logout
-      </a>
+      </Link>
     </p>
   );
 }

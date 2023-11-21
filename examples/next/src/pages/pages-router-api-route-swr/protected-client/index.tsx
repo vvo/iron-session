@@ -1,7 +1,5 @@
-"use client";
-
 import { Title } from "@/app/title";
-import useSession from "../use-session";
+import useSession from "@/pages-components/pages-router-api-route-swr/use-session";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import * as css from "@/app/css";
@@ -13,10 +11,7 @@ export default function ProtectedClient() {
       <Title subtitle="Protected page" />
       <Content />
       <p>
-        <Link
-          href="/app-router-client-component-route-handler-swr"
-          className={css.link}
-        >
+        <Link href="/pages-router-api-route-swr" className={css.link}>
           ← Back
         </Link>
       </p>
@@ -30,7 +25,7 @@ function Content() {
 
   useEffect(() => {
     if (!isLoading && !session.isLoggedIn) {
-      router.replace("/app-router-client-component-route-handler-swr");
+      router.replace("/pages-router-api-route-swr");
     }
   }, [isLoading, session.isLoggedIn, router]);
 

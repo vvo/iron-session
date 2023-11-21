@@ -1,15 +1,16 @@
-<small><i>Psst: This README is for `iron-session` v8 which brings full Next.js App Router compatibility. The previous documentation is [here](https://github.com/vvo/iron-session/tree/v6)</i></small>
+<small><i>Psst: This README is for `iron-session` v8 which brings full Next.js App Router compatibility. The previous documentation is [here](https://github.com/vvo/iron-session/tree/v6)</i></small>.
 
-# iron-session [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session)
+---
+
+# iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
-
-<p align="center">Online demo: <a href="https://get-iron-session.vercel.app/">https://get-iron-session.vercel.app</a> 👀</p>
 
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
 
-<p align="center"><i>⭐️ Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></i></p>
+<p align="center"><i>Online demo and examples: <a href="https://get-iron-session.vercel.app/">https://get-iron-session.vercel.app</a></i> 👀 <br/>
+ <i>Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></i> ⭐️</p>
 
 ## Table of Contents
 
@@ -145,7 +146,7 @@ await session.save()
 Destroys the session. This is a synchronous operation as it only removes the cookie. It must be done before headers are sent to the client.
 
 ```ts
-await session.destroy()
+session.destroy()
 ```
 
 ### `sealData(data: unknown, { password, ttl }): Promise<string>`

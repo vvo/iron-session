@@ -40,8 +40,7 @@ export async function GET() {
 export async function DELETE() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
-  // /app-router-client-component-route-handler-swr/logout
-  await session.destroy();
+  session.destroy();
 
   return Response.json(defaultSession);
 }

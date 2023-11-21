@@ -45,7 +45,7 @@ function LoginForm() {
       className={css.form}
     >
       <label className="block text-lg">
-        <span className="text-gray-700">Username</span>
+        <span className={css.label}>Username</span>
         <input
           type="text"
           name="username"
@@ -69,7 +69,7 @@ function LogoutButton() {
   return (
     <p>
       <a
-        href="/app-router-client-component-redirect-route-handler-fetch/logout"
+        href="/app-router-client-component-redirect-route-handler-fetch/session?action=logout"
         className={css.button}
       >
         Logout
