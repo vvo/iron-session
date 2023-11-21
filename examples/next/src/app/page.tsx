@@ -8,8 +8,8 @@ export default function Home() {
       <Title subtitle="" category="Home" />
       <p className="max-w-xl">
         This website showcase different ways to use the iron-session library.
-        Note: We&apos;ve added some delay to simulate database requests on
-        login.
+        <br />
+        Note: We&apos;ve added delay to simulate database requests at login.
       </p>
       <h2 className="text-slate-700 dark:text-slate-300 text-xl">
         Main Examples:
