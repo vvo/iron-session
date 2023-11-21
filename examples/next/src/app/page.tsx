@@ -35,9 +35,9 @@ export default function Home() {
           🤩
         </li>
       </ul>
-      <p className="indent-10 text-md text-slate-700 dark:text-slate-400">
-        ☝️ These two examples are the most advanced and the ones we recommend at
-        the moment.
+      <p className="indent-10 text-center text-md text-slate-700 dark:text-slate-400 max-w-lg">
+        ☝️ These two examples are the most advanced and the ones we recommend
+        for now.
       </p>
       <h2 className="text-slate-700 dark:text-slate-300 text-xl">
         Other Examples:
