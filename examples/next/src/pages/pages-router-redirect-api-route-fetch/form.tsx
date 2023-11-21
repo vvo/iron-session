@@ -3,6 +3,7 @@ import * as css from "@/app/css";
 import { useEffect, useState } from "react";
 import { SessionData } from "./lib";
 import { defaultSession } from "./lib";
+import Link from "next/link";
 
 export function Form() {
   const [session, setSession] = useState<SessionData>(defaultSession);
@@ -66,12 +67,12 @@ function LoginForm() {
 function LogoutButton() {
   return (
     <p>
-      <a
+      <Link
         href="/api/pages-router-redirect-api-route-fetch/session?action=logout"
         className={css.button}
       >
         Logout
-      </a>
+      </Link>
     </p>
   );
 }
