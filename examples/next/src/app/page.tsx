@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="p-10 space-y-5">
       <Title subtitle="" category="Home" />
-      <p>
+      <p className="max-w-xl">
         This website showcase different ways to use the iron-session library.
         Note: We&apos;ve added some delay to simulate database requests on
         login.
