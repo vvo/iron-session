@@ -1,5 +1,5 @@
 export const button =
-  "hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white border border-text-slate-900 dark:border-text-white py-2 px-4 rounded focus:outline-2 cursor-pointer";
+  "hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white border border-slate-900 dark:border-white py-2 px-4 rounded focus:outline-2 cursor-pointer";
 
 export const form = "max-w-md grid grid-cols-1 gap-6";
 
