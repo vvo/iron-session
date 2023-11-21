@@ -2,7 +2,7 @@
 
 ---
 
-# iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) [![Downloads](https://img.shields.io/npm/dm/next-iron-session.svg)](http://npm-stat.com/charts.html?package=iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
+# iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) ![npm](https://img.shields.io/npm/dm/iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
 
