@@ -5,7 +5,7 @@ import {
   sleep,
   defaultSession,
   SessionData,
-} from "../../pages-router-redirect-api-route-fetch/lib";
+} from "../../../pages-components/pages-router-redirect-api-route-fetch/lib";
 
 export default async function handler(
   req: NextApiRequest,

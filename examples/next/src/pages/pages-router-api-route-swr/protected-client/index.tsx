@@ -1,5 +1,5 @@
 import { Title } from "@/app/title";
-import useSession from "../use-session";
+import useSession from "@/pages-components/pages-router-api-route-swr/use-session";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import * as css from "@/app/css";

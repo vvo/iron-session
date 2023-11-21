@@ -2,7 +2,10 @@ import { Title } from "@/app/title";
 import * as css from "@/app/css";
 
 import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "../lib";
+import {
+  SessionData,
+  sessionOptions,
+} from "@/pages-components/pages-router-api-route-swr/lib";
 import Link from "next/link";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 

@@ -5,7 +5,7 @@ import {
   sessionOptions,
   sleep,
   SessionData,
-} from "../../pages-router-api-route-swr/lib";
+} from "../../../pages-components/pages-router-api-route-swr/lib";
 
 // login
 export default async function handler(

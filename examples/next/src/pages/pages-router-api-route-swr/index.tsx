@@ -1,9 +1,9 @@
 import Link from "next/link";
 import * as css from "@/app/css";
 
-import { Form } from "./form";
+import { Form } from "@/pages-components/pages-router-api-route-swr/form";
 import { Title } from "@/app/title";
-import { GetTheCode } from "../../get-the-code";
+import { GetTheCode } from "@/get-the-code";
 import Head from "next/head";
 
 export default function AppRouterSWR() {

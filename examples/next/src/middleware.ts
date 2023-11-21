@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { sessionOptions as appRouterClientComponentRouteHandlerSwrIronOptions } from "./app/app-router-client-component-route-handler-swr/lib";
-import { sessionOptions as pagesRouterApiRouteSwrIronOptions } from "./pages/pages-router-api-route-swr/lib";
+import { sessionOptions as pagesRouterApiRouteSwrIronOptions } from "./pages-components/pages-router-api-route-swr/lib";
 import { cookies } from "next/headers";
 import { SessionOptions, getIronSession } from "iron-session";
 

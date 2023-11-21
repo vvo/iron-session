@@ -2,7 +2,7 @@ import { GetTheCode } from "@/get-the-code";
 import { Title } from "@/app/title";
 import * as css from "@/app/css";
 import Link from "next/link";
-import { Form } from "./form";
+import { Form } from "@/pages-components/pages-router-redirect-api-route-fetch/form";
 import Head from "next/head";
 
 export default function PagesRouterRedirect() {
