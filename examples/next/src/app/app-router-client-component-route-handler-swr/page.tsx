@@ -61,7 +61,6 @@ export default function AppRouterSWR() {
               >
                 Protected page via server component →
               </Link>{" "}
-              <small>(broken: cache issue)</small>
             </li>
             <li>
               <Link
@@ -70,7 +69,6 @@ export default function AppRouterSWR() {
               >
                 Protected page via middleware →
               </Link>{" "}
-              <small>(broken: cache issue)</small>
             </li>
           </ul>
         </div>
