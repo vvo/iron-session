@@ -79,7 +79,7 @@ export function POST() {
 
 ```tsx
 // Next.js Server Components and Server Actions (App Router)
-import { cookies } from 'next/header';
+import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 async function getIronSession() {
