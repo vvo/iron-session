@@ -82,12 +82,12 @@ export function POST() {
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
-async function getIronSession() {
+async function getIronSessionData() {
   const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
 }
 
 function Profile() {
-  const session = await getIronSession();
+  const session = await getIronSessionData();
 
   return <div>{session.username}</div>;
 }
