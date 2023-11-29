@@ -63,7 +63,7 @@ export function post(req, res) {
 
 ```ts
 // Next.js Route Handlers (App Router)
-import { cookies } from 'next/header';
+import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 export function GET() {
