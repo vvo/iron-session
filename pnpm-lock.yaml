@@ -61,8 +61,8 @@ importers:
         specifier: 2.4.6
         version: 2.4.6(prettier@3.1.0)
       publint:
-        specifier: 0.2.5
-        version: 0.2.5
+        specifier: 0.2.6
+        version: 0.2.6
       tsup:
         specifier: 8.0.1
         version: 8.0.1(typescript@5.3.2)
@@ -3470,8 +3470,8 @@ packages:
       react-is: 16.13.1
     dev: true
 
-  /publint@0.2.5:
-    resolution: {integrity: sha512-eoQiP0WXkxkpth1fMLoS1I/6BQoxKNZxTAAnFjPgURFrJulC5D5Uifk49a9kfNCYmcza9E/ZkbFhQQdjkmKAbg==}
+  /publint@0.2.6:
+    resolution: {integrity: sha512-zMwDVwrlLnCsviDXlczhuc5nIljsjZUgbLeKNyMYqbIJLRhcW81xrKsHlEu21YUaIxpa8T66tdIqP0mZm9ym3A==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
