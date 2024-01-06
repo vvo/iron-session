@@ -52,8 +52,8 @@
   "devDependencies": {
     "@types/cookie": "0.6.0",
     "@types/node": "18.18.13",
-    "@typescript-eslint/eslint-plugin": "6.17.0",
-    "@typescript-eslint/parser": "6.17.0",
+    "@typescript-eslint/eslint-plugin": "6.18.0",
+    "@typescript-eslint/parser": "6.18.0",
     "c8": "8.0.1",
     "concurrently": "8.2.2",
     "eslint": "8.56.0",
