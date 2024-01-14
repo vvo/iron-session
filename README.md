@@ -1,10 +1,26 @@
-<small><i>Psst: This README is for `iron-session` v8 which brings full Next.js App Router compatibility. The previous documentation is [here](https://github.com/vvo/iron-session/tree/v6)</i></small>.
-
----
-
 # iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) ![npm](https://img.shields.io/npm/dm/iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
+
+<div align="right"><sub><i>our sponsor:</i></sup></div>
+
+---
+<div align="center">
+  <a href="https://stytch.com?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=logo&utm_campaign=iron-session">
+    <picture>
+      <source width="200px" media="(prefers-color-scheme: dark)" srcset="./sponsor/stytch_white.svg'>
+      <source width="200px" media="(prefers-color-scheme: light)" srcset="./sponsor/stytch_charcoal.svg">
+      <img width="200px" src="./sponsor/stytch_charcoal.svg" />
+    </picture>
+  </a>
+   <p align="center">API-first authentication, authorization, and fraud prevention</p>
+   <p align="center">
+       <a href="https://stytch.com?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=website-link&utm_campaign=iron-session"><b>Website</b></a> •
+       <a href="https://stytch.com/docs?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=docs-link&utm_campaign=iron-session"><b>Documentation</b></a>
+   </p>
+</div>
+
+---
 
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
