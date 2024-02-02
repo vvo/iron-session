@@ -31,11 +31,11 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup && pnpm --filter next-example build",
+    "build": "tsup",
     "dev": "pnpm build && concurrently \"pnpm build --watch\" \"pnpm --filter=next-example dev\" ",
     "lint": "tsc --noEmit && tsc --noEmit -p examples/next/tsconfig.json && pnpm eslint . && publint",
     "prepare": "pnpm build && tsc --noEmit",
-    "start": "pnpm start --filter next-example",
+    "start": "turbo start --filter=next-example",
     "test": "c8 -r text -r lcov node --loader tsx --test src/*.test.ts && pnpm build",
     "test:watch": "node --loader tsx --test --watch src/*.test.ts"
   },
