@@ -58,8 +58,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-plugin-packagejson:
-        specifier: 2.4.11
-        version: 2.4.11(prettier@3.2.5)
+        specifier: 2.4.12
+        version: 2.4.12(prettier@3.2.5)
       publint:
         specifier: 0.2.7
         version: 0.2.7
@@ -3377,8 +3377,8 @@ packages:
       fast-diff: 1.3.0
     dev: true
 
-  /prettier-plugin-packagejson@2.4.11(prettier@3.2.5):
-    resolution: {integrity: sha512-zmOmM96GkAjT2zUdHSQJnpyVpbisBkewDluo2NLHjI/JN7uOCZlEzWVaMhdqyZ8LVdQDfzamvbvSw4swd3Az1A==}
+  /prettier-plugin-packagejson@2.4.12(prettier@3.2.5):
+    resolution: {integrity: sha512-hifuuOgw5rHHTdouw9VrhT8+Nd7UwxtL1qco8dUfd4XUFQL6ia3xyjSxhPQTsGnSYFraTWy5Omb+MZm/OWDTpQ==}
     peerDependencies:
       prettier: '>= 1.16.0'
     peerDependenciesMeta:
@@ -3386,7 +3386,7 @@ packages:
         optional: true
     dependencies:
       prettier: 3.2.5
-      sort-package-json: 2.7.0
+      sort-package-json: 2.8.0
       synckit: 0.9.0
     dev: true
 
@@ -3675,8 +3675,8 @@ packages:
     resolution: {integrity: sha512-855pvK+VkU7PaKYPc+Jjnmt4EzejQHyhhF33q31qG8x7maDzkeFhAAThdCYay11CISO+qAMwjOBP+fPZe0IPyg==}
     dev: true
 
-  /sort-package-json@2.7.0:
-    resolution: {integrity: sha512-6AayF8bp6L+WROgpbhTMUtB9JSFmpGHjmW7DyaNPS1HwlTw2oSVlUUtlkHSEZmg5o89F3zvLBZNvMeZ1T4fjQg==}
+  /sort-package-json@2.8.0:
+    resolution: {integrity: sha512-PxeNg93bTJWmDGnu0HADDucoxfFiKkIr73Kv85EBThlI1YQPdc0XovBgg2llD0iABZbu2SlKo8ntGmOP9wOj/g==}
     hasBin: true
     dependencies:
       detect-indent: 7.0.1
