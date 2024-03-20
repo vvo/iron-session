@@ -68,7 +68,7 @@
     "publint": "0.2.7",
     "tsup": "8.0.2",
     "tsx": "4.7.1",
-    "typescript": "5.4.2"
+    "typescript": "5.4.3"
   },
   "packageManager": "pnpm@8.11.0",
   "publishConfig": {
