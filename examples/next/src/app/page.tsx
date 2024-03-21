@@ -69,7 +69,14 @@ export default function Home() {
             Pages Router + API routes, redirects, and fetch
           </Link>
         </li>
-        <li className="text-slate-500">Magic links (Help needed)</li>
+        <li>
+          <Link
+            href="/app-router-magic-links"
+            className={`${css.link} text-lg`}
+          >
+            Magic links
+          </Link>
+        </li>
         <li className="text-slate-500">
           OAuth login example (SWR) (Help needed)
         </li>
