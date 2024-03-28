@@ -70,7 +70,7 @@
     "tsx": "4.7.1",
     "typescript": "5.4.3"
   },
-  "packageManager": "pnpm@8.11.0",
+  "packageManager": "pnpm@8.15.5",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
