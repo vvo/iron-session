@@ -55,7 +55,7 @@
     "@types/node": "18.18.13",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
-    "c8": "8.0.1",
+    "c8": "9.1.0",
     "concurrently": "8.2.2",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
