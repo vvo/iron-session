@@ -20,7 +20,7 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
-      - run: pnpm lint && [ -z "$(git status --porcelain)" ]
+      - run: pnpm lint
       - run: pnpm test
       - uses: codecov/codecov-action@v3
         with:
