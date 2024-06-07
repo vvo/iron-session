@@ -12,8 +12,8 @@ importers:
         specifier: 0.6.0
         version: 0.6.0
       iron-webcrypto:
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.2.1
+        version: 1.2.1
       uncrypto:
         specifier: 0.1.3
         version: 0.1.3
@@ -2810,8 +2810,8 @@ packages:
       side-channel: 1.0.4
     dev: true
 
-  /iron-webcrypto@1.0.0:
-    resolution: {integrity: sha512-anOK1Mktt8U1Xi7fCM3RELTuYbnFikQY5VtrDj7kPgpejV7d43tWKhzgioO0zpkazLEL/j/iayRqnJhrGfqUsg==}
+  /iron-webcrypto@1.2.1:
+    resolution: {integrity: sha512-feOM6FaSr6rEABp/eDfVseKyTMDt+KGpeB35SkVn9Tyn0CqvVsY3EwI0v5i8nMHyJnzCIQf7nsy3p41TPkJZhg==}
     dev: false
 
   /is-array-buffer@3.0.2:
