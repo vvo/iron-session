@@ -60,6 +60,8 @@ pnpm add iron-session
 
 ## Usage
 
+*We have extensive examples here too: https://get-iron-session.vercel.app/.*
+
 To get a session, there's a single method to know: `getIronSession`.
 
 ```ts
@@ -68,6 +70,7 @@ import { getIronSession } from 'iron-session';
 
 export async function get(req, res) {
   const session = await getIronSession(req, res, { password: "...", cookieName: "..." });
+  return session;
 }
 
 export async function post(req, res) {
@@ -84,6 +87,7 @@ import { getIronSession } from 'iron-session';
 
 export async function GET() {
   const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  return session;
 }
 
 export async function POST() {
