@@ -444,7 +444,7 @@ async function getIronSessionFromCookieStore<T extends object>(
     );
   }
 
-  const sessionConfig = getSessionConfig(sessionOptions);
+  let sessionConfig = getSessionConfig(sessionOptions);
   const sealFromCookies = getServerActionCookie(
     sessionConfig.cookieName,
     cookieStore,
@@ -457,6 +457,11 @@ async function getIronSessionFromCookieStore<T extends object>(
     : ({} as T);
 
   Object.defineProperties(session, {
+    updateConfig: {
+      value: function updateConfig(newSessionOptions: SessionOptions) {
+        sessionConfig = getSessionConfig(newSessionOptions);
+      },
+    },
     save: {
       value: async function save() {
         const seal = await sealData(session, {
