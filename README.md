@@ -122,7 +122,7 @@ We have many different patterns and examples on the online demo, have a look: ht
 
 Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.****
 
-- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `array` of objects like this: `[{id: 2, password: "..."}, {id: 1, password: "..."}]` to allow for password rotation.
+- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation.  iron-session will use the highest numbered key for new cookies.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies.
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:

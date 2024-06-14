@@ -14,10 +14,28 @@ export async function POST(request: NextRequest) {
 
   session.isLoggedIn = true;
   session.username = username;
+  session.counter = 0;
   await session.save();
 
   // simulate looking up the user in db
   await sleep(250);
+
+  return Response.json(session);
+}
+
+export async function PATCH() {
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+
+  session.counter++;
+  session.updateConfig({
+    ...sessionOptions,
+    cookieOptions: {
+      ...sessionOptions.cookieOptions,
+      expires: new Date("2024-12-27T00:00:00.000Z"),
+      maxAge: undefined,
+    },
+  });
+  await session.save();
 
   return Response.json(session);
 }
