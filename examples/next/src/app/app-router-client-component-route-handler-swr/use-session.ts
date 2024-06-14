@@ -31,6 +31,12 @@ function doLogout(url: string) {
   });
 }
 
+function doIncrement(url: string) {
+  return fetchJson<SessionData>(url, {
+    method: "PATCH",
+  });
+}
+
 export default function useSession() {
   const { data: session, isLoading } = useSWR(
     sessionApiRoute,
@@ -45,6 +51,7 @@ export default function useSession() {
     revalidate: false,
   });
   const { trigger: logout } = useSWRMutation(sessionApiRoute, doLogout);
+  const { trigger: increment } = useSWRMutation(sessionApiRoute, doIncrement);
 
-  return { session, logout, login, isLoading };
+  return { session, logout, login, increment, isLoading };
 }

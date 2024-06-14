@@ -5,7 +5,7 @@ import useSession from "./use-session";
 import { defaultSession } from "./lib";
 
 export function Form() {
-  const { session, isLoading } = useSession();
+  const { session, isLoading, increment } = useSession();
 
   if (isLoading) {
     return <p className="text-lg">Loading...</p>;
@@ -16,6 +16,21 @@ export function Form() {
       <>
         <p className="text-lg">
           Logged in user: <strong>{session.username}</strong>
+          &nbsp;
+          <button
+            className={css.button}
+            onClick={() => {
+              increment(null, {
+                optimisticData: {
+                  ...session,
+                  counter: session.counter + 1,
+                },
+                revalidate: false,
+              });
+            }}
+          >
+            {session.counter}
+          </button>
         </p>
         <LogoutButton />
       </>
@@ -38,6 +53,7 @@ function LoginForm() {
           optimisticData: {
             isLoggedIn: true,
             username,
+            counter: 0,
           },
         });
       }}

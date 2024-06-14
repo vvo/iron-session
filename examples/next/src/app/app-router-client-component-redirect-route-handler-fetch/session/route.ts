@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
-  console.log(new URL(request.url).searchParams);
   const action = new URL(request.url).searchParams.get("action");
   // /app-router-client-component-redirect-route-handler-fetch/session?action=logout
   if (action === "logout") {
