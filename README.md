@@ -99,7 +99,7 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 async function getIronSessionData() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  return await getIronSession(cookies(), { password: "...", cookieName: "..." });
 }
 
 function Profile() {
