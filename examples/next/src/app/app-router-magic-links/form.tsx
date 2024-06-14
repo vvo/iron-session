@@ -58,7 +58,11 @@ function LoginForm() {
         />
       </label>
       <div>
-        <input type="submit" value="Login" className={css.button} />
+        <input
+          type="submit"
+          value="Get magic login link"
+          className={css.button}
+        />
       </div>
     </form>
   );
