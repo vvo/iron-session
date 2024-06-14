@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   //   // Ideally this would be an email or text message with a link to the magic link route
   //   magic_link: `${process.env.PUBLIC_URL}/app-router-magic-links/magic-login?seal=${seal}`,
   // });
-  const link = `${process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_URL}/app-router-magic-links/magic-login?seal=${seal}`;
+  const link = `${process.env.NEXT_PUBLIC_URL}/app-router-magic-links/magic-login?seal=${seal}`;
   return new Response(
     `<h1>Here is your magic link:</h1><h3><a href="${link}">${link}</a></h3><h3>You can now open this link in a private browser window and see yourself being logged in immediately.</h3><h3>👈 <a href="/app-router-magic-links">Go back</a></h3>`,
     {
