@@ -66,12 +66,12 @@ To get a session, there's a single method to know: `getIronSession`.
 // Next.js API Routes and Node.js/Express/Connect.
 import { getIronSession } from 'iron-session';
 
-export function get(req, res) {
-  const session = getIronSession(req, res, { password: "...", cookieName: "..." });
+export async function get(req, res) {
+  const session = await getIronSession(req, res, { password: "...", cookieName: "..." });
 }
 
-export function post(req, res) {
-  const session = getIronSession(req, res, { password: "...", cookieName: "..." });
+export async function post(req, res) {
+  const session = await getIronSession(req, res, { password: "...", cookieName: "..." });
   session.username = "Alison";
   await session.save();
 }
@@ -82,12 +82,12 @@ export function post(req, res) {
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
-export function GET() {
-  const session = getIronSession(cookies(), { password: "...", cookieName: "..." });
+export async function GET() {
+  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
 }
 
-export function POST() {
-  const session = getIronSession(cookies(), { password: "...", cookieName: "..." });
+export async function POST() {
+  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
   session.username = "Alison";
   await session.save();
 }
@@ -99,10 +99,11 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 async function getIronSessionData() {
-  return await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  return session
 }
 
-function Profile() {
+async function Profile() {
   const session = await getIronSessionData();
 
   return <div>{session.username}</div>;
@@ -141,13 +142,21 @@ Two options are required: `password` and `cookieName`. Everything else is automa
 ### `getIronSession<T>(req, res, sessionOptions): Promise<IronSession<T>>`
 
 ```ts
-const session = getIronSession<SessionData>(req, res, sessionOptions);
+type SessionData = {
+  // Your data
+}
+
+const session = await getIronSession<SessionData>(req, res, sessionOptions);
 ```
 
 ### `getIronSession<T>(cookieStore, sessionOptions): Promise<IronSession<T>>`
 
 ```ts
-const session = getIronSession<SessionData>(cookies(), sessionOptions);
+type SessionData = {
+  // Your data
+}
+
+const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 ```
 
 ### `session.save(): Promise<void>`
