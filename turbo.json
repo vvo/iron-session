@@ -1,16 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "//#build": {
-      "outputs": ["dist/**/*"],
-      "inputs": ["version.txt"]
+      "outputs": [
+        "dist/**/*"
+      ],
+      "inputs": [
+        "version.txt"
+      ]
     },
     "build": {
-      "dependsOn": ["^build", "//#build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build",
+        "//#build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "start": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   }
 }
