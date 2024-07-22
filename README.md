@@ -8,7 +8,7 @@
 <div align="center">
   <a href="https://clerk.com">
     <picture>
-      <source width="200px" media="(prefers-color-scheme: dark)" srcset="./sponsor/clerk-light.svg'>
+      <source width="200px" media="(prefers-color-scheme: dark)" srcset="./sponsor/clerk-light.svg">
       <source width="200px" media="(prefers-color-scheme: light)" srcset="./sponsor/clerk-dark.svg">
       <img width="200px" src="./sponsor/clerk-dark.svg" />
     </picture>
