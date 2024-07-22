@@ -6,17 +6,18 @@
 
 ---
 <div align="center">
-  <a href="https://stytch.com?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=logo&utm_campaign=iron-session">
+  <a href="https://clerk.com">
     <picture>
-      <source width="200px" media="(prefers-color-scheme: dark)" srcset="./sponsor/stytch_white.svg'>
-      <source width="200px" media="(prefers-color-scheme: light)" srcset="./sponsor/stytch_charcoal.svg">
-      <img width="200px" src="./sponsor/stytch_charcoal.svg" />
+      <source width="200px" media="(prefers-color-scheme: dark)" srcset="./sponsor/clerk-light.svg'>
+      <source width="200px" media="(prefers-color-scheme: light)" srcset="./sponsor/clerk-dark.svg">
+      <img width="200px" src="./sponsor/clerk-dark.svg" />
     </picture>
   </a>
-   <p align="center">API-first authentication, authorization, and fraud prevention</p>
+   <p align="center">Clerk is a complete suite of embeddable UIs, flexible APIs, and admin dashboards to authenticate and manage your users.</p>
    <p align="center">
-       <a href="https://stytch.com?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=website-link&utm_campaign=iron-session"><b>Website</b></a> •
-       <a href="https://stytch.com/docs?utm_source=oss-sponsorship&utm_medium=paid_sponsorship&utm_content=docs-link&utm_campaign=iron-session"><b>Documentation</b></a>
+      <a href="https://go.clerk.com/198WZf0">
+        <b>Add authentication in 7 minutes 👉</b>
+      </a>
    </p>
 </div>
 
