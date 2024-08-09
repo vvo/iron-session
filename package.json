@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@types/cookie": "0.6.0",
-    "@types/node": "20.14.14",
+    "@types/node": "20.14.15",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "c8": "10.1.2",
