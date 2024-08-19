@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "Secure, stateless, and cookie-based session library for JavaScript",
   "keywords": [
     "session",
