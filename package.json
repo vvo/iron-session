@@ -64,7 +64,7 @@
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-prettier": "5.2.1",
     "prettier": "3.3.3",
-    "prettier-plugin-packagejson": "2.5.1",
+    "prettier-plugin-packagejson": "2.5.2",
     "publint": "0.2.10",
     "tsup": "8.2.4",
     "tsx": "4.17.0",
