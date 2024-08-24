@@ -65,10 +65,10 @@ importers:
         version: 0.2.10
       tsup:
         specifier: 8.2.4
-        version: 8.2.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.17.0)(typescript@5.5.4)(yaml@2.4.3)
+        version: 8.2.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.18.0)(typescript@5.5.4)(yaml@2.4.3)
       tsx:
-        specifier: 4.17.0
-        version: 4.17.0
+        specifier: 4.18.0
+        version: 4.18.0
       turbo:
         specifier: ^2.0.5
         version: 2.0.14
@@ -2375,8 +2375,8 @@ packages:
       typescript:
         optional: true
 
-  tsx@4.17.0:
-    resolution: {integrity: sha512-eN4mnDA5UMKDt4YZixo9tBioibaMBpoxBkD+rIPAjVmYERSG0/dWEY1CEFuV89CgASlKL499q8AhmkMnnjtOJg==}
+  tsx@4.18.0:
+    resolution: {integrity: sha512-a1jaKBSVQkd6yEc1/NI7G6yHFfefIcuf3QJST7ZEyn4oQnxLYrZR5uZAM8UrwUa3Ge8suiZHcNS1gNrEvmobqg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4640,13 +4640,13 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.38
 
-  postcss-load-config@6.0.1(jiti@1.21.3)(postcss@8.4.38)(tsx@4.17.0)(yaml@2.4.3):
+  postcss-load-config@6.0.1(jiti@1.21.3)(postcss@8.4.38)(tsx@4.18.0)(yaml@2.4.3):
     dependencies:
       lilconfig: 3.1.1
     optionalDependencies:
       jiti: 1.21.3
       postcss: 8.4.38
-      tsx: 4.17.0
+      tsx: 4.18.0
       yaml: 2.4.3
 
   postcss-nested@6.0.1(postcss@8.4.38):
@@ -5116,7 +5116,7 @@ snapshots:
 
   tslib@2.6.3: {}
 
-  tsup@8.2.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.17.0)(typescript@5.5.4)(yaml@2.4.3):
+  tsup@8.2.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.18.0)(typescript@5.5.4)(yaml@2.4.3):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.23.0)
       cac: 6.7.14
@@ -5128,7 +5128,7 @@ snapshots:
       globby: 11.1.0
       joycon: 3.1.1
       picocolors: 1.0.1
-      postcss-load-config: 6.0.1(jiti@1.21.3)(postcss@8.4.38)(tsx@4.17.0)(yaml@2.4.3)
+      postcss-load-config: 6.0.1(jiti@1.21.3)(postcss@8.4.38)(tsx@4.18.0)(yaml@2.4.3)
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -5143,7 +5143,7 @@ snapshots:
       - tsx
       - yaml
 
-  tsx@4.17.0:
+  tsx@4.18.0:
     dependencies:
       esbuild: 0.23.0
       get-tsconfig: 4.7.5
