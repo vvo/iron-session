@@ -98,7 +98,7 @@ export interface SessionOptions {
   cookieOptions?: CookieOptions;
 }
 
-export type IronSession<T> = T & {
+export type IronSession<T> = Partial<T> & {
   /**
    * Encrypts the session data and sets the cookie.
    */
