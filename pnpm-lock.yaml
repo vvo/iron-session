@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       cookie:
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.2
+        version: 0.7.2
       iron-webcrypto:
         specifier: 1.2.1
         version: 1.2.1
@@ -904,8 +904,8 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  cookie@0.6.0:
-    resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
   cross-spawn@7.0.3:
@@ -1242,11 +1242,13 @@ packages:
   eslint@8.54.0:
     resolution: {integrity: sha512-NY0DfAkM8BIZDVl6PgSa1ttZbx3xHgJzSNJKYcQglem6CppHyMhRIQkBVSSMaSRnLhig3jsDbEzOjwCVt4AmmA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   eslint@8.57.1:
     resolution: {integrity: sha512-ypowyDxpVSYpkXr9WPv2PAZCtNip1Mv5KTW0SCurXv/9iOpcrH9PaqUElksqEB6pChqHGDRCFTyrZlGhnLNGiA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -3398,7 +3400,7 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  cookie@0.6.0: {}
+  cookie@0.7.2: {}
 
   cross-spawn@7.0.3:
     dependencies:
