@@ -229,10 +229,7 @@ export function createSealData(_crypto: Crypto) {
 export function createUnsealData(_crypto: Crypto) {
   return async function unsealData<T>(
     seal: string,
-    {
-      password,
-      ttl = fourteenDaysInSeconds,
-    }: { password: Password; ttl?: number },
+    { password }: { password: Password },
   ): Promise<T> {
     const passwordsMap = normalizeStringPasswordToMap(password);
     const { sealWithoutVersion, tokenVersion } = parseSeal(seal);
@@ -241,7 +238,6 @@ export function createUnsealData(_crypto: Crypto) {
       const data =
         (await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
           ...ironDefaults,
-          ttl: ttl * 1000,
         })) ?? {};
 
       if (tokenVersion === 2) {
@@ -365,7 +361,6 @@ export function createGetIronSession(
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, {
           password: passwordsMap,
-          ttl: sessionConfig.ttl,
         })
       : ({} as T);
 
@@ -452,7 +447,6 @@ async function getIronSessionFromCookieStore<T extends object>(
   const session = sealFromCookies
     ? await unsealData<T>(sealFromCookies, {
         password: passwordsMap,
-        ttl: sessionConfig.ttl,
       })
     : ({} as T);
 
