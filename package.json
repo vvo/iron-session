@@ -65,7 +65,7 @@
     "eslint-plugin-prettier": "5.2.1",
     "prettier": "3.3.3",
     "prettier-plugin-packagejson": "2.5.3",
-    "publint": "0.2.11",
+    "publint": "0.2.12",
     "tsup": "8.3.0",
     "tsx": "4.19.1",
     "turbo": "^2.0.5",
