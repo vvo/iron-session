@@ -64,8 +64,8 @@ importers:
         specifier: 0.2.12
         version: 0.2.12
       tsup:
-        specifier: 8.3.4
-        version: 8.3.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.19.1)(typescript@5.5.4)(yaml@2.4.3)
+        specifier: 8.3.5
+        version: 8.3.5(jiti@1.21.3)(postcss@8.4.38)(tsx@4.19.1)(typescript@5.5.4)(yaml@2.4.3)
       tsx:
         specifier: 4.19.1
         version: 4.19.1
@@ -2592,8 +2592,8 @@ packages:
   tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
 
-  tsup@8.3.4:
-    resolution: {integrity: sha512-0uCsxLADTFwGsEfSMx5fBFtXNw1mZJBAU6ZJe6xMeGfLT6o/12JDigvBIrQJEZlK01YBsocRxU3i+YY6QduShQ==}
+  tsup@8.3.5:
+    resolution: {integrity: sha512-Tunf6r6m6tnZsG9GYWndg0z8dEV7fD733VBFzFJ5Vcm1FtlXB8xBD/rtrBi2a3YKEV7hHtxiZtW5EAVADoe1pA==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -3251,7 +3251,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.5.4)
       '@typescript-eslint/utils': 7.18.0(eslint@8.57.1)(typescript@5.5.4)
-      debug: 4.3.5
+      debug: 4.3.7
       eslint: 8.57.1
       ts-api-utils: 1.3.0(typescript@5.5.4)
     optionalDependencies:
@@ -3267,7 +3267,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.5
+      debug: 4.3.7
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.4
@@ -3282,7 +3282,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.2.0
       '@typescript-eslint/visitor-keys': 7.2.0
-      debug: 4.3.5
+      debug: 4.3.7
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -5478,7 +5478,7 @@ snapshots:
 
   tslib@2.6.3: {}
 
-  tsup@8.3.4(jiti@1.21.3)(postcss@8.4.38)(tsx@4.19.1)(typescript@5.5.4)(yaml@2.4.3):
+  tsup@8.3.5(jiti@1.21.3)(postcss@8.4.38)(tsx@4.19.1)(typescript@5.5.4)(yaml@2.4.3):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.24.0)
       cac: 6.7.14
