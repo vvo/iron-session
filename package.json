@@ -67,7 +67,7 @@
     "prettier-plugin-packagejson": "2.5.3",
     "publint": "0.2.12",
     "tsup": "8.3.5",
-    "tsx": "4.19.1",
+    "tsx": "4.19.2",
     "turbo": "^2.0.5",
     "typescript": "5.5.4"
   },
