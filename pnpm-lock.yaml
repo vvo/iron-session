@@ -61,8 +61,8 @@ importers:
         specifier: 2.5.6
         version: 2.5.6(prettier@3.4.2)
       publint:
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: 0.3.1
+        version: 0.3.1
       tsup:
         specifier: 8.3.5
         version: 8.3.5(jiti@1.21.3)(postcss@8.4.38)(tsx@4.19.2)(typescript@5.5.4)(yaml@2.4.3)
@@ -2206,8 +2206,8 @@ packages:
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
 
-  publint@0.3.0:
-    resolution: {integrity: sha512-B7efom03c86OGqN1Jp2mDduiamb5apEuolvlbUeHaa14geCzJKz35oPIiKoXPMvM3tGABEZ1oLfY6xJNvOh69g==}
+  publint@0.3.1:
+    resolution: {integrity: sha512-kZo30Y7aRyF/KmXMiGjkQFuhqQ7+dS6msPUoMUhhCYpVd1bEO3LC2tYueJxzscFAM7P+ayJ5vWGUeoj1xDCmHw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4961,7 +4961,7 @@ snapshots:
       object-assign: 4.1.1
       react-is: 16.13.1
 
-  publint@0.3.0:
+  publint@0.3.1:
     dependencies:
       '@publint/pack': 0.1.0
       package-manager-detector: 0.2.8
