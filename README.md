@@ -87,12 +87,12 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 export async function GET() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(await cookies(), { password: "...", cookieName: "..." });
   return session;
 }
 
 export async function POST() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(await cookies(), { password: "...", cookieName: "..." });
   session.username = "Alison";
   await session.save();
 }
