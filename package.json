@@ -60,7 +60,7 @@
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-node": "0.3.9",
-    "eslint-import-resolver-typescript": "3.8.5",
+    "eslint-import-resolver-typescript": "3.8.6",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.3",
     "prettier": "3.5.3",
