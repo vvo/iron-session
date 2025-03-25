@@ -27,14 +27,6 @@ export async function PATCH() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   session.counter++;
-  session.updateConfig({
-    ...sessionOptions,
-    cookieOptions: {
-      ...sessionOptions.cookieOptions,
-      expires: new Date("2024-12-27T00:00:00.000Z"),
-      maxAge: undefined,
-    },
-  });
   await session.save();
 
   return Response.json(session);
