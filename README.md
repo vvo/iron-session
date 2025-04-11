@@ -26,6 +26,8 @@
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
 
+**New in v8.1**: Post-quantum cryptography support to protect against future quantum computing attacks.
+
 <p align="center"><i>Online demo and examples: <a href="https://get-iron-session.vercel.app/">https://get-iron-session.vercel.app</a></i> 👀 <br/>
  <i>Featured in the <a href="https://nextjs.org/docs/authentication">Next.js documentation</a></i> ⭐️</p>
 
@@ -37,6 +39,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 - [Examples](#examples)
 - [Project status](#project-status)
 - [Session options](#session-options)
+- [Post-Quantum Cryptography](#post-quantum-cryptography)
 - [API](#api)
   - [`getIronSession<T>(req, res, sessionOptions): Promise<IronSession<T>>`](#getironsessiontreq-res-sessionoptions-promiseironsessiont)
   - [`getIronSession<T>(cookieStore, sessionOptions): Promise<IronSession<T>>`](#getironsessiontcookiestore-sessionoptions-promiseironsessiont)
@@ -130,6 +133,7 @@ Two options are required: `password` and `cookieName`. Everything else is automa
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation.  iron-session will use the highest numbered key for new cookies.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies.
+- `usePostQuantum`, _optional_: Boolean flag to enable post-quantum encryption. Default is `false`. When enabled, uses ML-KEM1024 for key exchange instead of the traditional encryption. See [Post-Quantum Cryptography](#post-quantum-cryptography) for more details.
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:
 
   ```js
@@ -141,6 +145,37 @@ Two options are required: `password` and `cookieName`. Everything else is automa
     path: "/",
   }
   ```
+
+## Post-Quantum Cryptography
+
+Iron-session now supports post-quantum cryptography to protect your session data against future quantum computing attacks. This feature is opt-in and can be enabled by setting `usePostQuantum: true` in your session options.
+
+```ts
+// Enable post-quantum encryption
+const session = await getIronSession(req, res, {
+  password: "your-password-at-least-32-characters-long",
+  cookieName: "your-cookie-name",
+  usePostQuantum: true
+});
+```
+
+### How it works
+
+When post-quantum encryption is enabled:
+
+1. The session uses ML-KEM1024 (formerly Kyber-1024), a NIST-approved post-quantum key encapsulation mechanism
+2. This provides 256-bit security that's resistant to attacks from quantum computers
+3. The implementation maintains AES-GCM for symmetric encryption after secure key exchange
+
+### When to use it
+
+Post-quantum cryptography is recommended if:
+
+- You need long-term security for sensitive session data
+- You want to future-proof your application against quantum computing advances
+- You're handling particularly sensitive information that requires the highest level of cryptographic protection
+
+The feature has a minimal performance impact and provides a significant security improvement for forward-looking applications.
 
 ## API
 

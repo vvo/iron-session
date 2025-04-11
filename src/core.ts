@@ -1,7 +1,11 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
+import type { IncomingMessage, ServerResponse } from "http";
 import { parse, serialize, type CookieSerializeOptions } from "cookie";
+import {
+	defaults as ironDefaults,
+	seal as ironSeal,
+	unseal as ironUnseal,
+} from "iron-webcrypto";
 import { ml_kem1024 } from "@noble/post-quantum/ml-kem";
-import { ml_dsa87 } from "@noble/post-quantum/ml-dsa";
 import { randomBytes } from "@noble/hashes/utils";
 import { base64url } from "rfc4648";
 
@@ -9,13 +13,6 @@ type PasswordsMap = Record<string, string>;
 type Password = PasswordsMap | string;
 type RequestType = IncomingMessage | Request;
 type ResponseType = Response | ServerResponse;
-
-interface PQSealResult {
-	ciphertext: string;
-	publicKey: string;
-	signature: string;
-	signPublicKey: string;
-}
 
 /**
  * {@link https://wicg.github.io/cookie-store/#dictdef-cookielistitem CookieListItem}
@@ -102,6 +99,14 @@ export interface SessionOptions {
 	 * @see https://github.com/jshttp/cookie#options-1
 	 */
 	cookieOptions?: CookieOptions;
+
+	/**
+	 * Whether to use post-quantum cryptography for encryption.
+	 * Note: This is experimental and may not be compatible with all browsers.
+	 *
+	 * @default false
+	 */
+	usePostQuantum?: boolean;
 }
 
 export type IronSession<T> = T & {
@@ -131,11 +136,16 @@ const fourteenDaysInSeconds = 14 * 24 * 3600;
 const currentMajorVersion = 2;
 const versionDelimiter = "~";
 
-const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions">> =
-	{
-		ttl: fourteenDaysInSeconds,
-		cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
-	};
+// Version for post-quantum cryptography
+const pqMajorVersion = 3;
+
+const defaultOptions: Required<
+	Pick<SessionOptions, "ttl" | "cookieOptions" | "usePostQuantum">
+> = {
+	ttl: fourteenDaysInSeconds,
+	cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
+	usePostQuantum: false,
+};
 
 function normalizeStringPasswordToMap(password: Password): PasswordsMap {
 	return typeof password === "string" ? { 1: password } : password;
@@ -211,120 +221,189 @@ function setCookie(res: ResponseType, cookieValue: string): void {
 	]);
 }
 
+interface PQSealResult {
+	ciphertext: string;
+	publicKey: string;
+	iv: string;
+}
+
 export function createSealData(_crypto: Crypto) {
 	return async function sealData(
 		data: unknown,
-		_options: { password: Password; ttl?: number },
+		{
+			password,
+			ttl = fourteenDaysInSeconds,
+			usePostQuantum = false,
+		}: { password: Password; ttl?: number; usePostQuantum?: boolean },
 	): Promise<string> {
-		// Generate ML-KEM key pair with 64-byte seed
-		const kemSeed = randomBytes(64);
-		const { publicKey } = ml_kem1024.keygen(kemSeed);
+		// Use post-quantum cryptography if specified
+		if (usePostQuantum) {
+			try {
+				// Generate ML-KEM key pair
+				const kemSeed = randomBytes(64);
+				const { publicKey } = ml_kem1024.keygen(kemSeed);
 
-		// Encapsulate a shared secret
-		const { sharedSecret } = ml_kem1024.encapsulate(publicKey);
+				// Encapsulate a shared secret
+				const { sharedSecret } = ml_kem1024.encapsulate(publicKey);
 
-		// Encrypt data with AES-GCM using shared secret
-		const iv = randomBytes(12);
-		const dataBytes =
-			data instanceof Uint8Array
-				? data
-				: new TextEncoder().encode(JSON.stringify(data));
-		const encryptedData = await crypto.subtle.encrypt(
-			{
-				name: "AES-GCM",
-				iv,
-			},
-			await crypto.subtle.importKey(
-				"raw",
-				sharedSecret,
-				{ name: "AES-GCM", length: 256 },
-				false,
-				["encrypt"],
-			),
-			dataBytes,
+				// Encrypt data with AES-GCM using shared secret
+				const iv = randomBytes(12);
+				const dataBytes =
+					data instanceof Uint8Array
+						? data
+						: new TextEncoder().encode(JSON.stringify(data));
+
+				const encryptedData = await _crypto.subtle.encrypt(
+					{
+						name: "AES-GCM",
+						iv,
+					},
+					await _crypto.subtle.importKey(
+						"raw",
+						sharedSecret,
+						{ name: "AES-GCM", length: 256 },
+						false,
+						["encrypt"],
+					),
+					dataBytes,
+				);
+
+				// Combine all components
+				const seal: PQSealResult = {
+					ciphertext: base64url.stringify(new Uint8Array(encryptedData)),
+					publicKey: base64url.stringify(publicKey),
+					iv: base64url.stringify(iv),
+				};
+
+				const sealString = base64url.stringify(
+					new TextEncoder().encode(JSON.stringify(seal)),
+				);
+
+				// Check cookie length before returning
+				if (sealString.length > 4096) {
+					throw new Error("Cookie length is too big");
+				}
+
+				return `${sealString}${versionDelimiter}${pqMajorVersion}`;
+			} catch (error) {
+				console.error(
+					"Post-quantum encryption failed, falling back to iron-webcrypto",
+					error,
+				);
+				// Fall back to iron-webcrypto if post-quantum fails
+			}
+		}
+
+		// Use iron-webcrypto (original implementation)
+		const passwordsMap = normalizeStringPasswordToMap(password);
+
+		const mostRecentPasswordId = Math.max(
+			...Object.keys(passwordsMap).map(Number),
 		);
+		const secret = passwordsMap[mostRecentPasswordId];
 
-		// Sign the encrypted data with ML-DSA using 64-byte seed
-		const dsaSeed = randomBytes(64);
-		const { publicKey: signPublicKey, secretKey: signSecretKey } =
-			ml_dsa87.keygen(dsaSeed);
-		const signature = ml_dsa87.sign(
-			new Uint8Array(encryptedData),
-			signSecretKey,
-		);
+		// Ensure we have a valid password
+		if (!secret) {
+			throw new Error("iron-session: Password not found for the given ID.");
+		}
 
-		// Combine all components
-		const seal: PQSealResult = {
-			ciphertext: base64url.stringify(new Uint8Array(encryptedData)),
-			publicKey: base64url.stringify(publicKey),
-			signature: base64url.stringify(signature),
-			signPublicKey: base64url.stringify(signPublicKey),
+		const passwordForSeal = {
+			id: mostRecentPasswordId.toString(),
+			secret,
 		};
 
-		return `${base64url.stringify(new TextEncoder().encode(JSON.stringify(seal)))}${versionDelimiter}${currentMajorVersion}`;
+		const seal = await ironSeal(_crypto, data, passwordForSeal, {
+			...ironDefaults,
+			ttl: ttl * 1000,
+		});
+
+		return `${seal}${versionDelimiter}${currentMajorVersion}`;
 	};
 }
 
 export function createUnsealData(_crypto: Crypto) {
 	return async function unsealData<T>(
 		seal: string,
-		_options: { password: Password; ttl?: number },
+		{
+			password,
+			ttl = fourteenDaysInSeconds,
+			usePostQuantum = false,
+		}: { password: Password; ttl?: number; usePostQuantum?: boolean },
 	): Promise<T> {
+		const passwordsMap = normalizeStringPasswordToMap(password);
 		const { sealWithoutVersion, tokenVersion } = parseSeal(seal);
 
-		try {
-			const sealData: PQSealResult = JSON.parse(
-				new TextDecoder().decode(
-					base64url.parse(sealWithoutVersion, { loose: true }),
-				),
-			);
-
-			// Parse the components
-			const ciphertext = base64url.parse(sealData.ciphertext);
-			const kemPublicKey = base64url.parse(sealData.publicKey);
-			const signature = base64url.parse(sealData.signature);
-			const signPublicKey = base64url.parse(sealData.signPublicKey);
-
-			// Verify signature first
-			const isValid = ml_dsa87.verify(ciphertext, signature, signPublicKey);
-			if (!isValid) {
-				throw new Error("Invalid signature");
-			}
-
-			// Decapsulate the shared secret
-			const sharedSecret = ml_kem1024.decapsulate(ciphertext, kemPublicKey);
-
-			// Decrypt data
-			const decryptedData = await crypto.subtle.decrypt(
-				{
-					name: "AES-GCM",
-					iv: new Uint8Array(12), // IV is included in the ciphertext
-				},
-				await crypto.subtle.importKey(
-					"raw",
-					sharedSecret,
-					{ name: "AES-GCM", length: 256 },
-					false,
-					["decrypt"],
-				),
-				ciphertext,
-			);
-
-			// Try to parse as JSON first, if it fails return as Uint8Array
+		// Handle post-quantum seal (version 3)
+		if (tokenVersion === pqMajorVersion) {
 			try {
-				return JSON.parse(new TextDecoder().decode(decryptedData)) as T;
-			} catch {
-				return new Uint8Array(decryptedData) as T;
+				const sealData = JSON.parse(
+					new TextDecoder().decode(base64url.parse(sealWithoutVersion)),
+				) as PQSealResult;
+
+				// Parse the components
+				const ciphertext = base64url.parse(sealData.ciphertext);
+				const kemPublicKey = base64url.parse(sealData.publicKey);
+				const iv = base64url.parse(sealData.iv);
+
+				// Decapsulate the shared secret
+				const sharedSecret = ml_kem1024.decapsulate(ciphertext, kemPublicKey);
+
+				// Decrypt data
+				const decryptedData = await _crypto.subtle.decrypt(
+					{
+						name: "AES-GCM",
+						iv,
+					},
+					await _crypto.subtle.importKey(
+						"raw",
+						sharedSecret,
+						{ name: "AES-GCM", length: 256 },
+						false,
+						["decrypt"],
+					),
+					ciphertext,
+				);
+
+				// Try to parse as JSON first, if it fails return as Uint8Array
+				try {
+					return JSON.parse(new TextDecoder().decode(decryptedData)) as T;
+				} catch {
+					return new Uint8Array(decryptedData) as unknown as T;
+				}
+			} catch (error) {
+				// If post-quantum unseal fails, return empty object
+				return {} as T;
 			}
+		}
+
+		// Handle iron-webcrypto seal (version 2 or null)
+		try {
+			const data =
+				(await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
+					...ironDefaults,
+					ttl: ttl * 1000,
+				})) ?? {};
+
+			if (tokenVersion === 2) {
+				return data as T;
+			}
+
+			// @ts-expect-error `persistent` does not exist on newer tokens
+			return { ...data.persistent } as T;
 		} catch (error) {
 			if (
 				error instanceof Error &&
-				/^(Invalid signature|Invalid seal format|Bad hmac value|Cannot find password|Incorrect number of sealed components)/.test(
+				/^(Expired seal|Bad hmac value|Cannot find password|Incorrect number of sealed components)/.test(
 					error.message,
 				)
 			) {
+				// if seal expired or
+				// if seal is not valid (encrypted using a different password, when passwords are badly rotated) or
+				// if we can't find back the password in the seal
+				// then we just start a new session over
 				return {} as T;
 			}
+
 			throw error;
 		}
 	};
@@ -427,6 +506,7 @@ export function createGetIronSession(
 			? await unsealData<T>(sealFromCookies, {
 					password: passwordsMap,
 					ttl: sessionConfig.ttl,
+					usePostQuantum: sessionConfig.usePostQuantum,
 				})
 			: ({} as T);
 
@@ -447,6 +527,7 @@ export function createGetIronSession(
 					const seal = await sealData(session, {
 						password: passwordsMap,
 						ttl: sessionConfig.ttl,
+						usePostQuantum: sessionConfig.usePostQuantum,
 					});
 					const cookieValue = serialize(
 						sessionConfig.cookieName,
@@ -514,6 +595,7 @@ async function getIronSessionFromCookieStore<T extends object>(
 		? await unsealData<T>(sealFromCookies, {
 				password: passwordsMap,
 				ttl: sessionConfig.ttl,
+				usePostQuantum: sessionConfig.usePostQuantum,
 			})
 		: ({} as T);
 
@@ -528,6 +610,7 @@ async function getIronSessionFromCookieStore<T extends object>(
 				const seal = await sealData(session, {
 					password: passwordsMap,
 					ttl: sessionConfig.ttl,
+					usePostQuantum: sessionConfig.usePostQuantum,
 				});
 
 				const cookieLength =
