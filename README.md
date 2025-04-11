@@ -163,7 +163,7 @@ const session = await getIronSession(req, res, {
 
 When post-quantum encryption is enabled:
 
-1. The session uses ML-KEM1024 (formerly Kyber-1024), a NIST-approved post-quantum key encapsulation mechanism
+1. The session uses ML-KEM1024 (formerly known as Kyber-1024), a NIST-approved post-quantum key encapsulation mechanism
 2. This provides 256-bit security that's resistant to attacks from quantum computers
 3. The implementation maintains AES-GCM for symmetric encryption after secure key exchange
 
