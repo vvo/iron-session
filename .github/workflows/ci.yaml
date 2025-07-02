@@ -22,6 +22,6 @@ jobs:
         run: pnpm install
       - run: pnpm lint
       - run: pnpm test
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           files: coverage/lcov.info
