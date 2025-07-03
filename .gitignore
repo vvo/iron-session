@@ -6,3 +6,5 @@ dist
 coverage*
 *.tsbuildinfo
 .turbo
+
+package-lock.json
