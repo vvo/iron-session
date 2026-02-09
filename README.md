@@ -220,6 +220,12 @@ Not so much:
 
 Depending on your own needs and preferences, `iron-session` may or may not fit you.
 
+## Used by
+
+[![Used by](https://api.usedby.dev/npm/iron-session?max=50&sort=stars)](https://github.com/vvo/iron-session/network/dependents)
+
+Generated with [usedby.dev](https://usedby.dev/)
+
 ## Credits
 
 - [Eran Hammer and hapi.js contributors](https://github.com/hapijs/iron/graphs/contributors)
