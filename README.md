@@ -96,6 +96,26 @@ async function Profile() {
 }
 ```
 
+**For large session data (>4KB), enable cookie chunking:**
+
+```ts
+import { getIronSession } from 'iron-session';
+
+export async function POST(req, res) {
+  const session = await getIronSession(req, res, {
+    password: "...",
+    cookieName: "...",
+    chunking: {
+      enabled: true,
+      chunkSize: 3500 // optional
+    }
+  });
+
+  session.largeData = { /* your large session data */ };
+  await session.save(); // Automatically splits into multiple cookies if needed
+}
+```
+
 ## Examples
 
 We have many different patterns and examples on the online demo, have a look: https://get-iron-session.vercel.app/.
@@ -111,6 +131,22 @@ Two options are required: `password` and `cookieName`. Everything else is automa
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation.  iron-session will use the highest numbered key for new cookies.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies.
+- `chunking`, _optional_: Enable cookie chunking for large session data that exceeds browser cookie size limits (~4KB). When enabled, the session cookie is automatically split into multiple smaller cookies. Default to `undefined` (disabled). Options:
+  - `enabled`: Boolean to enable/disable chunking
+  - `chunkSize`: Maximum size of each chunk in bytes. Default to `3500`
+
+  Example:
+  ```js
+  {
+    chunking: {
+      enabled: true,
+      chunkSize: 3500 // optional, defaults to 3500
+    }
+  }
+  ```
+
+  When chunking is enabled and the session data exceeds the chunk size, cookies are stored as `{cookieName}.0`, `{cookieName}.1`, etc. The reconstruction happens automatically on read. Old chunks are cleaned up when the session is saved or destroyed.
+
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:
 
   ```js
@@ -200,6 +236,14 @@ Not so much:
 - @hapi/iron mechanism is not a standard, it's a way to sign and encrypt data into seals
 
 Depending on your own needs and preferences, `iron-session` may or may not fit you.
+
+### What if my session data exceeds cookie size limits?
+
+Browsers typically limit cookies to around 4KB. If your session data is larger, you have two options:
+
+1. **Enable cookie chunking** (recommended for moderate sizes): Set `chunking: { enabled: true }` in your session options. This will automatically split large cookies into multiple smaller cookies (e.g., `session.0`, `session.1`, etc.) and reconstruct them transparently when reading.
+
+2. **Store large data elsewhere**: For very large session data, consider storing it in a database or cache (like Redis) and only keep a session ID in the cookie.
 
 ## Credits
 

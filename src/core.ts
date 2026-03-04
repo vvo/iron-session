@@ -96,6 +96,33 @@ export interface SessionOptions {
    * @see https://github.com/jshttp/cookie#options-1
    */
   cookieOptions?: CookieOptions;
+
+  /**
+   * Configure cookie chunking for large sessions that exceed browser cookie size limits.
+   *
+   * When enabled, iron-session will automatically split large cookies into multiple
+   * smaller chunks (named `{cookieName}.0`, `{cookieName}.1`, etc.) and reassemble
+   * them when reading. This allows sessions larger than the typical 4096-byte browser
+   * limit.
+   *
+   * @example { enabled: true, chunkSize: 3500 }
+   */
+  chunking?: {
+    /**
+     * Enable cookie chunking. When `false` or `undefined`, the traditional 4096-byte
+     * limit check will be enforced.
+     *
+     * @default false
+     */
+    enabled: boolean;
+    /**
+     * Maximum size in bytes for each cookie chunk. Should be less than 4096 to allow
+     * room for cookie name and attributes.
+     *
+     * @default 3500
+     */
+    chunkSize?: number;
+  };
 }
 
 export type IronSession<T> = T & {
@@ -199,6 +226,89 @@ function setCookie(res: ResponseType, cookieValue: string): void {
   ]);
 }
 
+/**
+ * Splits a large cookie value into multiple chunks for browsers that enforce
+ * size limits. Each chunk is named `{baseName}.{index}`.
+ */
+function splitCookieIntoChunks(
+  value: string,
+  chunkSize: number,
+): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < value.length; i += chunkSize) {
+    chunks.push(value.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+/**
+ * Reconstructs a cookie value from chunks. Tries direct cookie first,
+ * then attempts to reassemble from indexed chunks if not found.
+ * Works transparently for both chunked and non-chunked cookies.
+ */
+function reconstructCookie(
+  req: RequestType,
+  cookieName: string,
+): string {
+  // Try direct cookie first (for non-chunked or old sessions)
+  const directCookie = getCookie(req, cookieName);
+  if (directCookie) {
+    return directCookie;
+  }
+
+  // Try to reconstruct from chunks
+  const chunks: string[] = [];
+  let chunkIndex = 0;
+
+  while (true) {
+    const chunkName = `${cookieName}.${chunkIndex}`;
+    const chunk = getCookie(req, chunkName);
+
+    if (!chunk) {
+      break;
+    }
+
+    chunks.push(chunk);
+    chunkIndex++;
+  }
+
+  return chunks.join("");
+}
+
+/**
+ * Reconstructs a cookie value from chunks using CookieStore.
+ * For use with Next.js cookies() and similar APIs.
+ * Works transparently for both chunked and non-chunked cookies.
+ */
+function reconstructCookieWithStore(
+  cookieHandler: CookieStore,
+  cookieName: string,
+): string {
+  // Try direct cookie first
+  const directCookie = getServerActionCookie(cookieName, cookieHandler);
+  if (directCookie) {
+    return directCookie;
+  }
+
+  // Try to reconstruct from chunks
+  const chunks: string[] = [];
+  let chunkIndex = 0;
+
+  while (true) {
+    const chunkName = `${cookieName}.${chunkIndex}`;
+    const chunk = getServerActionCookie(chunkName, cookieHandler);
+
+    if (!chunk) {
+      break;
+    }
+
+    chunks.push(chunk);
+    chunkIndex++;
+  }
+
+  return chunks.join("");
+}
+
 export function createSealData(_crypto: Crypto) {
   return async function sealData(
     data: unknown,
@@ -271,7 +381,7 @@ export function createUnsealData(_crypto: Crypto) {
 
 function getSessionConfig(
   sessionOptions: SessionOptions,
-): Required<SessionOptions> {
+): Required<Pick<SessionOptions, "ttl" | "cookieOptions" | "password" | "cookieName">> & Pick<SessionOptions, "chunking"> {
   const options = {
     ...defaultOptions,
     ...sessionOptions,
@@ -361,7 +471,7 @@ export function createGetIronSession(
 
     let sessionConfig = getSessionConfig(sessionOptions);
 
-    const sealFromCookies = getCookie(req, sessionConfig.cookieName);
+    const sealFromCookies = reconstructCookie(req, sessionConfig.cookieName);
     const session = sealFromCookies
       ? await unsealData<T>(sealFromCookies, {
           password: passwordsMap,
@@ -387,19 +497,72 @@ export function createGetIronSession(
             password: passwordsMap,
             ttl: sessionConfig.ttl,
           });
-          const cookieValue = serialize(
-            sessionConfig.cookieName,
-            seal,
-            sessionConfig.cookieOptions,
-          );
 
-          if (cookieValue.length > 4096) {
-            throw new Error(
-              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
+          // Check if chunking is enabled
+          if (sessionConfig.chunking?.enabled) {
+            const chunkSize = sessionConfig.chunking.chunkSize ?? 3500;
+
+            // Clean up old chunks first
+            let oldChunkIndex = 0;
+            while (true) {
+              const oldChunkName = `${sessionConfig.cookieName}.${oldChunkIndex}`;
+              const oldChunk = getCookie(req, oldChunkName);
+              if (!oldChunk) break;
+
+              const cleanupCookie = serialize(oldChunkName, "", {
+                ...sessionConfig.cookieOptions,
+                maxAge: 0,
+              });
+              setCookie(res, cleanupCookie);
+              oldChunkIndex++;
+            }
+
+            // If seal is small enough, use single cookie
+            const testCookieValue = serialize(
+              sessionConfig.cookieName,
+              seal,
+              sessionConfig.cookieOptions,
             );
-          }
 
-          setCookie(res, cookieValue);
+            if (testCookieValue.length <= 4096) {
+              setCookie(res, testCookieValue);
+              return;
+            }
+
+            // Split into chunks
+            const chunks = splitCookieIntoChunks(seal, chunkSize);
+            chunks.forEach((chunk, index) => {
+              const chunkName = `${sessionConfig.cookieName}.${index}`;
+              const chunkCookieValue = serialize(
+                chunkName,
+                chunk,
+                sessionConfig.cookieOptions,
+              );
+              setCookie(res, chunkCookieValue);
+            });
+
+            // Delete the main cookie if it exists (we're using chunks now)
+            const deleteCookie = serialize(sessionConfig.cookieName, "", {
+              ...sessionConfig.cookieOptions,
+              maxAge: 0,
+            });
+            setCookie(res, deleteCookie);
+          } else {
+            // Original behavior - no chunking
+            const cookieValue = serialize(
+              sessionConfig.cookieName,
+              seal,
+              sessionConfig.cookieOptions,
+            );
+
+            if (cookieValue.length > 4096) {
+              throw new Error(
+                `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
+              );
+            }
+
+            setCookie(res, cookieValue);
+          }
         },
       },
 
@@ -408,12 +571,30 @@ export function createGetIronSession(
           Object.keys(session).forEach((key) => {
             delete (session as Record<string, unknown>)[key];
           });
+
+          // Delete main cookie
           const cookieValue = serialize(sessionConfig.cookieName, "", {
             ...sessionConfig.cookieOptions,
             maxAge: 0,
           });
-
           setCookie(res, cookieValue);
+
+          // Also delete chunks if chunking was enabled
+          if (sessionConfig.chunking?.enabled) {
+            let chunkIndex = 0;
+            while (true) {
+              const chunkName = `${sessionConfig.cookieName}.${chunkIndex}`;
+              const chunk = getCookie(req, chunkName);
+              if (!chunk) break;
+
+              const chunkCookieValue = serialize(chunkName, "", {
+                ...sessionConfig.cookieOptions,
+                maxAge: 0,
+              });
+              setCookie(res, chunkCookieValue);
+              chunkIndex++;
+            }
+          }
         },
       },
     });
@@ -445,10 +626,8 @@ async function getIronSessionFromCookieStore<T extends object>(
   }
 
   let sessionConfig = getSessionConfig(sessionOptions);
-  const sealFromCookies = getServerActionCookie(
-    sessionConfig.cookieName,
-    cookieStore,
-  );
+
+  const sealFromCookies = reconstructCookieWithStore(cookieStore, sessionConfig.cookieName);
   const session = sealFromCookies
     ? await unsealData<T>(sealFromCookies, {
         password: passwordsMap,
@@ -469,22 +648,70 @@ async function getIronSessionFromCookieStore<T extends object>(
           ttl: sessionConfig.ttl,
         });
 
-        const cookieLength =
-          sessionConfig.cookieName.length +
-          seal.length +
-          JSON.stringify(sessionConfig.cookieOptions).length;
+        // Check if chunking is enabled
+        if (sessionConfig.chunking?.enabled) {
+          const chunkSize = sessionConfig.chunking.chunkSize ?? 3500;
 
-        if (cookieLength > 4096) {
-          throw new Error(
-            `iron-session: Cookie length is too big (${cookieLength} bytes), browsers will refuse it. Try to remove some data.`,
+          // Clean up old chunks first
+          let oldChunkIndex = 0;
+          while (true) {
+            const oldChunkName = `${sessionConfig.cookieName}.${oldChunkIndex}`;
+            const oldChunk = getServerActionCookie(oldChunkName, cookieStore);
+            if (!oldChunk) break;
+
+            cookieStore.set(oldChunkName, "", {
+              ...sessionConfig.cookieOptions,
+              maxAge: 0,
+            });
+            oldChunkIndex++;
+          }
+
+          // If seal is small enough, use single cookie
+          const cookieLength =
+            sessionConfig.cookieName.length +
+            seal.length +
+            JSON.stringify(sessionConfig.cookieOptions).length;
+
+          if (cookieLength <= 4096) {
+            cookieStore.set(
+              sessionConfig.cookieName,
+              seal,
+              sessionConfig.cookieOptions,
+            );
+            return;
+          }
+
+          // Split into chunks
+          const chunks = splitCookieIntoChunks(seal, chunkSize);
+          chunks.forEach((chunk, index) => {
+            const chunkName = `${sessionConfig.cookieName}.${index}`;
+            cookieStore.set(chunkName, chunk, sessionConfig.cookieOptions);
+          });
+
+          // Delete the main cookie if it exists (we're using chunks now)
+          cookieStore.set(sessionConfig.cookieName, "", {
+            ...sessionConfig.cookieOptions,
+            maxAge: 0,
+          });
+        } else {
+          // Original behavior - no chunking
+          const cookieLength =
+            sessionConfig.cookieName.length +
+            seal.length +
+            JSON.stringify(sessionConfig.cookieOptions).length;
+
+          if (cookieLength > 4096) {
+            throw new Error(
+              `iron-session: Cookie length is too big (${cookieLength} bytes), browsers will refuse it. Try to remove some data.`,
+            );
+          }
+
+          cookieStore.set(
+            sessionConfig.cookieName,
+            seal,
+            sessionConfig.cookieOptions,
           );
         }
-
-        cookieStore.set(
-          sessionConfig.cookieName,
-          seal,
-          sessionConfig.cookieOptions,
-        );
       },
     },
 
@@ -494,8 +721,22 @@ async function getIronSessionFromCookieStore<T extends object>(
           delete (session as Record<string, unknown>)[key];
         });
 
+        // Delete main cookie
         const cookieOptions = { ...sessionConfig.cookieOptions, maxAge: 0 };
         cookieStore.set(sessionConfig.cookieName, "", cookieOptions);
+
+        // Also delete chunks if chunking was enabled
+        if (sessionConfig.chunking?.enabled) {
+          let chunkIndex = 0;
+          while (true) {
+            const chunkName = `${sessionConfig.cookieName}.${chunkIndex}`;
+            const chunk = getServerActionCookie(chunkName, cookieStore);
+            if (!chunk) break;
+
+            cookieStore.set(chunkName, "", cookieOptions);
+            chunkIndex++;
+          }
+        }
       },
     },
   });
