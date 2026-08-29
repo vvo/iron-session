@@ -19,14 +19,9 @@ export function Title({
             <Link className={css.link} href="/">
               iron-session
             </Link>{" "}
-            <span className="text-slate-700 dark:text-slate-300">
-              examples: {category}
-            </span>
+            <span className="text-slate-700 dark:text-slate-300">examples: {category}</span>
           </div>
-          <span className="text-slate-300 dark:text-slate-700 text-xl">
-            {" "}
-            |{" "}
-          </span>
+          <span className="text-slate-300 dark:text-slate-700 text-xl"> | </span>
           <div>
             <div className="flex items-center gap-2 text-md">
               <GitHubLogo />{" "}

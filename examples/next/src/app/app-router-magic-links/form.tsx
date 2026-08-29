@@ -38,11 +38,7 @@ export function Form() {
 
 function LoginForm() {
   return (
-    <form
-      action="/app-router-magic-links/session"
-      method="POST"
-      className={css.form}
-    >
+    <form action="/app-router-magic-links/session" method="POST" className={css.form}>
       <label className="block text-lg">
         <span className={css.label}>Username</span>
         <input
@@ -58,11 +54,7 @@ function LoginForm() {
         />
       </label>
       <div>
-        <input
-          type="submit"
-          value="Get magic login link"
-          className={css.button}
-        />
+        <input type="submit" value="Get magic login link" className={css.button} />
       </div>
     </form>
   );
@@ -71,10 +63,7 @@ function LoginForm() {
 function LogoutButton() {
   return (
     <p>
-      <a
-        href="/app-router-magic-links/session?action=logout"
-        className={css.button}
-      >
+      <a href="/app-router-magic-links/session?action=logout" className={css.button}>
         Logout
       </a>
     </p>

@@ -27,10 +27,7 @@ export default function ProtectedServer() {
         <Content />
       </Suspense>
       <p>
-        <Link
-          href="/app-router-client-component-route-handler-swr"
-          className={css.link}
-        >
+        <Link href="/app-router-client-component-route-handler-swr" className={css.link}>
           ← Back
         </Link>
       </p>
@@ -51,8 +48,8 @@ async function Content() {
         Hello <strong>{session.username}!</strong>
       </p>
       <p>
-        This page is protected and can only be accessed if you are logged in.
-        Otherwise you will be redirected to the login page.
+        This page is protected and can only be accessed if you are logged in. Otherwise you will be
+        redirected to the login page.
       </p>
       <p>The check is done via a server component.</p>
     </div>

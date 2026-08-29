@@ -35,9 +35,7 @@ export async function GET(request: NextRequest) {
   // /app-router-client-component-redirect-route-handler-fetch/session?action=logout
   if (action === "logout") {
     session.destroy();
-    return redirect(
-      "/app-router-client-component-redirect-route-handler-fetch",
-    );
+    return redirect("/app-router-client-component-redirect-route-handler-fetch");
   }
 
   // simulate looking up the user in db

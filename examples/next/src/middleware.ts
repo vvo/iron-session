@@ -14,8 +14,7 @@ interface SessionData {
 const sessionOptions: Record<string, SessionOptions> = {
   "/app-router-client-component-route-handler-swr/protected-middleware":
     appRouterClientComponentRouteHandlerSwrIronOptions,
-  "/pages-router-api-route-swr/protected-middleware":
-    pagesRouterApiRouteSwrIronOptions,
+  "/pages-router-api-route-swr/protected-middleware": pagesRouterApiRouteSwrIronOptions,
 };
 
 // This function can be marked `async` if using `await` inside
@@ -26,9 +25,7 @@ export async function middleware(request: NextRequest) {
   );
 
   if (!session.isLoggedIn) {
-    const redirectTo = request.nextUrl.pathname.split(
-      "/protected-middleware",
-    )[0];
+    const redirectTo = request.nextUrl.pathname.split("/protected-middleware")[0];
 
     return Response.redirect(`${request.nextUrl.origin}${redirectTo}`, 302);
   }
