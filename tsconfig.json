@@ -1,17 +1,12 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "baseUrl": "src",
-    "rootDir": ".",
     "declaration": true,
-    "downlevelIteration": true,
-    "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
-    "jsx": "preserve",
-    "lib": ["ES2022", "dom"],
-    "module": "NodeNext",
+    "isolatedModules": true,
+    "lib": ["ES2023", "DOM"],
+    "module": "nodenext",
     "moduleResolution": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -20,11 +15,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "dist",
+    "rootDir": ".",
     "skipLibCheck": true,
     "strict": true,
-    // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-18
-    "target": "ES2022",
+    "target": "ES2023",
+    "types": ["node"],
     "verbatimModuleSyntax": true
   },
-  "exclude": ["dist", "examples/next"]
+  "exclude": ["dist", "examples", "coverage", ".triage"]
 }
