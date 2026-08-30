@@ -6,7 +6,7 @@ import { sleep, SessionData } from "../lib";
 
 // login
 export async function POST(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
   const { username = "No username" } = (await request.json()) as {
     username: string;
@@ -24,9 +24,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
-  session.counter++;
+  // `counter` can be absent: this route is reachable without a session, and
+  // the type says so now instead of letting `undefined++` produce NaN.
+  session.counter = (session.counter ?? 0) + 1;
   await session.save();
 
   return Response.json(session);
@@ -34,7 +36,7 @@ export async function PATCH() {
 
 // read session
 export async function GET() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
   // simulate looking up the user in db
   await sleep(250);
@@ -48,7 +50,7 @@ export async function GET() {
 
 // logout
 export async function DELETE() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
   session.destroy();
 

@@ -7,7 +7,7 @@ import { sleep, SessionData } from "../lib";
 
 // /app-router-client-component-redirect-route-handler-fetch/session
 export async function POST(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
   const formData = await request.formData();
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 // /app-router-client-component-redirect-route-handler-fetch/session
 // /app-router-client-component-redirect-route-handler-fetch/session?action=logout
 export async function GET(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
   const action = new URL(request.url).searchParams.get("action");
   // /app-router-client-component-redirect-route-handler-fetch/session?action=logout

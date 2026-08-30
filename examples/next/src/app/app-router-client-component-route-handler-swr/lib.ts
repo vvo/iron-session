@@ -1,4 +1,6 @@
-import { SessionOptions } from "iron-session";
+import type { SessionOptions } from "iron-session";
+
+import { sessionPassword } from "../../passwords";
 
 export interface SessionData {
   username: string;
@@ -13,7 +15,7 @@ export const defaultSession: SessionData = {
 };
 
 export const sessionOptions: SessionOptions = {
-  password: "complex_password_at_least_32_characters_long",
+  password: sessionPassword(),
   cookieName: "iron-examples-app-router-client-component-route-handler-swr",
   cookieOptions: {
     // secure only works in `https` environments

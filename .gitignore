@@ -13,3 +13,6 @@ coverage*
 /blob-report/
 /e2e/fixture/.next/
 /e2e/fixture/next-env.d.ts
+
+# local env
+.env.local
