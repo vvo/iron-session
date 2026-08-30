@@ -2,21 +2,19 @@ import { getIronSession, sealData } from "iron-session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
-import { SessionData, defaultSession, sessionOptions, sleep } from "../lib";
+import {
+  defaultSession,
+  magicLinkTokenOptions,
+  sessionOptions,
+  sleep,
+  type SessionData,
+} from "../lib";
 
 // /app-router-magic-links/session
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const username = formData.get("username") as string;
-  const fifteenMinutesInSeconds = 15 * 60;
-
-  const seal = await sealData(
-    { username },
-    {
-      password: "complex_password_at_least_32_characters_long",
-      ttl: fifteenMinutesInSeconds,
-    },
-  );
+  const seal = await sealData({ username }, magicLinkTokenOptions);
 
   // In a real application you would send back this data and use it to send an email
   // For the example purposes we will just display a webpage
@@ -39,9 +37,8 @@ export async function POST(request: NextRequest) {
 // /app-router-magic-links/session
 // /app-router-magic-links/session?action=logout
 export async function GET(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
-  console.log(new URL(request.url).searchParams);
   const action = new URL(request.url).searchParams.get("action");
   // /app-router-magic-links/session?action=logout
   if (action === "logout") {

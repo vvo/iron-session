@@ -2,7 +2,11 @@ import { Title } from "@/app/title";
 import * as css from "@/app/css";
 
 import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/pages-components/pages-router-api-route-swr/lib";
+import {
+  defaultSession,
+  sessionOptions,
+  type SessionData,
+} from "@/pages-components/pages-router-api-route-swr/lib";
 import Link from "next/link";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
@@ -34,7 +38,10 @@ export const getServerSideProps = (async (context) => {
     };
   }
 
-  return { props: { session } };
+  // Send plain data to the client. The session object also carries save() and
+  // destroy(), and its properties are optional because a session may not exist,
+  // so spread it over the defaults to get a complete SessionData.
+  return { props: { session: { ...defaultSession, ...session } } };
 }) satisfies GetServerSideProps<{
   session: SessionData;
 }>;
