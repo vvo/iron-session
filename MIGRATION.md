@@ -87,13 +87,13 @@ relying on that, you were not rotating anything.
 - **Adapters** for the runtimes that needed them:
   - `nextProxyCookies(request, response)` for Next.js `proxy.ts` (called
     `middleware.ts` before Next 16). This is the fix if saving a session in
-    middleware never seemed to take effect.
+    Proxy (middleware) never seemed to take effect.
   - `nodeCookies(req, res)` and `webCookies(request, responseOrHeaders)` if you
     want to be explicit instead of relying on the `(req, res, options)` form.
 
-### Rotating a session in Next.js middleware
+### Rotating a session in Next.js Proxy (middleware)
 
-This did not work before. A cookie written in middleware only reaches the
+This did not work before. A cookie written in Proxy (middleware) only reaches the
 current render when it goes through `response.cookies.set()`, so `session.save()`
 appeared to succeed and then vanished.
 

@@ -135,7 +135,7 @@ else, pass an adapter instead:
 | ---------------------------------------- | -------------------------------------------------------------------------- |
 | `nodeCookies(req, res)`                  | Node `http`, Express, Connect, Next.js API routes                          |
 | `webCookies(request, responseOrHeaders)` | Anything web-standard: Hono, Bun, Deno, Cloudflare Workers, Route Handlers |
-| `nextProxyCookies(request, response)`    | Next.js `proxy.ts` / `middleware.ts`                                       |
+| `nextProxyCookies(request, response)`    | Next.js Proxy (middleware), `proxy.ts`                                     |
 
 Anything with `get(name)` and `set(name, value, options)`, like Next's
 `cookies()`, can be passed directly. If your framework has neither, a cookie jar
