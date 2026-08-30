@@ -102,7 +102,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Test on Deno
         # This job is about runtime behaviour, `tsc --noEmit` in the quality job
-        # is the type gate. Both flags are about the same thing: our sources use
-        # NodeNext `./core.js` specifiers that resolve to `.ts` files, which Deno
-        # will not follow on its own.
-        run: deno test --no-check --sloppy-imports --allow-read --allow-env --node-modules-dir src/index.test.ts
+        # is the type gate. `--sloppy-imports` and `--no-check` are both about
+        # our NodeNext `./core.js` specifiers resolving to `.ts` files, which
+        # deno will not follow on its own. `--node-modules-dir=manual` makes it
+        # use what pnpm already installed instead of resolving npm itself.
+        run: deno test --no-check --sloppy-imports --allow-read --allow-env --node-modules-dir=manual src/index.test.ts
