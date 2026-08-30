@@ -17,8 +17,10 @@ on:
         default: false
         type: boolean
 
-# `id-token: write` is what lets npm attach a provenance statement, so anyone can
-# verify a tarball was built from this repository at this commit.
+# `id-token: write` is what npm's trusted publishing exchanges for a short-lived
+# publish token, and what lets npm attach a provenance statement so anyone can
+# verify a tarball was built from this repository at this commit. There is no
+# NPM_TOKEN on purpose: see AGENTS.md.
 permissions:
   contents: read
   id-token: write
@@ -30,11 +32,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      # No `registry-url` here on purpose. It makes setup-node write an
+      # `_authToken` line into .npmrc, and a statically configured token used to
+      # make pnpm skip the OIDC exchange entirely, publishing without provenance.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: ".node-version"
           cache: "pnpm"
-          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
 
@@ -70,11 +74,40 @@ jobs:
               ;;
           esac
 
+      - name: Refuse to republish a version that is already on npm
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "iron-session@$version" version > /dev/null 2>&1; then
+            if [ "${{ inputs.dry-run }}" = "true" ]; then
+              echo "::warning::iron-session@$version is already published. A real release would fail here."
+            else
+              echo "::error::iron-session@$version is already published. Bump the version instead."
+              exit 1
+            fi
+          fi
+
       - name: Publish
         if: ${{ !inputs.dry-run }}
         run: pnpm publish --tag ${{ inputs.tag }} --provenance --no-git-checks --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # The failure we care about is publishing without provenance, which looks
+      # exactly like a success. Ask the registry what it actually stored. Note
+      # `npm view` exits 0 with empty output for a missing field, so test the
+      # output rather than the exit code.
+      - name: Verify the published version has provenance
+        if: ${{ !inputs.dry-run }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          for _ in 1 2 3 4 5; do
+            url=$(npm view "iron-session@$version" dist.attestations.url 2>/dev/null || true)
+            if [ -n "$url" ]; then
+              echo "::notice::iron-session@$version published with provenance: $url"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::iron-session@$version has no provenance attestation. Trusted publishing did not run."
+          exit 1
 
       - name: Pack only (dry run)
         if: ${{ inputs.dry-run }}
