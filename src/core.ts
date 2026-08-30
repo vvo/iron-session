@@ -149,6 +149,30 @@ export interface SessionOptions {
    * }
    */
   onUnsealError?: (reason: UnsealErrorReason, error: unknown) => void;
+
+  /**
+   * Split a session that does not fit in one cookie across several cookies,
+   * named `<cookieName>.0`, `<cookieName>.1` and so on.
+   *
+   * Off by default, and reading works either way: turning this on or off does
+   * not sign anyone out.
+   *
+   * Read the size limits before reaching for this. A browser caps one cookie at
+   * 4096 bytes, but the real constraint is the request side: every cookie is
+   * sent on every request, and proxies cap the whole `Cookie` header well below
+   * what four chunks can produce. nginx allows 8 KB by default, and a CDN or
+   * load balancer in front of it may allow less. Going over that returns 400 or
+   * 431 at the edge, before your app runs, which is much harder to debug than
+   * an error from us. iron-session refuses more than {@link MAX_CHUNKS} chunks
+   * for that reason.
+   *
+   * Chunking is an escape hatch for a session slightly over the limit. If you
+   * need a lot of room, store an id in the session and keep the data in your
+   * database.
+   *
+   * @default false
+   */
+  chunk?: boolean;
 }
 
 export type IronSession<T> = T & {
@@ -178,9 +202,10 @@ const fourteenDaysInSeconds = 14 * 24 * 3600;
 const currentMajorVersion = 2;
 const versionDelimiter = "~";
 
-const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions">> = {
+const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions" | "chunk">> = {
   ttl: fourteenDaysInSeconds,
   cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
+  chunk: false,
 };
 
 function normalizeStringPasswordToMap(password: Password): PasswordsMap {
@@ -497,7 +522,7 @@ function isCookieStore(value: unknown): value is CookieStore {
 
 /** The options that actually shape the cookie, with defaults applied. */
 type SessionConfig = Required<
-  Pick<SessionOptions, "cookieName" | "password" | "ttl" | "cookieOptions">
+  Pick<SessionOptions, "cookieName" | "password" | "ttl" | "cookieOptions" | "chunk">
 > & {
   passwordsMap: PasswordsMap;
 };
@@ -567,7 +592,7 @@ async function createSession<T extends object>(
   let config = getSessionConfig(sessionOptions);
   let onUnsealError = sessionOptions.onUnsealError;
 
-  const sealFromCookies = jar.read(config.cookieName);
+  const sealFromCookies = readSeal(jar, config.cookieName);
   const session = sealFromCookies
     ? await unsealData<T>(sealFromCookies, {
         password: config.passwordsMap,
@@ -607,8 +632,7 @@ async function createSession<T extends object>(
           ttl: config.ttl,
         });
 
-        assertCookieFits(config.cookieName, seal, config.cookieOptions);
-        jar.write(config.cookieName, seal, config.cookieOptions);
+        writeSeal(jar, config, seal);
       },
     },
     destroy: {
@@ -618,6 +642,11 @@ async function createSession<T extends object>(
           delete (session as Record<string, unknown>)[key];
         }
         jar.write(config.cookieName, "", { ...config.cookieOptions, maxAge: 0 });
+        // Leaving chunks behind would let a later read reassemble a stale seal.
+        clearStaleCookies(jar, config.cookieName, config.cookieOptions, {
+          whole: true,
+          chunksUpTo: 0,
+        });
       },
     },
   });
@@ -625,24 +654,147 @@ async function createSession<T extends object>(
   return session as IronSession<T>;
 }
 
-/**
- * Browsers cap a single cookie at 4096 bytes, counted over the whole
- * `Set-Cookie` value. The two old code paths measured this differently: the
- * Node path measured the real header, the cookie-store path added up
- * `name.length + seal.length + JSON.stringify(options).length`, which is not
- * the same number, so identical data was accepted by one and rejected by the
- * other. Both now measure the header that actually goes out, in bytes rather
- * than UTF-16 code units.
- */
-function assertCookieFits(name: string, seal: string, cookieOptions: CookieOptions): void {
-  const header = serializeCookie(name, seal, cookieOptions);
-  const bytes = new TextEncoder().encode(header).length;
+/** Browsers cap one cookie at 4096 bytes over the whole `Set-Cookie` value. */
+const MAX_COOKIE_BYTES = 4096;
 
-  if (bytes > 4096) {
+/**
+ * Hard cap on chunks, not configurable on purpose.
+ *
+ * Four chunks is already ~16 KB of `Cookie` header on every single request, and
+ * nginx's default `large_client_header_buffers` is 8 KB. Letting people raise
+ * this just moves the failure from our error message to a 400 at their CDN.
+ */
+const MAX_CHUNKS = 4;
+
+const chunkName = (cookieName: string, index: number): string => `${cookieName}.${index}`;
+
+function cookieBytes(name: string, value: string, cookieOptions: CookieOptions): number {
+  return new TextEncoder().encode(serializeCookie(name, value, cookieOptions)).length;
+}
+
+/**
+ * Reads the seal, whether it was stored in one cookie or split across several.
+ *
+ * Both shapes are always accepted regardless of the `chunk` setting, so turning
+ * chunking on or off does not invalidate cookies that are already out there.
+ *
+ * Chunk discovery probes `name.0`, `name.1`, ... and stops at the first gap,
+ * bounded by {@link MAX_CHUNKS}. There is deliberately no cookie holding the
+ * chunk count: that value would be attacker-controlled, and a `name.count` of
+ * 99999999 is free CPU amplification before anyone is authenticated.
+ *
+ * The chunks are concatenated and handed to `unseal` whole. Nothing here
+ * inspects, validates or trusts an individual chunk, and that is what makes
+ * reassembly safe: the HMAC already covers the entire seal string, so a deleted
+ * chunk, reordered chunks, or a chunk swapped in from a different session all
+ * fail integrity and land in the unreadable-cookie path.
+ */
+function readSeal(jar: CookieJar, cookieName: string): string {
+  const whole = jar.read(cookieName);
+  if (whole) {
+    return whole;
+  }
+
+  let seal = "";
+  for (let index = 0; index < MAX_CHUNKS; index += 1) {
+    const part = jar.read(chunkName(cookieName, index));
+    if (!part) {
+      break;
+    }
+    seal += part;
+  }
+
+  return seal;
+}
+
+/**
+ * Expires cookies that are no longer part of the session.
+ *
+ * This is the bug chunking would otherwise ship with. A session that shrinks
+ * from three chunks to one leaves `name.1` and `name.2` in the browser, the next
+ * read concatenates the new chunk 0 with the two stale ones, the HMAC fails, and
+ * the user is signed out on every request from then on while `save()` keeps
+ * reporting success. There is no error anywhere in that loop.
+ *
+ * Only cookies actually present on the request are expired, so a normal
+ * unchunked save does not emit four pointless `Set-Cookie` headers. The expiry
+ * reuses the same `path` and `domain` as the write, otherwise the browser treats
+ * it as a different cookie and the delete does nothing.
+ */
+function clearStaleCookies(
+  jar: CookieJar,
+  cookieName: string,
+  cookieOptions: CookieOptions,
+  keep: { whole: boolean; chunksUpTo: number },
+): void {
+  const expire = (name: string): void => {
+    if (jar.read(name)) {
+      jar.write(name, "", { ...cookieOptions, maxAge: 0 });
+    }
+  };
+
+  if (!keep.whole) {
+    expire(cookieName);
+  }
+
+  for (let index = keep.chunksUpTo; index < MAX_CHUNKS; index += 1) {
+    expire(chunkName(cookieName, index));
+  }
+}
+
+/**
+ * Writes the seal, splitting it across cookies when it does not fit and
+ * chunking is enabled.
+ *
+ * The seal is split as an opaque string, after the version suffix is applied to
+ * the whole thing. Rejoining is a plain concatenation with no separator.
+ */
+function writeSeal(jar: CookieJar, config: SessionConfig, seal: string): void {
+  const { cookieName, cookieOptions } = config;
+  const wholeBytes = cookieBytes(cookieName, seal, cookieOptions);
+
+  if (wholeBytes <= MAX_COOKIE_BYTES) {
+    jar.write(cookieName, seal, cookieOptions);
+    clearStaleCookies(jar, cookieName, cookieOptions, { whole: true, chunksUpTo: 0 });
+    return;
+  }
+
+  if (!config.chunk) {
     throw new Error(
-      `iron-session: Cookie length is too big (${bytes} bytes), browsers will refuse it. Try to remove some data.`,
+      `iron-session: Cookie length is too big (${wholeBytes} bytes), browsers will refuse it. Remove some data from the session, or set \`chunk: true\` to split it across several cookies.`,
     );
   }
+
+  // Every chunk index is a single digit because MAX_CHUNKS is 4, so all chunk
+  // names are the same length and one budget works for all of them.
+  const perChunkOverhead = cookieBytes(chunkName(cookieName, 0), "", cookieOptions);
+  const budget = MAX_COOKIE_BYTES - perChunkOverhead;
+
+  if (budget <= 0) {
+    throw new Error(
+      `iron-session: The cookie name and options alone take ${perChunkOverhead} bytes, which leaves no room for session data. Use a shorter cookie name.`,
+    );
+  }
+
+  const chunks: string[] = [];
+  for (let offset = 0; offset < seal.length; offset += budget) {
+    chunks.push(seal.slice(offset, offset + budget));
+  }
+
+  if (chunks.length > MAX_CHUNKS) {
+    throw new Error(
+      `iron-session: The session needs ${chunks.length} cookies and the maximum is ${MAX_CHUNKS}. Even at ${MAX_CHUNKS} the whole Cookie header is sent on every request and proxies commonly cap it at 8 KB, so raising this would fail at your CDN instead. Store an id in the session and keep the data in your database.`,
+    );
+  }
+
+  chunks.forEach((value, index) => {
+    jar.write(chunkName(cookieName, index), value, cookieOptions);
+  });
+
+  clearStaleCookies(jar, cookieName, cookieOptions, {
+    whole: false,
+    chunksUpTo: chunks.length,
+  });
 }
 
 const badUsageMessage =
