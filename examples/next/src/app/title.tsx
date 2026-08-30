@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import * as css from "@/app/css";
 import GitHubLogo from "./GitHubLogo";
@@ -7,7 +8,7 @@ export function Title({
   subtitle,
 }: {
   category?: string;
-  subtitle: JSX.Element | string;
+  subtitle: ReactNode;
 }) {
   return (
     <div>
