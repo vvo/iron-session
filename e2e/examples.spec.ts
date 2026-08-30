@@ -194,7 +194,7 @@ for (const { name, path } of [
 // Magic links use a second password (`MAGIC_LINK_PASSWORD`) and seal their token
 // with `sealData` instead of writing a session cookie, so a missing or shared
 // secret here fails independently of everything above.
-test("magic links: a generated link logs you in", async ({ page, browser }) => {
+test("magic links: a generated link logs you in", async ({ page, context }) => {
   await openExample(page, "/app-router-magic-links");
 
   await loginForm(page).fill(username);
@@ -209,19 +209,16 @@ test("magic links: a generated link logs you in", async ({ page, browser }) => {
     throw new Error("the magic link was rendered without an href");
   }
 
-  // Open it in a clean context: the point of a magic link is logging in someone
-  // who has no session yet.
-  const fresh = await browser.newContext();
+  // Drop every cookie before following it: the point of a magic link is logging
+  // in someone who has no session yet. Clearing this context rather than making
+  // a new one keeps the config's options, which on a preview deployment include
+  // the header that gets past Vercel Authentication.
+  await context.clearCookies();
 
-  try {
-    const freshPage = await fresh.newPage();
-    await freshPage.goto(href);
+  await page.goto(href);
 
-    await expect(freshPage).toHaveURL(/\/app-router-magic-links\/?$/);
-    await loggedInAs(freshPage, username);
-  } finally {
-    await fresh.close();
-  }
+  await expect(page).toHaveURL(/\/app-router-magic-links\/?$/);
+  await loggedInAs(page, username);
 });
 
 test("magic links: a tampered seal does not log you in", async ({ page }) => {

@@ -13,6 +13,14 @@ if (!baseURL) {
   throw new Error("BASE_URL is required, e.g. BASE_URL=https://get-iron-session.vercel.app");
 }
 
+/**
+ * Preview deployments sit behind Vercel Authentication, which answers every
+ * request with a redirect to vercel.com/sso-api. This is the project's
+ * "Protection Bypass for Automation" secret, which lets CI through without
+ * making previews public. Unset when running against a public URL.
+ */
+const bypassSecret = process.env["VERCEL_AUTOMATION_BYPASS_SECRET"];
+
 export default defineConfig({
   testDir: "./e2e",
   // Only the deployed-site suite. The library assertions in session.spec.ts
@@ -32,7 +40,13 @@ export default defineConfig({
   // many lambdas Vercel can cold start at once.
   workers: 4,
   reporter: process.env["CI"] ? [["html"], ["list"]] : "list",
-  use: { baseURL, trace: "on-first-retry" },
+  use: {
+    baseURL,
+    trace: "on-first-retry",
+    ...(bypassSecret && {
+      extraHTTPHeaders: { "x-vercel-protection-bypass": bypassSecret },
+    }),
+  },
   // One browser is enough here: this suite checks the deployment works, and
   // cross-browser cookie behaviour is already covered on Chromium, Firefox and
   // WebKit by the fixture suite.
