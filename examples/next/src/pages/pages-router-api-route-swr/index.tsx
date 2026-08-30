@@ -12,16 +12,7 @@ export default function AppRouterSWR() {
       <Head>
         <title>🛠 iron-session examples: Pages Router, API routes, and SWR</title>
       </Head>
-      <Title
-        subtitle={
-          <>
-            + API routes, and{" "}
-            <a className={css.link} href="https://swr.vercel.app" target="_blank">
-              SWR
-            </a>
-          </>
-        }
-      />
+      <Title subtitle="API Routes, getServerSideProps and SWR" category="Pages Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in action. Bonus: open

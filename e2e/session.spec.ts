@@ -169,24 +169,46 @@ test("shrinking a chunked session cleans up its old chunks", async ({ page, cont
  * #870: "cookie not being saved with Next.js 15 and Safari".
  *
  * The library default is `secure: true` and this fixture is served over plain
- * http. Every engine we test refuses to store that cookie, including Chromium,
- * so the "Safari" framing in the issue was a red herring: the header we send is
- * correct and complete, and the browser is doing what the spec says.
+ * http. The engines disagree about that, and the disagreement is the point:
+ * WebKit refuses the cookie, Chromium and Firefox keep it because they treat
+ * localhost as a trustworthy origin even on http.
  *
- * The fix is `cookieOptions: { secure: false }` in local development, or serving
- * over https (`next dev --experimental-https`).
+ * So the report was right to name Safari. Anyone developing on Chrome sees
+ * their session work locally and then breaks for Safari users, which is why
+ * this runs on all three engines.
+ *
+ * The fix either way is `cookieOptions: { secure: false }` in local
+ * development, or serving over https (`next dev --experimental-https`).
  */
-test("a Secure cookie is dropped over plain http, in every browser", async ({ page, context }) => {
+test("a Secure cookie over plain http is kept or dropped depending on the engine", async ({
+  page,
+  context,
+  browserName,
+}) => {
   await page.goto("/");
+
+  // Wait for the action to answer before looking at the jar. Sampling early
+  // reads zero cookies for the boring reason that none have arrived yet, which
+  // is a pass for the wrong reason.
+  const saved = page.waitForResponse(
+    (response) => response.request().method() === "POST" && response.status() < 400,
+  );
   await page.getByTestId("login-secure").click();
+  await saved;
 
-  // The response carries a well-formed `Secure` cookie, verified separately with
-  // curl, and no browser keeps it on an insecure origin.
-  await expectCookieCount(context, "e2e-secure").toBe(0);
-  await expect(page.getByTestId("secure-username")).toHaveText("anonymous");
+  const keepsSecureCookieOnLocalhost = browserName !== "webkit";
 
-  // The non-secure session still works on the same page, which rules out the
-  // fixture or the action being broken.
+  await expectCookieCount(context, "e2e-secure").toBe(keepsSecureCookieOnLocalhost ? 1 : 0);
+
+  // WebKit never got the cookie, so it cannot send it back and the session
+  // stays anonymous on the next request.
+  if (!keepsSecureCookieOnLocalhost) {
+    await page.reload();
+    await expect(page.getByTestId("secure-username")).toHaveText("anonymous");
+  }
+
+  // The non-secure session works on the same page in every engine, which rules
+  // out the fixture or the action being broken.
   await page.getByTestId("login").click();
   await expect(page.getByTestId("username")).toHaveText("alison");
   await expectCookieCount(context, cookieName).toBe(1);

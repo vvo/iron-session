@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { getIronSession } from "iron-session";
 import { sessionOptions, type SessionData } from "../lib";
 import Link from "next/link";
+import { SessionSkeleton } from "@/app/session-skeleton";
 
 // The session lives in a cookie, so the part of this page that reads it can
 // never be static. With `cacheComponents` on, that is expressed by the
@@ -18,8 +19,8 @@ async function getSession() {
 export default function ProtectedServer() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="Protected page" />
-      <Suspense fallback={<p className="text-lg">Loading...</p>}>
+      <Title subtitle="Protected page" category="Redirected in proxy.ts" />
+      <Suspense fallback={<SessionSkeleton />}>
         <Content />
       </Suspense>
       <p>

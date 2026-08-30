@@ -109,6 +109,9 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       swr:
         specifier: ^2.3.6
         version: 2.5.1(react@19.2.8)
@@ -1824,6 +1827,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   sharp@0.35.4:
     resolution: {integrity: sha512-n++8XWcj+jCOr2IOl7h8LbKnGBDY4aPbmprMONBNFdn0ImXqpGVv5zliDs0V9HbmbCQLpbuo2ej9rAoOQTvMDA==}
     engines: {node: '>=20.9.0'}
@@ -3214,6 +3220,8 @@ snapshots:
   scheduler@0.27.0: {}
 
   semver@7.8.5: {}
+
+  server-only@0.0.1: {}
 
   sharp@0.35.4(@types/node@26.4.0):
     dependencies:

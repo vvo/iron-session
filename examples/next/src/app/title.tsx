@@ -1,43 +1,19 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import * as css from "@/app/css";
-import GitHubLogo from "./GitHubLogo";
 
-export function Title({
-  category = "App router",
-  subtitle,
-}: {
-  category?: string;
-  subtitle: ReactNode;
-}) {
+import * as css from "@/app/css";
+
+/**
+ * The heading of an example page.
+ *
+ * The site chrome (name, GitHub, npm) moved to `SiteHeader` in the layout, so
+ * every page has the same header at the same height and navigating between
+ * examples moves nothing.
+ */
+export function Title({ category, subtitle }: { category?: string; subtitle: ReactNode }) {
   return (
-    <div>
-      <h1>
-        <div className="flex items-center gap-2">
-          <div className="text-2xl">
-            <span className="hidden dark:inline">🌝</span>
-            <span className="dark:hidden">🛠</span>{" "}
-            <Link className={css.link} href="/">
-              iron-session
-            </Link>{" "}
-            <span className="text-slate-700 dark:text-slate-300">examples: {category}</span>
-          </div>
-          <span className="text-slate-300 dark:text-slate-700 text-xl"> | </span>
-          <div>
-            <div className="flex items-center gap-2 text-md">
-              <GitHubLogo />{" "}
-              <a
-                href="https://github.com/vvo/iron-session"
-                target="_blank"
-                className="text-slate-700 dark:text-slate-300 underline hover:no-underline"
-              >
-                vvo/iron-session
-              </a>
-            </div>
-          </div>
-        </div>
-      </h1>
-      <h2 className="text-lg text-slate-500 dark:text-slate-400">{subtitle}</h2>
+    <div className="space-y-1">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{subtitle}</h1>
+      {category ? <p className={css.sectionHint}>{category}</p> : null}
     </div>
   );
 }

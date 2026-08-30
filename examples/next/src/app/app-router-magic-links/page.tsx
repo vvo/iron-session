@@ -1,26 +1,35 @@
-import * as css from "@/app/css";
+import { Suspense } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import type { Metadata } from "next";
 
-import { Metadata } from "next";
+import * as css from "@/app/css";
 import { GetTheCode } from "../../get-the-code";
 import { Title } from "../title";
-import { Form } from "./form";
+import { SessionSkeleton } from "../session-skeleton";
+import { MagicLinkForm } from "./magic-link-form";
+import { logout } from "./actions";
+import { sessionOptions, type SessionData } from "./lib";
 
 export const metadata: Metadata = {
   title: "🛠 iron-session examples: Magic links",
 };
 
-export default function AppRouterRedirect() {
+export default function MagicLinks() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="+ client components, route handlers, redirects, and fetch" />
+      <Title subtitle="Magic links" category="App Router" />
 
-      <p className="italic max-w-xl">
-        <u>How to test</u>: Login and refresh the page to see iron-session in action.
+      <p className="max-w-xl text-slate-700 dark:text-slate-300">
+        Log in without a password. The username is sealed into a URL, and opening that URL unseals
+        it and starts a session.
       </p>
 
-      <div className="grid grid-cols-1 gap-4 p-10 border border-slate-500 rounded-md max-w-xl">
-        <Form />
+      <div className="max-w-xl rounded-md border border-slate-300 dark:border-slate-700 p-6">
+        <Suspense fallback={<SessionSkeleton />}>
+          <SessionPanel />
+        </Suspense>
       </div>
 
       <GetTheCode path="app/app-router-magic-links" />
@@ -35,36 +44,50 @@ export default function AppRouterRedirect() {
   );
 }
 
+async function SessionPanel() {
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+
+  if (!session.isLoggedIn) {
+    return <MagicLinkForm />;
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-lg">
+        Logged in user: <strong>{session.username}</strong>
+      </p>
+      <form action={logout}>
+        <input type="submit" value="Logout" className={css.button} />
+      </form>
+    </div>
+  );
+}
+
 function HowItWorks() {
   return (
     <details className="max-w-2xl space-y-4">
       <summary className="cursor-pointer">How it works</summary>
 
-      <ol className="list-decimal list-inside">
+      <ol className="list-decimal list-inside space-y-2">
         <li>
-          The form is submitted to /app-router-magic-links/session (API route) via a POST call
-          (non-fetch). The API route generates a sealed token and returns the magic link to client
-          so it can be either sent or used right away. When the magic link is visited it sets the
-          session data and redirects back to /app-router-magic-links (this page)
+          A Server Action seals the username with <code>sealData</code> and returns the link. The
+          page renders it through <code>useActionState</code>, so nothing navigates away.
         </li>
         <li>
-          The page gets the session data via a fetch call to /app-router-magic-links/session (API
-          route). The API route either return the session data (logged in) or a default session (not
-          logged in).
+          Opening the link hits a Route Handler that calls <code>unsealData</code> and saves the
+          session. A tampered or expired seal unseals to an empty object, so it redirects back
+          without logging anyone in.
         </li>
         <li>
-          The logout is a regular link navigating to /app-router-magic-links/logout which destroy
-          the session and redirects back to /app-router-magic-links (this page).
+          The token is sealed with its own password, never the session one. Both shared a password
+          once, which meant a link token was a valid session cookie and the other way around. A
+          leaked link in an email or a referrer header was a full session.
+        </li>
+        <li>
+          The token has a 15 minute <code>ttl</code>. Without an invalidation list a link still
+          works more than once inside that window, so treat it as a short-lived bearer token.
         </li>
       </ol>
-
-      <p>
-        <strong>Pros</strong>: Simple.
-      </p>
-      <p>
-        <strong>Cons</strong>: Dangerous if not used properly. Without any invalidations or
-        blacklists, the magic link can be used multiple times if compromised.
-      </p>
     </details>
   );
 }

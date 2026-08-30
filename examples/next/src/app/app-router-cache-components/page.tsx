@@ -7,6 +7,7 @@ import * as css from "@/app/css";
 import { Title } from "../title";
 import { GetTheCode } from "../../get-the-code";
 import { SessionPanel } from "./session-panel";
+import { SessionSkeleton } from "../session-skeleton";
 
 export const metadata: Metadata = {
   title: "🛠 iron-session examples: Cache Components",
@@ -46,7 +47,7 @@ async function CachedPanel() {
 export default function CacheComponentsExample() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="+ Cache Components (Next.js 16)" />
+      <Title subtitle="Cache Components and Partial Prerendering" category="App Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: log in, then reload. The cached panel keeps its timestamp, the session
@@ -58,9 +59,18 @@ export default function CacheComponentsExample() {
 
       {/* The session lives in a cookie, so it is a dynamic hole: it streams in
           per request while everything around it is served from the prerender. */}
-      <Suspense fallback={<p className="text-lg">Loading session...</p>}>
+      <Suspense fallback={<SessionSkeleton />}>
         <SessionPanel />
       </Suspense>
+
+      <p className="max-w-xl">
+        <Link href="/app-router-cache-components/protected" className={css.link}>
+          Protected page →
+        </Link>{" "}
+        <span className={css.sectionHint}>
+          redirects back here unless you are logged in, checked in the Data Access Layer.
+        </span>
+      </p>
 
       <GetTheCode path="app/app-router-cache-components" />
       <HowItWorks />

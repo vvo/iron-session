@@ -209,7 +209,7 @@ for (const { name, path } of [
 // with `sealData` instead of writing a session cookie, so a missing or shared
 // secret here fails independently of everything above.
 test("magic links: a generated link logs you in", async ({ page, context }) => {
-  await openExample(page, "/app-router-magic-links");
+  await page.goto("/app-router-magic-links");
 
   await loginForm(page).fill(username);
   await page.getByRole("button", { name: "Get magic login link" }).click();
@@ -240,6 +240,61 @@ test("magic links: a tampered seal does not log you in", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/app-router-magic-links\/?$/);
   await expect(loginForm(page)).toBeVisible();
+});
+
+// The two "Start here" examples protect a route with `verifySession()` in their
+// Data Access Layer, which is where the Next.js guide puts the check.
+for (const { name, base } of [
+  { name: "server components and actions", base: "/app-router-server-component-and-action" },
+  { name: "cache components", base: "/app-router-cache-components" },
+]) {
+  test(`${name}: the protected page redirects anonymous visitors`, async ({ page }) => {
+    await page.goto(`${base}/protected`);
+
+    await expect(page).toHaveURL(new RegExp(`${base}/?$`));
+    await expect(loginForm(page)).toBeVisible();
+  });
+
+  test(`${name}: the protected page renders once logged in`, async ({ page }) => {
+    await page.goto(base);
+    await loginForm(page).fill(username);
+    await loginButton(page).click();
+    await loggedInAs(page, username);
+
+    await page.goto(`${base}/protected`);
+    await expect(page.getByRole("heading", { name: "Protected page" })).toBeVisible();
+    await expect(page.getByText(`Hello ${username}!`)).toBeVisible();
+  });
+}
+
+/**
+ * OAuth. The provider is part of the demo, but the state cookie and the session
+ * are real, and the state check is the part worth asserting: without it a
+ * callback URL from someone else logs your browser into their account.
+ */
+test("oauth: the full round trip creates a session", async ({ page }) => {
+  await page.goto("/app-router-oauth");
+
+  await page.getByRole("button", { name: "Sign in with Example Provider" }).click();
+  await expect(page).toHaveURL(/\/app-router-oauth\/provider\?/);
+
+  await page.getByRole("link", { name: "Authorize" }).click();
+
+  await expect(page).toHaveURL(/\/app-router-oauth\/?$/);
+  await loggedInAs(page, "oauth-user");
+  await expect.poll(async () => (await sessionCookies(page)).length).toBeGreaterThan(0);
+
+  await logoutButton(page).click();
+  await expect(page.getByRole("button", { name: "Sign in with Example Provider" })).toBeVisible();
+});
+
+test("oauth: a callback with the wrong state is rejected", async ({ page }) => {
+  await page.goto("/app-router-oauth/callback?code=code-attacker&state=not-the-state");
+
+  await expect(page).toHaveURL(/error=state/);
+  await expect(page.getByText(/state did not match/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in with Example Provider" })).toBeVisible();
+  expect(await sessionCookies(page)).toHaveLength(0);
 });
 
 /**

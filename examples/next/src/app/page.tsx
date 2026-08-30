@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import * as css from "@/app/css";
-import GitHubLogo from "./GitHubLogo";
+
 import { ExampleGrid, type Example } from "./example-card";
 
 export const metadata: Metadata = {
@@ -22,13 +22,13 @@ const appRouter: Example[] = [
     href: "/app-router-server-component-and-action",
     title: "Server Components and Server Actions",
     when: "The default. A form posts to a Server Action, the action writes the session, the page reads it on the server.",
-    tags: ["Server Actions", "cookies()", "useFormStatus"],
+    tags: ["Server Actions", "Data Access Layer", "Protected route"],
   },
   {
     href: "/app-router-cache-components",
     title: "Cache Components and Partial Prerendering",
     when: "When cacheComponents is on. The session is a dynamic hole inside a prerendered page, and never inside use cache.",
-    tags: ["use cache", "Suspense", "useActionState", "Proxy"],
+    tags: ["use cache", "Suspense", "useActionState", "Protected route"],
     badge: "Next.js 16",
   },
 ];
@@ -50,10 +50,16 @@ const clientSide: Example[] = [
 
 const otherPatterns: Example[] = [
   {
+    href: "/app-router-oauth",
+    title: "OAuth login",
+    when: "Sign in through a provider. iron-session seals the state on the way out and holds the session on the way back.",
+    tags: ["sealData", "state", "Route Handlers"],
+  },
+  {
     href: "/app-router-magic-links",
     title: "Magic links",
     when: "Passwordless login: seal a token into a URL, unseal it on the way back, then start the session.",
-    tags: ["sealData", "unsealData"],
+    tags: ["sealData", "unsealData", "useActionState"],
   },
 ];
 
@@ -104,44 +110,22 @@ export default function Home() {
 
 function Hero() {
   return (
-    <header className="space-y-4 max-w-2xl">
+    <div className="space-y-3 max-w-2xl">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-        <span className="hidden dark:inline">🌝</span>
-        <span className="dark:hidden">🛠</span> iron-session examples
+        Cookie-based sessions for Next.js
       </h1>
 
       <p className="text-lg text-slate-700 dark:text-slate-300">
-        Secure, stateless, cookie-based sessions. The session lives in a signed and encrypted
-        cookie, so there is no session store to run and no lookup on the way in.
+        The session lives in a signed and encrypted cookie, so there is no session store to run and
+        no lookup on the way in. Reading it is a decrypt, which is why these pages render on the
+        server with no loading state.
       </p>
-
-      <div className="flex flex-wrap items-center gap-4 text-sm">
-        <span className="flex items-center gap-2">
-          <GitHubLogo />
-          <a
-            href="https://github.com/vvo/iron-session"
-            target="_blank"
-            className="text-slate-700 dark:text-slate-300 underline hover:no-underline"
-          >
-            vvo/iron-session
-          </a>
-        </span>
-        <a href="https://www.npmjs.com/package/iron-session" target="_blank" className={css.link}>
-          npm
-        </a>
-        <a
-          href="https://nextjs.org/docs/app/guides/authentication"
-          target="_blank"
-          className={css.link}
-        >
-          Next.js authentication guide
-        </a>
-      </div>
 
       <p className={css.sectionHint}>
-        Every example logs in with a fake user and sleeps 250ms to stand in for a database call.
+        Every example logs in with a fake user. Logging in sleeps 250ms to stand in for a database
+        call; reading the session does not, because it never touches one.
       </p>
-    </header>
+    </div>
   );
 }
 
