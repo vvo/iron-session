@@ -243,10 +243,44 @@ function computeCookieMaxAge(ttl: number): number {
   }
 
   // Expire the cookie slightly before the seal, and allow for a 60 second clock
-  // difference between server and client. Clamped to 1: a short ttl used to
-  // produce `Max-Age=0` or a negative value, which makes the browser drop the
-  // cookie on arrival while save() still reported success.
-  return Math.max(1, ttl - timestampSkewSec);
+  // difference between server and client. A ttl at or under that skew keeps its
+  // full length: subtracting it produced `Max-Age=0` or a negative value, which
+  // makes the browser drop the cookie on arrival while save() reported success.
+  return ttl > timestampSkewSec ? ttl - timestampSkewSec : ttl;
+}
+
+/**
+ * Names the value that iron-webcrypto refused, so the error points at
+ * `session.lastSeen` instead of leaving you to find it.
+ */
+function describeUnserializable(data: unknown, path = "session", depth = 0): string {
+  const type = typeof data;
+
+  if (type === "bigint" || type === "function" || type === "symbol") {
+    return ` (${path} is a ${type})`;
+  }
+  if (type === "number" && !Number.isFinite(data)) return ` (${path} is ${String(data)})`;
+  if (type !== "object" || data === null || depth > 5) return "";
+
+  const object = data as object;
+
+  // Date, Map, Set and class instances all land here: anything whose prototype
+  // is not plain Object cannot survive a JSON round trip.
+  const name = (object.constructor as { name?: string } | undefined)?.name;
+  if (!Array.isArray(object) && name !== undefined && name !== "Object") {
+    return ` (${path} is a ${name})`;
+  }
+
+  const entries: [string, unknown][] = Array.isArray(object)
+    ? object.map((value, index) => [`[${index}]`, value])
+    : Object.entries(object).map(([key, value]) => [`.${key}`, value]);
+
+  for (const [suffix, value] of entries) {
+    const found = describeUnserializable(value, `${path}${suffix}`, depth + 1);
+    if (found) return found;
+  }
+
+  return "";
 }
 
 export async function sealData(
@@ -278,7 +312,7 @@ export async function sealData(
   } catch (error) {
     if (error instanceof Error && error.message === "Data is not JSON serializable") {
       throw new Error(
-        "iron-session: The session data is not JSON serializable. Store plain JSON values only: a Date must be stored as a timestamp (Date.now()) or an ISO string, and Map/Set/BigInt/undefined/functions are not supported.",
+        `iron-session: The session data is not JSON serializable${describeUnserializable(data)}. Store plain JSON values only: a Date must be stored as a timestamp (Date.now()) or an ISO string, and Map/Set/BigInt/functions are not supported.`,
         { cause: error },
       );
     }
@@ -579,14 +613,20 @@ function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
-  const { expires } = options.cookieOptions;
+  return options;
+}
+
+/**
+ * Only checked when writing: reading a session does not set a cookie, so a
+ * stale `expires` should not break a page that just reads one.
+ */
+function assertCookieCanPersist(cookieOptions: CookieOptions): void {
+  const { expires } = cookieOptions;
   if (expires instanceof Date && expires.getTime() < Date.now()) {
     throw new Error(
       `iron-session: Bad usage. cookieOptions.expires is in the past (${expires.toISOString()}), so the browser will discard the cookie and the session will never persist. This usually means the Date was created once at module scope. Use \`ttl\` instead.`,
     );
   }
-
-  return options;
 }
 
 /**
@@ -628,12 +668,22 @@ async function createSession<T extends object>(
     save: {
       value: async function save() {
         if (destroyed) {
+          // `destroy()` already cleared the cookie, so saving nothing on top of
+          // it is redundant rather than wrong: plenty of logout handlers call
+          // both, and that end state is the one they wanted. Writing data after
+          // a destroy is the real bug, because the last Set-Cookie wins and the
+          // user silently stays signed in.
+          if (Object.keys(session).length === 0) {
+            return;
+          }
+
           throw new Error(
-            "iron-session: Cannot save a destroyed session. session.destroy() signs the user out, and saving afterwards would restore the cookie you just cleared. Get a fresh session if you need to write one.",
+            "iron-session: Cannot save a destroyed session that has data written back into it. session.destroy() signs the user out, and saving these fields would restore the cookie you just cleared, leaving the user signed in. Get a fresh session if you need to write one.",
           );
         }
 
         jar.assertWritable?.();
+        assertCookieCanPersist(config.cookieOptions);
 
         const seal = await sealData(session, {
           password: config.passwordsMap,

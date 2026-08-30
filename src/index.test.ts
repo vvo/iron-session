@@ -581,7 +581,7 @@ await test("updateConfig should validate the new password", async () => {
   );
 });
 
-await test("should refuse to save a destroyed session", async () => {
+await test("should ignore save() after destroy() when nothing was written back", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
   const session = await getSession(
@@ -596,11 +596,9 @@ await test("should refuse to save a destroyed session", async () => {
   await session.save();
 
   session.destroy();
-
-  // destroy() only cleared the object and queued an expired cookie, so a later
-  // save() re-sealed the session and the last Set-Cookie won. A wrapper
-  // refreshing a rolling expiry at end of request cancelled every logout.
-  await rejects(async () => session.save(), /Cannot save a destroyed session/);
+  // Logout handlers commonly call both, and the cleared cookie is the end state
+  // they wanted, so this stays a no-op instead of a 500 on the logout route.
+  await session.save();
 
   const headers = res.setHeader.mock.calls.map((call) => call.arguments[1] as string[]);
   const last = headers.at(-1)?.at(-1) ?? "";
@@ -609,17 +607,105 @@ await test("should refuse to save a destroyed session", async () => {
   mock.reset();
 });
 
-await test("should reject cookieOptions.expires in the past", async () => {
+await test("should refuse to save a destroyed session that has data written back", async () => {
+  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
+
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
+  session.user = { id: 1 };
+  await session.save();
+
+  session.destroy();
+  session.user = { id: 1 };
+
+  // The last Set-Cookie wins, so this would hand back a valid session and
+  // silently cancel the logout. A wrapper refreshing a rolling expiry at end of
+  // request did exactly that to every logout in the app.
+  await rejects(async () => session.save(), /destroyed session that has data/);
+
+  const headers = res.setHeader.mock.calls.map((call) => call.arguments[1] as string[]);
+  const last = headers.at(-1)?.at(-1) ?? "";
+  match(last, /Max-Age=0/);
+
+  mock.reset();
+});
+
+await test("should reject cookieOptions.expires in the past on save, but still read", async () => {
   // A module-scope `expires` is evaluated once per process and drifts into the
   // past, after which the browser discards every cookie we set. That reads as
   // "works locally, works after deploy, then randomly stops" (#910).
+  const options = {
+    cookieName,
+    password,
+    cookieOptions: { expires: new Date(Date.now() - 1000) },
+  };
+  const seal = await sealData({ user: { id: 1 } }, { password });
+
+  // Reading sets no cookie, so a page that only reads a session keeps working.
+  const session = await getSession(
+    { headers: { cookie: `${cookieName}=${seal}` } } as IncomingMessage,
+    {} as Response,
+    options,
+  );
+  deepEqual(session.user, { id: 1 });
+
+  await rejects(async () => session.save(), /expires is in the past/);
+});
+
+await test("should keep the full max-age for a ttl shorter than the clock skew", async () => {
+  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
+
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    { cookieName, password, ttl: 30 },
+  );
+  session.user = { id: 1 };
+  await session.save();
+
+  // Subtracting the 60s skew from a 30s ttl produced Max-Age=-30, and the
+  // browser dropped the cookie on arrival while save() reported success.
+  match(res.setHeader.mock.calls[0]?.arguments[1][0], /Max-Age=30;/);
+
+  mock.reset();
+});
+
+await test("should name the value that is not JSON serializable", async () => {
   await rejects(
-    getSession({ headers: {} } as IncomingMessage, {} as Response, {
-      cookieName,
-      password,
-      cookieOptions: { expires: new Date(Date.now() - 1000) },
-    }),
-    /expires is in the past/,
+    async () => sealData({ user: { lastSeen: new Date() } }, { password }),
+    /\(session\.user\.lastSeen is a Date\)/,
+  );
+  await rejects(async () => sealData({ ids: new Set([1]) }, { password }), /session\.ids is a Set/);
+  await rejects(
+    async () => sealData({ xs: [1, 2n] }, { password }),
+    /session\.xs\[1\] is a bigint/,
+  );
+  await rejects(
+    async () => sealData({ m: new Map([["a", 1]]) }, { password }),
+    /session\.m is a Map/,
+  );
+  class User {
+    id = 1;
+  }
+  await rejects(async () => sealData({ u: new User() }, { password }), /session\.u is a User/);
+  await rejects(async () => sealData({ n: Number.POSITIVE_INFINITY }, { password }), /is Infinity/);
+
+  await rejects(async () => sealData({ s: Symbol("x") }, { password }), /session\.s is a symbol/);
+  await rejects(
+    async () => sealData({ fn: () => null }, { password }),
+    /session\.fn is a function/,
+  );
+
+  // Too deep to name: the message still explains what is allowed.
+  await rejects(
+    async () => sealData({ a: { b: { c: { d: { e: { f: { g: new Date() } } } } } } }, { password }),
+    /not JSON serializable\. Store plain JSON values/,
   );
 });
 

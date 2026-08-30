@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "description": "Secure, stateless, and cookie-based session library for JavaScript",
   "keywords": [
     "cookie",
@@ -77,7 +77,7 @@
     {
       "name": "iron-session, with cookie + iron-webcrypto",
       "path": "dist/index.js",
-      "limit": "6 kB",
+      "limit": "6.25 kB",
       "gzip": true
     },
     {
@@ -88,7 +88,7 @@
         "cookie",
         "iron-webcrypto"
       ],
-      "limit": "3 kB",
+      "limit": "3.5 kB",
       "gzip": true
     }
   ],

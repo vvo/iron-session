@@ -18,6 +18,16 @@ export async function logout(): Promise<void> {
   session.destroy();
 }
 
+/**
+ * Plenty of logout handlers call both, so the save is ignored rather than
+ * throwing, and the user still ends up signed out.
+ */
+export async function logoutThenSave(): Promise<void> {
+  const session = await getSession();
+  session.destroy();
+  await session.save();
+}
+
 /** #684: a cookies().set() after save() must not lose the session cookie. */
 export async function loginThenSetAnotherCookie(): Promise<void> {
   const { cookies } = await import("next/headers");

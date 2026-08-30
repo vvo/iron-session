@@ -64,6 +64,23 @@ test("logout removes the cookie from the browser", async ({ page, context }) => 
   await expectCookieCount(context, cookieName).toBe(0);
 });
 
+// A logout handler that calls destroy() and then save() still signs the user
+// out: the save is ignored instead of writing the cookie back.
+test("logout still works when the handler saves after destroy", async ({ page, context }) => {
+  await page.goto("/");
+  await page.getByTestId("login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  await expectCookieCount(context, cookieName).toBe(1);
+
+  await page.getByTestId("logout-then-save").click();
+  await expect(page.getByTestId("username")).toHaveText("anonymous");
+  await expectCookieCount(context, cookieName).toBe(0);
+
+  await page.reload();
+  await expect(page.getByTestId("username")).toHaveText("anonymous");
+  await expectCookieCount(context, cookieName).toBe(0);
+});
+
 // #684: setting an unrelated cookie after save() used to drop the session cookie.
 test("a cookie set after save does not lose the session", async ({ page, context }) => {
   await page.goto("/");

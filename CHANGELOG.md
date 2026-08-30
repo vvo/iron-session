@@ -15,13 +15,16 @@ line if they store a `Date` in the session.
 * **`IronSession<T>` properties are optional on read.** A session that does not
   exist yet is an empty object, so the old type let `session.user.id` compile
   and then throw ([#661](https://github.com/vvo/iron-session/issues/661)).
-* **`save()` after `destroy()` throws.** It used to re-seal the session, and the
-  browser kept the last `Set-Cookie`, so the logout silently did not happen.
+* **Writing to a session after `destroy()` and then saving throws.** A bare
+  `save()` after `destroy()` is ignored, so logout handlers that call both keep
+  working. Before, that save re-sealed the session and the browser kept the last
+  `Set-Cookie`, so the logout silently did not happen.
 * **`updateConfig()` validates and applies a new password.** Passing one used to
   be ignored: it kept sealing with the old password and skipped the 32-character
   check.
-* **`cookieOptions.expires` in the past is rejected.** A `Date` built once at
-  module scope drifts into the past, and the browser then discards every cookie.
+* **`cookieOptions.expires` in the past is rejected when saving.** A `Date` built
+  once at module scope drifts into the past, and the browser then discards every
+  cookie. Reading a session never sets a cookie, so reads are unaffected.
 * **Pre-v8 cookies are no longer read**, so those users sign in once more. The
   format was chosen by a version marker outside the seal's signature, which made
   it attacker-controlled.
@@ -49,14 +52,19 @@ line if they store a `Date` in the session.
 * cookie 2 and iron-webcrypto 2
 * CI runs the suite on Node 22/24/26, Bun and Deno. Runtime-specific reports were
   previously impossible for us to reproduce
-* `SECURITY.md`, and releases publish with npm provenance
+* `SECURITY.md`
 
 ### Bug Fixes
 
 * `getIronSession(await cookies(), options)` typechecks without a cast. Our
   `CookieStore.set` was an overload pair while Next declares a single signature
-  over a tuple union, so `as any` around an auth boundary was the only thing that
-  worked ([#840](https://github.com/vvo/iron-session/issues/840))
+  over a tuple union, so `as any` on the session that guards your
+  app was the only thing that worked ([#840](https://github.com/vvo/iron-session/issues/840))
+* a `ttl` shorter than the 60s clock skew keeps its full `Max-Age`. It used to
+  produce `Max-Age=0` or a negative value, so the browser dropped the cookie on
+  arrival while `save()` reported success
+* the "not JSON serializable" error names the value it choked on, for example
+  `(session.user.lastSeen is a Date)`, instead of leaving you to find it
 * an unreadable cookie always starts a fresh session. Two reachable
   iron-webcrypto messages, `Wrong mac prefix` and `Invalid expiration`, escaped
   the old error allowlist and threw a 500 on every request from a browser
