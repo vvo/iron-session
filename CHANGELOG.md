@@ -1,4 +1,23 @@
 
+## [9.0.1](https://github.com/vvo/iron-session/compare/v9.0.0...v9.0.1)
+
+No code changes. `dist/index.js` and `dist/index.d.ts` are byte-for-byte
+identical to `9.0.0`; only the version number differs.
+
+`9.0.0` was published from a laptop because CI could not authenticate with npm,
+so its tarball carries no provenance attestation and cannot be verified against a
+commit. That is not fixable after the fact: npm versions are immutable. `9.0.1`
+is the same code published from CI with
+[provenance](https://docs.npmjs.com/generating-provenance-statements), so you can
+check it was built from this repository at a known commit:
+
+```sh
+npm audit signatures
+```
+
+If you are on `9.0.0` and do not care about provenance, there is no reason to
+upgrade.
+
 ## [9.0.0](https://github.com/vvo/iron-session/compare/v8.0.4...v9.0.0)
 
 ### Install
