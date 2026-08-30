@@ -18,6 +18,9 @@ importers:
       '@arethetypeswrong/cli':
         specifier: 0.18.5
         version: 0.18.5
+      '@playwright/test':
+        specifier: 1.62.1
+        version: 1.62.1
       '@size-limit/preset-small-lib':
         specifier: 13.0.3
         version: 13.0.3(size-limit@13.0.3)
@@ -66,6 +69,28 @@ importers:
       unrun:
         specifier: 0.3.1
         version: 0.3.1
+
+  e2e/fixture:
+    dependencies:
+      iron-session:
+        specifier: workspace:*
+        version: link:../..
+      next:
+        specifier: 16.3.3
+        version: 16.3.3(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.7)
 
   examples/next:
     dependencies:
@@ -2487,7 +2512,6 @@ snapshots:
   '@playwright/test@1.62.1':
     dependencies:
       playwright: 1.62.1
-    optional: true
 
   '@publint/pack@0.1.7':
     dependencies:
@@ -3153,15 +3177,13 @@ snapshots:
 
   pirates@4.0.7: {}
 
-  playwright-core@1.62.1:
-    optional: true
+  playwright-core@1.62.1: {}
 
   playwright@1.62.1:
     dependencies:
       playwright-core: 1.62.1
     optionalDependencies:
       fsevents: 2.3.2
-    optional: true
 
   postcss-import@15.1.0(postcss@8.5.26):
     dependencies:
