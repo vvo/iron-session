@@ -16,6 +16,10 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Examples](#examples)
+- [Runtimes](#runtimes)
+- [Session size](#session-size)
+- [Watching for unreadable cookies](#watching-for-unreadable-cookies)
+- [Validating session data](#validating-session-data)
 - [Project status](#project-status)
 - [Session options](#session-options)
 - [API](#api)
@@ -68,12 +72,12 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 
 export async function GET() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(await cookies(), { password: "...", cookieName: "..." });
   return session;
 }
 
 export async function POST() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(await cookies(), { password: "...", cookieName: "..." });
   session.username = "Alison";
   await session.save();
 }
@@ -85,7 +89,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 
 async function getIronSessionData() {
-  const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  const session = await getIronSession(await cookies(), { password: "...", cookieName: "..." });
   return session;
 }
 
@@ -96,9 +100,119 @@ async function Profile() {
 }
 ```
 
+```ts
+// Next.js proxy.ts (middleware.ts before Next 16)
+import { NextResponse, type NextRequest } from "next/server";
+import { getIronSession, nextProxyCookies } from "iron-session";
+
+export async function proxy(request: NextRequest) {
+  const response = NextResponse.next();
+  const session = await getIronSession(nextProxyCookies(request, response), options);
+
+  session.lastSeen = Date.now();
+  await session.save();
+
+  return response;
+}
+```
+
+Middleware needs the adapter because Next only merges a cookie into the current
+render when it goes through `response.cookies.set()`. Writing a raw `Set-Cookie`
+header there looks like it works and then has no effect.
+
 ## Examples
 
 We have many different patterns and examples on the online demo, have a look: https://get-iron-session.vercel.app/.
+
+## Runtimes
+
+`getIronSession(req, res, options)` covers Node, Express, Connect and Next.js
+API routes, and `getIronSession(await cookies(), options)` covers the Next.js App
+Router. When you want to be explicit, or when your framework hands you something
+else, pass an adapter instead:
+
+| Adapter                                  | For                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------- |
+| `nodeCookies(req, res)`                  | Node `http`, Express, Connect, Next.js API routes                          |
+| `webCookies(request, responseOrHeaders)` | Anything web-standard: Hono, Bun, Deno, Cloudflare Workers, Route Handlers |
+| `nextProxyCookies(request, response)`    | Next.js `proxy.ts` / `middleware.ts`                                       |
+
+Anything with `get(name)` and `set(name, value, options)`, like Next's
+`cookies()`, can be passed directly. If your framework has neither, a cookie jar
+is two functions:
+
+```ts
+const session = await getIronSession(
+  {
+    read: (name) => myFramework.getCookie(name),
+    write: (name, value, options) => myFramework.setCookie(name, value, options),
+  },
+  options,
+);
+```
+
+## Session size
+
+A browser refuses a cookie over 4096 bytes, and iron-session throws rather than
+letting one be silently dropped. Encryption adds overhead, so plan for roughly
+3KB of actual data.
+
+If you need more, `chunk: true` splits the session across several cookies. Before
+you reach for it, know what the real limit is: every cookie is sent on **every
+request**, and proxies cap the whole `Cookie` header well below what a few
+chunks produce. nginx allows 8KB by default and a CDN in front of it may allow
+less. Going over returns a 400 or 431 at the edge, before your code runs.
+iron-session refuses more than 4 chunks for that reason.
+
+The scalable answer is to keep an id in the session and the data in your
+database:
+
+```ts
+session.userId = user.id; // small, stateless
+const user = await db.user.findUnique({ where: { id: session.userId } });
+```
+
+## Watching for unreadable cookies
+
+When a cookie cannot be read, iron-session starts a new empty session instead of
+throwing. It has to: it cannot tell a tampered cookie from a password you
+rotated out or a seal that simply expired, and a 500 on every request would be
+worse. That makes real problems invisible, so log them:
+
+```ts
+const options = {
+  cookieName: "session",
+  password: process.env.SESSION_PASSWORD,
+  onUnsealError: (reason, error) => {
+    // "expired" is normal, that is how sessions end.
+    if (reason !== "expired") {
+      logger.warn({ reason, error }, "session cookie rejected");
+    }
+  },
+};
+```
+
+A burst of `"unknown-password"` usually means a password rotation went wrong. A
+burst of `"invalid"` can mean someone is probing your cookies.
+
+## Validating session data
+
+There is no `validate` option, on purpose. If you change the shape of your
+session, old cookies still decrypt into the old shape, and the place to handle
+that is the wrapper you already have:
+
+```ts
+// lib/session.ts
+export async function getSession() {
+  const session = await getIronSession<Session>(await cookies(), options);
+
+  if (session.user && !SessionSchema.safeParse({ ...session }).success) {
+    session.destroy();
+  }
+
+  return session;
+}
+```
 
 ## Project status
 
@@ -106,12 +220,14 @@ We have many different patterns and examples on the online demo, have a look: ht
 
 ## Session options
 
-Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.****
+Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.
 
 - `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation. iron-session will use the highest numbered key for new cookies.
 - `cookieName`, **required**: Name of the cookie to be stored
-- `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies.
-- `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:
+- `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. Setting it to `0` means the seal never expires, which also means it can never be revoked: do not use `0` for authentication.
+- `chunk`, _optional_: Split a session that does not fit in one cookie across several cookies. Defaults to `false`. See [Session size](#session-size) before turning it on.
+- `onUnsealError`, _optional_: Called when an existing cookie could not be read, with a reason of `"expired"`, `"invalid"` or `"unknown-password"`. The session is reset to empty either way, so this is for logging. See [Watching for unreadable cookies](#watching-for-unreadable-cookies).
+- `cookieOptions`, _optional_: Any [Set-Cookie attribute](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) supported by [jshttp/cookie](https://github.com/jshttp/cookie). Default to:
 
   ```js
   {
