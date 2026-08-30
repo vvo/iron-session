@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { chunkedOptions, getSession, secureOptions } from "../session";
 import {
   login,
@@ -9,15 +11,26 @@ import {
   shrinkBig,
 } from "./actions";
 
-export const dynamic = "force-dynamic";
+// No `export const dynamic` here: `cacheComponents` is on, so the reads below
+// are dynamic because they touch cookies, and the <Suspense> boundary is what
+// says so.
+export default function Home() {
+  return (
+    <main>
+      <Suspense fallback={<p data-testid="loading">loading</p>}>
+        <Content />
+      </Suspense>
+    </main>
+  );
+}
 
-export default async function Home() {
+async function Content() {
   const session = await getSession();
   const chunked = await getSession(chunkedOptions);
   const secure = await getSession(secureOptions);
 
   return (
-    <main>
+    <>
       <p data-testid="username">{session.username ?? "anonymous"}</p>
       <p data-testid="visits">{session.visits ?? 0}</p>
       <p data-testid="last-seen">{session.lastSeen ?? "never"}</p>
@@ -71,6 +84,10 @@ export default async function Home() {
       <a href="/other" data-testid="to-other">
         go to another page
       </a>
-    </main>
+
+      <a href="/cache" data-testid="to-cache">
+        go to the cache components page
+      </a>
+    </>
   );
 }

@@ -2,12 +2,17 @@ import { getIronSession, nextProxyCookies, type SessionOptions } from "iron-sess
 import { NextResponse, type NextRequest } from "next/server";
 
 import { sessionOptions as appRouterClientComponentRouteHandlerSwrIronOptions } from "./app/app-router-client-component-route-handler-swr/lib";
+import {
+  basePath as cacheComponentsBasePath,
+  sessionOptions as cacheComponentsSessionOptions,
+} from "./app/app-router-cache-components/lib";
 import { sessionOptions as pagesRouterApiRouteSwrIronOptions } from "./pages-components/pages-router-api-route-swr/lib";
 
 // Only here for the multi examples demo, in your app this would be imported from elsewhere
 interface SessionData {
   username: string;
   isLoggedIn: boolean;
+  lastSeen: number;
 }
 
 const sessionOptions: Record<string, SessionOptions> = {
@@ -34,6 +39,10 @@ const sessionOptions: Record<string, SessionOptions> = {
  *    CVE-2025-29927 was a Next.js bug that let requests skip it entirely.
  */
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname === cacheComponentsBasePath) {
+    return rotate(request);
+  }
+
   const options = sessionOptions[request.nextUrl.pathname];
 
   if (!options) {
@@ -52,7 +61,32 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// See "Matching Paths" below to learn more
+/**
+ * Writing to the session from this layer, which is the part people get wrong.
+ *
+ * `session.save()` here goes through `response.cookies.set()` and through
+ * `request.cookies`, so the page rendering this same request reads the value
+ * written just above. The page is partially prerendered, and this still works:
+ * the session panel is a dynamic hole, so it runs after this file did.
+ */
+async function rotate(request: NextRequest) {
+  const response = NextResponse.next();
+  const session = await getIronSession<SessionData>(
+    nextProxyCookies(request, response),
+    cacheComponentsSessionOptions,
+  );
+
+  // Only touch an existing session, so an anonymous visitor stays cookie-free.
+  if (session.isLoggedIn) {
+    session.lastSeen = Date.now();
+    await session.save();
+  }
+
+  return response;
+}
+
+// See "Matching Paths" below to learn more. These have to be literals: Next
+// reads this config statically, so it cannot be built from an imported const.
 export const config = {
-  matcher: "/:path+/protected-middleware",
+  matcher: ["/:path+/protected-middleware", "/app-router-cache-components"],
 };

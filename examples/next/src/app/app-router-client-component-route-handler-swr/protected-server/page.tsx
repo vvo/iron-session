@@ -8,11 +8,9 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "../lib";
 import Link from "next/link";
 
-// Broken: None of these parameters is working, thus we have caching issues
-// TODO fix this
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
+// No route segment config here on purpose. `cacheComponents` is on, so the
+// shell below prerenders and the session read inside <Suspense> runs per
+// request. That is what `force-dynamic` and `revalidate = 0` were reaching for.
 async function getSession() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 

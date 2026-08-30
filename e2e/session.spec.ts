@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContext } from "@playwright/test";
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
 const cookieName = "e2e-session";
 const chunkedCookieName = "e2e-chunked";
@@ -14,6 +14,13 @@ const chunkCookies = (context: BrowserContext) => cookiesNamed(context, chunkedC
 /** The cookie jar can lag the rendered response slightly, so poll it. */
 function expectCookieCount(context: BrowserContext, name: string) {
   return expect.poll(async () => (await cookiesNamed(context, name)).length);
+}
+
+/** Rendered text of a testid, asserted present so callers get a plain string. */
+async function textOf(page: Page, testId: string): Promise<string> {
+  const value = await page.getByTestId(testId).textContent();
+  expect(value).not.toBeNull();
+  return value ?? "";
 }
 
 test("login sets a session cookie with safe attributes", async ({ page, context }) => {
@@ -182,5 +189,86 @@ test("a Secure cookie is dropped over plain http, in every browser", async ({ pa
   // fixture or the action being broken.
   await page.getByTestId("login").click();
   await expect(page.getByTestId("username")).toHaveText("alison");
+  await expectCookieCount(context, cookieName).toBe(1);
+});
+
+/**
+ * Cache Components, the Next 16 default shape. `/cache` is one page with a
+ * `use cache` component and a session read in a <Suspense> boundary.
+ *
+ * The cached panel must never move, and the session panel must be per visitor.
+ * A session leaking into the cached half would be the worst bug this library
+ * could have, so it gets an assertion rather than a comment.
+ */
+test("a cached component stays frozen while the session stays per request", async ({ page }) => {
+  await page.goto("/cache");
+
+  const cachedAt = await textOf(page, "cached-at");
+
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+
+  // The session changed, the cache entry did not.
+  await expect(page.getByTestId("cached-at")).toHaveText(cachedAt);
+
+  await page.reload();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  await expect(page.getByTestId("cached-at")).toHaveText(cachedAt);
+});
+
+test("a second visitor sees the same cached half and no session", async ({ page, browser }) => {
+  await page.goto("/cache");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  const cachedAt = await textOf(page, "cached-at");
+
+  // A fresh context is a different browser with an empty cookie jar.
+  const other = await browser.newContext();
+  const otherPage = await other.newPage();
+  await otherPage.goto("/cache");
+
+  await expect(otherPage.getByTestId("cached-at")).toHaveText(cachedAt);
+  await expect(otherPage.getByTestId("username")).toHaveText("anonymous");
+
+  await other.close();
+});
+
+// #887, #709, #938 again, on a partially prerendered page: proxy.ts writes the
+// session and the dynamic hole rendering the same request has to read it.
+test("proxy rotation reaches a dynamic hole in a prerendered page", async ({ page }) => {
+  await page.goto("/cache");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+
+  await page.reload();
+  const first = await textOf(page, "last-seen");
+  expect(first).not.toBe("never");
+
+  await page.waitForTimeout(5);
+  await page.reload();
+  const second = await textOf(page, "last-seen");
+  expect(Number(second)).toBeGreaterThan(Number(first));
+});
+
+// A rejected login has to come back as state, not an exception, and must not
+// write a cookie.
+test("useActionState surfaces a validation error without touching the session", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/cache");
+
+  await page.getByTestId("cache-username-input").fill("a");
+  await page.getByTestId("cache-login").click();
+
+  await expect(page.getByTestId("cache-login-error")).toHaveText("too short");
+  await expect(page.getByTestId("username")).toHaveText("anonymous");
+  await expectCookieCount(context, cookieName).toBe(0);
+
+  // And the same form still works once the input is valid.
+  await page.getByTestId("cache-username-input").fill("alison");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  await expect(page.getByTestId("cache-login-error")).toHaveText("");
   await expectCookieCount(context, cookieName).toBe(1);
 });

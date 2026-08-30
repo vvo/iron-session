@@ -1,4 +1,5 @@
 import { Title } from "@/app/title";
+import { Suspense } from "react";
 import * as css from "@/app/css";
 
 import { cookies } from "next/headers";
@@ -7,9 +8,9 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, type SessionData } from "../lib";
 import Link from "next/link";
 
-// The session lives in a cookie, so this page can never be static.
-export const dynamic = "force-dynamic";
-
+// The session lives in a cookie, so the part of this page that reads it can
+// never be static. With `cacheComponents` on, that is expressed by the
+// <Suspense> boundary below rather than by `export const dynamic`.
 async function getSession() {
   return getIronSession<SessionData>(await cookies(), sessionOptions);
 }
@@ -18,7 +19,9 @@ export default function ProtectedServer() {
   return (
     <main className="p-10 space-y-5">
       <Title subtitle="Protected page" />
-      <Content />
+      <Suspense fallback={<p className="text-lg">Loading...</p>}>
+        <Content />
+      </Suspense>
       <p>
         <Link href="/app-router-client-component-route-handler-swr" className={css.link}>
           ← Back
