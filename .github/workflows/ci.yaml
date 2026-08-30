@@ -36,6 +36,10 @@ jobs:
         run: pnpm oxlint --type-aware
       - name: Typecheck
         run: pnpm tsc --noEmit
+      # Compile-only test that iron-session still accepts what Next.js hands
+      # you. #840 sat open for months because nothing checked this.
+      - name: Typecheck against real Next.js types
+        run: pnpm lint:types
       - name: Build
         run: pnpm build
       - name: Package lint (publint)

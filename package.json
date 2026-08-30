@@ -39,10 +39,11 @@
     "dev": "pnpm build && concurrently \"pnpm build --watch\" \"pnpm --filter=next-example dev\" ",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "lint": "oxlint --type-aware && tsc --noEmit && pnpm build && publint && attw --pack . --ignore-rules cjs-resolves-to-esm",
+    "lint": "oxlint --type-aware && tsc --noEmit && pnpm build && publint && attw --pack . --ignore-rules cjs-resolves-to-esm && pnpm lint:types",
+    "lint:types": "tsdown && tsc --noEmit -p type-tests/tsconfig.json",
+    "pretest": "node -e \"require('node:fs').mkdirSync('coverage',{recursive:true})\"",
     "size": "size-limit",
     "start": "pnpm --filter=next-example start",
-    "pretest": "node -e \"require('node:fs').mkdirSync('coverage',{recursive:true})\"",
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --import tsx src/*.test.ts",
     "test:watch": "node --import tsx --test --watch src/*.test.ts"
   },
@@ -54,11 +55,15 @@
     "@arethetypeswrong/cli": "0.18.5",
     "@size-limit/preset-small-lib": "13.0.3",
     "@types/node": "26.4.0",
+    "@types/react": "19.2.7",
     "concurrently": "9.2.1",
+    "next": "16.3.3",
     "oxfmt": "0.65.0",
     "oxlint": "1.80.0",
     "oxlint-tsgolint": "^7.0.2001",
     "publint": "0.3.24",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "size-limit": "13.0.3",
     "tsdown": "0.22.14",
     "tsx": "4.23.12",
@@ -69,7 +74,7 @@
     {
       "name": "iron-session, with cookie + iron-webcrypto",
       "path": "dist/index.js",
-      "limit": "5 kB",
+      "limit": "5.5 kB",
       "gzip": true
     },
     {

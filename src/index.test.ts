@@ -1,8 +1,15 @@
-import { deepEqual, doesNotMatch, equal, match, rejects } from "node:assert";
+import { deepEqual, doesNotMatch, equal, match, rejects, throws } from "node:assert";
 import { mock, test } from "node:test";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { SessionOptions } from "./index.js";
-import { getIronSession, sealData } from "./index.js";
+import {
+  getIronSession,
+  nextProxyCookies,
+  nodeCookies,
+  sealData,
+  unsealData,
+  webCookies,
+} from "./index.js";
 
 const password = "Gbm49ATjnqnkCCCdhV4uDBhbfnPqsCW0";
 const cookieName = "test";
@@ -523,12 +530,97 @@ await test("allow to update session configuration", async () => {
   );
   session.user = { id: 1 };
 
-  session.updateConfig({ ttl: 61, cookieName: "test2", password: "ok" });
+  session.updateConfig({ ttl: 61, cookieName: "test2", password });
 
   await session.save();
   match(res.setHeader.mock.calls[0]?.arguments[1][0], /Max-Age=1;/);
 
   mock.reset();
+});
+
+await test("updateConfig should actually apply a new password", async () => {
+  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
+  const rotated = "Ck7qLm2XvB9nR4tY6uI8oP0aS3dF5gH1";
+
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
+  session.user = { id: 1 };
+
+  session.updateConfig({ cookieName, password: rotated });
+  await session.save();
+
+  const setCookie = res.setHeader.mock.calls[0]?.arguments[1][0] as string;
+  const seal = setCookie.slice(`${cookieName}=`.length).split(";")[0] ?? "";
+
+  // The password map was captured once and closed over by save(), so passing a
+  // new password to updateConfig() kept sealing with the old one. A rotation
+  // that silently does not happen is worse than one that throws.
+  deepEqual(await unsealData(seal, { password: rotated }), { user: { id: 1 } });
+  deepEqual(await unsealData(seal, { password }), {});
+
+  mock.reset();
+});
+
+await test("updateConfig should validate the new password", async () => {
+  const session = await getSession({ headers: {} } as IncomingMessage, {} as Response, {
+    cookieName,
+    password,
+  });
+
+  // updateConfig bypassed every check in the constructor, so a too-short
+  // password was accepted here and then failed deep inside the crypto layer.
+  throws(
+    () => session.updateConfig({ cookieName, password: "too-short" }),
+    /at least 32 characters/,
+  );
+});
+
+await test("should refuse to save a destroyed session", async () => {
+  const res = { getHeader: mock.fn(), setHeader: mock.fn() };
+
+  const session = await getSession(
+    { headers: {} } as IncomingMessage,
+    res as unknown as ServerResponse,
+    {
+      cookieName,
+      password,
+    },
+  );
+  session.user = { id: 1 };
+  await session.save();
+
+  session.destroy();
+
+  // destroy() only cleared the object and queued an expired cookie, so a later
+  // save() re-sealed the session and the last Set-Cookie won. A wrapper
+  // refreshing a rolling expiry at end of request cancelled every logout.
+  await rejects(async () => session.save(), /Cannot save a destroyed session/);
+
+  const headers = res.setHeader.mock.calls.map((call) => call.arguments[1] as string[]);
+  const last = headers.at(-1)?.at(-1) ?? "";
+  match(last, /Max-Age=0/);
+
+  mock.reset();
+});
+
+await test("should reject cookieOptions.expires in the past", async () => {
+  // A module-scope `expires` is evaluated once per process and drifts into the
+  // past, after which the browser discards every cookie we set. That reads as
+  // "works locally, works after deploy, then randomly stops" (#910).
+  await rejects(
+    getSession({ headers: {} } as IncomingMessage, {} as Response, {
+      cookieName,
+      password,
+      cookieOptions: { expires: new Date(Date.now() - 1000) },
+    }),
+    /expires is in the past/,
+  );
 });
 
 await test("should work with standard web Request/Response APIs", async () => {
@@ -547,4 +639,200 @@ await test("should work with standard web Request/Response APIs", async () => {
   req.headers.set("cookie", cookie.split(";")[0] ?? "");
   session = await getSession(req, res, { cookieName, password });
   deepEqual(session, { user: { id: 1 } });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Adapters. The cookie-store path had no test coverage at all before v9, which
+// is how the two code paths managed to drift apart in the first place.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Minimal stand-in for `await cookies()` from next/headers. */
+function fakeCookieStore(initial: Record<string, string> = {}) {
+  const jar = new Map(Object.entries(initial));
+  const sets: { name: string; value: string; options?: unknown }[] = [];
+
+  return {
+    store: {
+      get: (name: string) => {
+        const value = jar.get(name);
+        return value === undefined ? undefined : { name, value };
+      },
+      getAll: () => [...jar].map(([name, value]) => ({ name, value })),
+      set: (name: string, value: string, options?: unknown) => {
+        jar.set(name, value);
+        sets.push({ name, value, options });
+      },
+    },
+    sets,
+  };
+}
+
+await test("cookie store: should round-trip a session", async () => {
+  const { store, sets } = fakeCookieStore();
+
+  const session = await getIronSession<Data>(store, { cookieName, password });
+  deepEqual({ ...session }, {});
+
+  session.user = { id: 42 };
+  await session.save();
+
+  equal(sets.length, 1);
+  equal(sets[0]?.name, cookieName);
+
+  const restored = await getIronSession<Data>(store, { cookieName, password });
+  deepEqual({ ...restored }, { user: { id: 42 } });
+});
+
+await test("cookie store: should apply the default cookie options", async () => {
+  const { store, sets } = fakeCookieStore();
+  const session = await getIronSession<Data>(store, { cookieName, password });
+  session.user = { id: 1 };
+  await session.save();
+
+  deepEqual(sets[0]?.options, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 1209540,
+  });
+});
+
+await test("cookie store: destroy should expire the cookie", async () => {
+  const { store, sets } = fakeCookieStore();
+  const session = await getIronSession<Data>(store, { cookieName, password });
+  session.user = { id: 1 };
+  await session.save();
+  session.destroy();
+
+  equal(sets.at(-1)?.value, "");
+  equal((sets.at(-1)?.options as { maxAge: number } | undefined)?.maxAge, 0);
+});
+
+await test("cookie store: should reset a tampered cookie instead of throwing", async () => {
+  const seal = await sealData({ user: { id: 1 } }, { password });
+  // Flip a character inside the encrypted body so the HMAC no longer matches.
+  const middle = Math.floor(seal.length / 2);
+  const flipped = seal[middle] === "a" ? "b" : "a";
+  const tampered = seal.slice(0, middle) + flipped + seal.slice(middle + 1);
+  const { store } = fakeCookieStore({ [cookieName]: tampered });
+
+  const reasons: string[] = [];
+  const session = await getIronSession<Data>(store, {
+    cookieName,
+    password,
+    onUnsealError: (reason) => reasons.push(reason),
+  });
+
+  deepEqual({ ...session }, {});
+  deepEqual(reasons, ["invalid"]);
+});
+
+await test("cookie store: should measure the real cookie size", async () => {
+  const { store } = fakeCookieStore();
+  const session = await getIronSession<Record<string, string>>(store, { cookieName, password });
+  session.blob = "a".repeat(4096);
+
+  // The old cookie-store path estimated the size with
+  // `name.length + seal.length + JSON.stringify(options).length`, a different
+  // number than the Node path used, so the same data was accepted by one and
+  // rejected by the other.
+  await rejects(async () => session.save(), /Cookie length is too big/);
+});
+
+await test("nextProxyCookies: should write to both response and request", async () => {
+  const requestJar = fakeCookieStore();
+  const responseJar = fakeCookieStore();
+
+  const session = await getIronSession<Data>(
+    nextProxyCookies({ cookies: requestJar.store }, { cookies: responseJar.store }),
+    { cookieName, password },
+  );
+
+  session.user = { id: 7 };
+  await session.save();
+
+  // The response carries it to the browser. Next only merges a middleware
+  // cookie into the current render when it goes through response.cookies.set().
+  equal(responseJar.sets.length, 1);
+  // The request makes it readable by the rest of the same request, which is
+  // what makes rotation work (#709, #684, #887).
+  equal(requestJar.sets.length, 1);
+
+  const sameRequest = await getIronSession<Data>(
+    nextProxyCookies({ cookies: requestJar.store }, { cookies: responseJar.store }),
+    { cookieName, password },
+  );
+  deepEqual({ ...sameRequest }, { user: { id: 7 } });
+});
+
+await test("nodeCookies: should keep cookies set by other code", async () => {
+  const res = {
+    getHeader: mock.fn(() => "other=1"),
+    setHeader: mock.fn(),
+    headersSent: false,
+  };
+
+  const session = await getIronSession<Data>(
+    nodeCookies({ headers: {} } as IncomingMessage, res as unknown as ServerResponse),
+    { cookieName, password },
+  );
+  session.user = { id: 1 };
+  await session.save();
+
+  const written = res.setHeader.mock.calls[0]?.arguments[1] as string[];
+  equal(written.length, 2);
+  equal(written[0], "other=1");
+  match(written[1] ?? "", /^test=/u);
+
+  mock.reset();
+});
+
+await test("nodeCookies: should throw when headers are already sent", async () => {
+  const res = {
+    getHeader: mock.fn(),
+    setHeader: mock.fn(),
+    headersSent: true,
+  };
+
+  const session = await getIronSession<Data>(
+    nodeCookies({ headers: {} } as IncomingMessage, res as unknown as ServerResponse),
+    { cookieName, password },
+  );
+
+  await rejects(async () => session.save(), /after headers were sent/);
+  mock.reset();
+});
+
+await test("webCookies: should write into a bare Headers", async () => {
+  const request = new Request("https://example.com");
+  const headers = new Headers();
+
+  const session = await getIronSession<Data>(webCookies(request, headers), {
+    cookieName,
+    password,
+  });
+  session.user = { id: 3 };
+  await session.save();
+
+  match(
+    headers.get("set-cookie") ?? "",
+    /^test=.+; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/u,
+  );
+});
+
+await test("webCookies: should throw when the response body was already consumed", async () => {
+  const request = new Request("https://example.com");
+  const response = new Response("already read");
+  await response.text();
+
+  const session = await getIronSession<Data>(webCookies(request, response), {
+    cookieName,
+    password,
+  });
+  session.user = { id: 1 };
+
+  // Mutating headers on a response the runtime has started sending is ignored
+  // without complaining, which loses the session silently.
+  await rejects(async () => session.save(), /already been consumed/);
 });
