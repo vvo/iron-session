@@ -30,6 +30,15 @@
         "typescript/no-explicit-any": "off",
         "no-await-in-loop": "off"
       }
+    },
+    {
+      // These files are never executed. They exist so that `tsc` checks the
+      // shapes we promise, and a bare `session.user?.id` is the assertion.
+      "files": ["type-tests/**/*.ts"],
+      "rules": {
+        "no-unused-expressions": "off",
+        "typescript/no-unused-vars": "off"
+      }
     }
   ]
 }

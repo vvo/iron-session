@@ -175,7 +175,15 @@ export interface SessionOptions {
   chunk?: boolean;
 }
 
-export type IronSession<T> = T & {
+/**
+ * A session object: your data, plus `save`, `destroy` and `updateConfig`.
+ *
+ * `T` is wrapped in `Partial` because a session that does not exist yet reads as
+ * an empty object. Declaring `IronSession<{ user: User }>` used to promise that
+ * `session.user` was there, so `session.user.id` typechecked and then threw at
+ * runtime on the first visit, on an expired cookie, and after `destroy()`.
+ */
+export type IronSession<T> = Partial<T> & {
   /**
    * Encrypts the session data and sets the cookie.
    */
