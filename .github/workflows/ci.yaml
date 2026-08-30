@@ -8,20 +8,122 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+# The default workflow token on this repo is write-scoped. Every job here only
+# reads the checkout, and nothing should be able to push to main from CI.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  test:
+  # Lint, typecheck, build, and the package publishing gates. One Node version
+  # is enough for these, the matrix below is about runtime behaviour.
+  quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: ".node-version"
           cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install
-      - run: pnpm lint
+      - run: pnpm install --frozen-lockfile
+      - name: Format check
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm oxlint --type-aware
+      - name: Typecheck
+        run: pnpm tsc --noEmit
+      - name: Build
+        run: pnpm build
+      - name: Package lint (publint)
+        run: pnpm publint
+      # `cjs-resolves-to-esm` is expected: v9 is ESM-only on purpose, and Node
+      # >=22.12 can require() it. Every other rule stays on.
+      - name: Types resolution (are-the-types-wrong)
+        run: pnpm attw --pack . --ignore-rules cjs-resolves-to-esm
+      - name: Bundle size budget
+        run: pnpm size
+
+  # iron-session runs wherever WebCrypto exists. These are the runtimes we
+  # claim support for, so each one runs the real test suite.
+  test-node:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.13.0", "22", "24", "26"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
       - run: pnpm test
-      - uses: codecov/codecov-action@v3
+      - name: Upload coverage
+        if: matrix.node == '24'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-bun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".node-version"
+          cache: "pnpm"
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+      - run: pnpm install --frozen-lockfile
+      - name: Test on Bun
+        run: bun test src/index.test.ts
+
+  test-deno:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".node-version"
+          cache: "pnpm"
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
+      - run: pnpm install --frozen-lockfile
+      - name: Test on Deno
+        # This job is about runtime behaviour, `tsc --noEmit` in the quality job
+        # is the type gate. `--sloppy-imports` and `--no-check` are both about
+        # our NodeNext `./core.js` specifiers resolving to `.ts` files, which
+        # deno will not follow on its own. `--node-modules-dir=manual` makes it
+        # use what pnpm already installed instead of resolving npm itself.
+        run: deno test --no-check --sloppy-imports --allow-read --allow-env --node-modules-dir=manual src/index.test.ts
+
+  # `main` requires a check literally named "test". The single job that used to
+  # provide it is now a quality job plus a runtime matrix, so this aggregates
+  # them: it fails if any one of them failed or was skipped. Without it the
+  # required check never reports and nothing can merge.
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [quality, test-node, test-bun, test-deno]
+    steps:
+      - name: Check the results
+        run: |
+          echo "quality:   ${{ needs.quality.result }}"
+          echo "test-node: ${{ needs.test-node.result }}"
+          echo "test-bun:  ${{ needs.test-bun.result }}"
+          echo "test-deno: ${{ needs.test-deno.result }}"
+          [ "${{ needs.quality.result }}" = "success" ] \
+            && [ "${{ needs.test-node.result }}" = "success" ] \
+            && [ "${{ needs.test-bun.result }}" = "success" ] \
+            && [ "${{ needs.test-deno.result }}" = "success" ]

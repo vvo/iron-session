@@ -1,11 +1,30 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "security:openssf-scorecard", "helpers:pinGitHubActionDigests"],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
+      "description": "This package handles authentication cookies. Nothing merges into main without a human looking at it, an automerged devDependency runs in the same job that can publish.",
+      "matchPackageNames": ["*"],
+      "automerge": false
+    },
+    {
+      "description": "Group the linting and formatting toolchain, it moves fast and always moves together.",
+      "matchPackageNames": ["oxlint", "oxlint-tsgolint", "oxfmt"],
+      "groupName": "oxc toolchain"
+    },
+    {
+      "description": "Runtime dependencies are part of the published package, review them individually.",
+      "matchDepTypes": ["dependencies"],
+      "dependencyDashboardApproval": false,
+      "minimumReleaseAge": "3 days"
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "minimumReleaseAge": null
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  }
 }

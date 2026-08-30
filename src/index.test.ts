@@ -71,23 +71,16 @@ await test("should set a cookie in the response object on save", async () => {
     setHeader: mock.fn(),
   };
 
-  const session = await getSession(
-    { headers: {} } as Request,
-    res as unknown as ServerResponse,
-    {
-      cookieName,
-      password,
-    },
-  );
+  const session = await getSession({ headers: {} } as Request, res as unknown as ServerResponse, {
+    cookieName,
+    password,
+  });
   session.user = { id: 1 };
   await session.save();
 
   const [name, value] = res.setHeader.mock.calls[0]?.arguments ?? [];
   equal(name, "set-cookie");
-  match(
-    value[0],
-    /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/,
-  );
+  match(value[0], /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/);
 
   mock.reset();
 });
@@ -95,14 +88,10 @@ await test("should set a cookie in the response object on save", async () => {
 await test("should allow deleting then saving session data", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 
-  let session = await getSession(
-    { headers: {} } as Request,
-    res as unknown as ServerResponse,
-    {
-      cookieName,
-      password,
-    },
-  );
+  let session = await getSession({ headers: {} } as Request, res as unknown as ServerResponse, {
+    cookieName,
+    password,
+  });
   session.user = { id: 1 };
   await session.save();
 
@@ -301,11 +290,10 @@ await test("should reset the session if password is changed", async () => {
   const seal = await sealData({ user: { id: 1 } }, { password: firstPassword });
   const req = { headers: { cookie: `${cookieName}=${seal}` } };
 
-  const session = await getSession(
-    req as IncomingMessage,
-    {} as unknown as ServerResponse,
-    { cookieName, password: secondPassword },
-  );
+  const session = await getSession(req as IncomingMessage, {} as unknown as ServerResponse, {
+    cookieName,
+    password: secondPassword,
+  });
   deepEqual(session, {});
 });
 
@@ -317,11 +305,10 @@ await test("should decrypt cookie generated from older password", async () => {
   const req = { headers: { cookie: `${cookieName}=${seal}` } };
 
   const passwords = { 2: secondPassword, 1: firstPassword }; // rotation
-  const session = await getSession(
-    req as IncomingMessage,
-    {} as unknown as ServerResponse,
-    { cookieName, password: passwords },
-  );
+  const session = await getSession(req as IncomingMessage, {} as unknown as ServerResponse, {
+    cookieName,
+    password: passwords,
+  });
   deepEqual(session, { user: { id: 1 } });
 });
 
@@ -350,10 +337,7 @@ await test("should throw if trying to save after headers are sent", async () => 
   );
   session.user = { id: 1 };
 
-  await rejects(
-    session.save(),
-    /session.save\(\) was called after headers were sent/,
-  );
+  await rejects(session.save(), /session.save\(\) was called after headers were sent/);
 });
 
 await test("should keep previously set cookie - single", async () => {
@@ -363,14 +347,10 @@ await test("should keep previously set cookie - single", async () => {
     setHeader: mock.fn(),
   };
 
-  const session = await getSession(
-    { headers: {} } as IncomingMessage,
-    res as unknown as Response,
-    {
-      cookieName,
-      password,
-    },
-  );
+  const session = await getSession({ headers: {} } as IncomingMessage, res as unknown as Response, {
+    cookieName,
+    password,
+  });
   session.user = { id: 1 };
   await session.save();
 
@@ -382,10 +362,7 @@ await test("should keep previously set cookie - single", async () => {
 
   cookies = res.setHeader.mock.calls[1]?.arguments[1];
   deepEqual(cookies[0], existingCookie);
-  deepEqual(
-    cookies[1],
-    `${cookieName}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`,
-  );
+  deepEqual(cookies[1], `${cookieName}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
   mock.reset();
 });
@@ -397,14 +374,10 @@ await test("should keep previously set cookies - multiple", async () => {
     setHeader: mock.fn(),
   };
 
-  const session = await getSession(
-    { headers: {} } as Request,
-    res as unknown as Response,
-    {
-      cookieName,
-      password,
-    },
-  );
+  const session = await getSession({ headers: {} } as Request, res as unknown as Response, {
+    cookieName,
+    password,
+  });
   session.user = { id: 1 };
   await session.save();
 
@@ -418,42 +391,120 @@ await test("should keep previously set cookies - multiple", async () => {
   cookies = res.setHeader.mock.calls[1]?.arguments[1];
   deepEqual(cookies[0], existingCookies[0]);
   deepEqual(cookies[1], existingCookies[1]);
-  deepEqual(
-    cookies[2],
-    `${cookieName}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`,
-  );
+  deepEqual(cookies[2], `${cookieName}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
   mock.reset();
 });
 
-await test("should be backwards compatible with older cookie format", async () => {
-  // this seal is in the old next-iron-session format (generated with ttl: 0)
+await test("should no longer unwrap the pre-v8 `persistent` cookie format", async () => {
+  // A seal in the next-iron-session (v6) format, generated with ttl: 0.
+  // v8 detected the `~1` version marker and hoisted `data.persistent` to the
+  // session root. v9 drops that: the marker sits outside the seal's HMAC, so
+  // letting it select a code path meant attacker-controlled data reshaped the
+  // session. These cookies now read as an unrecognised shape, which logs the
+  // user out once. See the v9 migration guide.
   const cookie = `${cookieName}=Fe26.2*1*1e2bacee1edffaeb4a9ba4a07dc36c2c60d20415a60ac1b901033af1f107ead5*LAC9Fn3BJ9ifKMhVL3pP5w*JHhcByIzk4ThLt9rUW-fDMrOwUT7htHy1uyqeOTIqrVwDJ0Bz7TOAwIz_Cos-ug3**7dfa11868bbcc4f7e118342c0280ff49ba4a7cc84c70395bbc3d821a5f460174*6a8FkHxdg322jyym6PwJf3owz7pd6nq5ZIzyLHGVC0c`;
 
-  const session = await getSession(
-    { headers: { cookie } } as IncomingMessage,
+  const session = await getSession({ headers: { cookie } } as IncomingMessage, {} as Response, {
+    cookieName,
+    password,
+  });
+
+  // The caller's `session.user` is undefined, so the app treats this as signed out.
+  equal((session as { user?: { id: number } }).user, undefined);
+});
+
+await test("should not let the unauthenticated version marker reshape the session", async () => {
+  // Same v9 seal, replayed with every version marker an attacker could write.
+  // The marker is outside the HMAC, so none of them may change the outcome.
+  const seal = await sealData({ user: { id: 77 } }, { password, ttl: 0 });
+  const sealWithoutVersion = seal.split("~")[0];
+
+  for (const marker of ["~1", "~2", "~999", "~NaN", "~2abc", "", "~"]) {
+    const session = await getSession(
+      {
+        headers: { cookie: `${cookieName}=${sealWithoutVersion}${marker}` },
+      } as IncomingMessage,
+      {} as Response,
+      { cookieName, password, ttl: 0 },
+    );
+    deepEqual(
+      { user: (session as { user?: { id: number } }).user },
+      { user: { id: 77 } },
+      `version marker ${JSON.stringify(marker)} changed the session shape`,
+    );
+  }
+});
+
+await test("should start a fresh session for cookie values that are not seals", async () => {
+  // These reach iron-webcrypto with error messages that v8's regex allowlist
+  // did not cover ("Wrong mac prefix", "Invalid expiration"), so they escaped
+  // as a 500 on every request from a browser holding such a cookie. An
+  // HttpOnly cookie the app cannot clear made that state sticky.
+  const reasons: string[] = [];
+
+  for (const value of [
+    "a*b*c*d*e*f*g*h", // Wrong mac prefix
+    "Fe26.2*1*aa*bb*cc*zz*dd*ee", // Invalid expiration
+    "garbage",
+    "~",
+    "Fe26.2**",
+  ]) {
+    const session = await getSession(
+      { headers: { cookie: `${cookieName}=${value}` } } as IncomingMessage,
+      {} as Response,
+      {
+        cookieName,
+        password,
+        onUnsealError: (reason) => reasons.push(reason),
+      },
+    );
+    deepEqual({ ...session }, {}, `value ${JSON.stringify(value)} should reset`);
+  }
+
+  // Every failure is still reported, so this is observable rather than silent.
+  equal(reasons.length, 5);
+  deepEqual([...new Set(reasons)], ["invalid"]);
+});
+
+await test("should report expired and unknown-password seals to onUnsealError", async () => {
+  const reasons: string[] = [];
+  const seal = await sealData({ user: { id: 1 } }, { password, ttl: 61 });
+
+  // Sealed with password id 1, read with a map that only has id 2.
+  await getSession(
+    { headers: { cookie: `${cookieName}=${seal}` } } as IncomingMessage,
     {} as Response,
-    { cookieName, password },
+    {
+      cookieName,
+      password: { 2: "Xf9wKqZ2mNvB7cJ4hR6tY8uI0oP3aS5d" },
+      onUnsealError: (reason) => reasons.push(reason),
+    },
   );
-  deepEqual(session, { user: { id: 77 } });
+
+  deepEqual(reasons, ["unknown-password"]);
 });
 
 await test("should prevent reassignment of save/destroy functions", async () => {
-  const session = await getSession(
-    { headers: {} } as IncomingMessage,
-    {} as Response,
-    { cookieName, password },
-  );
+  const session = await getSession({ headers: {} } as IncomingMessage, {} as Response, {
+    cookieName,
+    password,
+  });
+
+  // Node says "Cannot assign to read only property 'save'", Bun says
+  // "Attempted to assign to readonly property". Match the behaviour, not the
+  // wording, or this test only passes on one runtime.
+  const readOnly = /read.?only property/iu;
 
   await rejects(async () => {
-    // @ts-expect-error Runtime check
+    // @ts-expect-error assigning to a readonly property is the thing under test
     session.save = () => {};
-  }, /Cannot assign to read only property 'save' of object '#<Object>'/);
+  }, readOnly);
 
   await rejects(async () => {
-    // @ts-expect-error Runtime check
+    // @ts-expect-error assigning to a readonly property is the thing under test
     session.destroy = () => {};
-  }, /Cannot assign to read only property 'destroy' of object '#<Object>'/);
+  }, readOnly);
 });
 
 await test("allow to update session configuration", async () => {
@@ -491,10 +542,7 @@ await test("should work with standard web Request/Response APIs", async () => {
   await session.save();
 
   const cookie = res.headers.get("set-cookie") ?? "";
-  match(
-    cookie,
-    /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/,
-  );
+  match(cookie, /^test=.{265}; Max-Age=1209540; Path=\/; HttpOnly; Secure; SameSite=Lax$/);
 
   req.headers.set("cookie", cookie.split(";")[0] ?? "");
   session = await getSession(req, res, { cookieName, password });

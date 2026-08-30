@@ -8,5 +8,4 @@ export const label = "text-slate-700 dark:text-slate-300";
 export const input =
   "mt-1 block w-full disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 dark:text-slate-900";
 
-export const link =
-  "text-indigo-500 dark:text-indigo-400 underline hover:no-underline";
+export const link = "text-indigo-500 dark:text-indigo-400 underline hover:no-underline";

@@ -39,8 +39,8 @@ function Content() {
         Hello <strong>{session.username}!</strong>
       </p>
       <p>
-        This page is protected and can only be accessed if you are logged in.
-        Otherwise you will be redirected to the login page.
+        This page is protected and can only be accessed if you are logged in. Otherwise you will be
+        redirected to the login page.
       </p>
       <p>The check is done via a fetch call on the client using SWR.</p>
       <p>
@@ -48,8 +48,8 @@ function Content() {
         <a href="https://swr.vercel.app" target="_blank" className={css.link}>
           SWR
         </a>
-        : if you open the page in different tabs/windows, and logout from one
-        place, every other tab/window will be synced and logged out.
+        : if you open the page in different tabs/windows, and logout from one place, every other
+        tab/window will be synced and logged out.
       </p>
     </div>
   );

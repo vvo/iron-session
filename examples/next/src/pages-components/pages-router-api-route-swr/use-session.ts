@@ -4,10 +4,7 @@ import useSWRMutation from "swr/mutation";
 
 const sessionApiRoute = "/api/pages-router-api-route-swr/session";
 
-async function fetchJson<JSON = unknown>(
-  input: RequestInfo,
-  init?: RequestInit,
-): Promise<JSON> {
+async function fetchJson<JSON = unknown>(input: RequestInfo, init?: RequestInit): Promise<JSON> {
   return fetch(input, {
     headers: {
       accept: "application/json",
@@ -31,13 +28,9 @@ function doLogout(url: string) {
 }
 
 export default function useSession() {
-  const { data: session, isLoading } = useSWR(
-    sessionApiRoute,
-    fetchJson<SessionData>,
-    {
-      fallbackData: defaultSession,
-    },
-  );
+  const { data: session, isLoading } = useSWR(sessionApiRoute, fetchJson<SessionData>, {
+    fallbackData: defaultSession,
+  });
 
   const { trigger: login } = useSWRMutation(sessionApiRoute, doLogin, {
     // the login route already provides the updated information, no need to revalidate

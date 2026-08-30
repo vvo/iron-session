@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "import", "oxc", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "rules": {
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "no-console": "error",
+    // Every hit is an overload-dispatch cast in getIronSession(). The adapters
+    // refactor removes the overloads, turn this back on once it lands.
+    "typescript/no-unsafe-type-assertion": "off",
+    "unicorn/prefer-node-protocol": "error",
+    "import/no-cycle": "error",
+    "promise/prefer-await-to-then": "error"
+  },
+  "ignorePatterns": ["dist/**", "examples/**", "coverage/**", ".triage/**"],
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "typescript/no-non-null-assertion": "off",
+        "typescript/no-explicit-any": "off",
+        "no-await-in-loop": "off"
+      }
+    }
+  ]
+}

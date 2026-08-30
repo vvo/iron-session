@@ -42,13 +42,13 @@ pnpm add iron-session
 
 ## Usage
 
-*We have extensive examples here too: https://get-iron-session.vercel.app/.*
+_We have extensive examples here too: https://get-iron-session.vercel.app/._
 
 To get a session, there's a single method to know: `getIronSession`.
 
 ```ts
 // Next.js API Routes and Node.js/Express/Connect.
-import { getIronSession } from 'iron-session';
+import { getIronSession } from "iron-session";
 
 export async function get(req, res) {
   const session = await getIronSession(req, res, { password: "...", cookieName: "..." });
@@ -64,8 +64,8 @@ export async function post(req, res) {
 
 ```ts
 // Next.js Route Handlers (App Router)
-import { cookies } from 'next/headers';
-import { getIronSession } from 'iron-session';
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
 
 export async function GET() {
   const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
@@ -81,12 +81,12 @@ export async function POST() {
 
 ```tsx
 // Next.js Server Components and Server Actions (App Router)
-import { cookies } from 'next/headers';
-import { getIronSession } from 'iron-session';
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
 
 async function getIronSessionData() {
   const session = await getIronSession(cookies(), { password: "...", cookieName: "..." });
-  return session
+  return session;
 }
 
 async function Profile() {
@@ -108,7 +108,7 @@ We have many different patterns and examples on the online demo, have a look: ht
 
 Two options are required: `password` and `cookieName`. Everything else is automatically computed and usually doesn't need to be changed.****
 
-- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation.  iron-session will use the highest numbered key for new cookies.
+- `password`, **required**: Private key used to encrypt the cookie. It has to be at least 32 characters long. Use <https://1password.com/password-generator/> to generate strong passwords. `password` can be either a `string` or an `object` with incrementing keys like this: `{2: "...", 1: "..."}` to allow for password rotation. iron-session will use the highest numbered key for new cookies.
 - `cookieName`, **required**: Name of the cookie to be stored
 - `ttl`, _optional_: In seconds. Default to the equivalent of 14 days. You can set this to `0` and iron-session will compute the maximum allowed value by cookies.
 - `cookieOptions`, _optional_: Any option available from [jshttp/cookie#serialize](https://github.com/jshttp/cookie#cookieserializename-value-options) except for `encode` which is not a Set-Cookie Attribute. See [Mozilla Set-Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) and [Chrome Cookie Fields](https://developer.chrome.com/docs/devtools/application/cookies/#fields). Default to:
@@ -130,7 +130,7 @@ Two options are required: `password` and `cookieName`. Everything else is automa
 ```ts
 type SessionData = {
   // Your data
-}
+};
 
 const session = await getIronSession<SessionData>(req, res, sessionOptions);
 ```
@@ -140,7 +140,7 @@ const session = await getIronSession<SessionData>(req, res, sessionOptions);
 ```ts
 type SessionData = {
   // Your data
-}
+};
 
 const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 ```
@@ -150,7 +150,7 @@ const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 Saves the session. This is an asynchronous operation. It must be done and awaited before headers are sent to the client.
 
 ```ts
-await session.save()
+await session.save();
 ```
 
 ### `session.destroy(): void`
@@ -158,7 +158,7 @@ await session.save()
 Destroys the session. This is a synchronous operation as it only removes the cookie. It must be done before headers are sent to the client.
 
 ```ts
-session.destroy()
+session.destroy();
 ```
 
 ### `session.updateConfig(sessionOptions: SessionOptions): void`

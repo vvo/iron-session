@@ -7,10 +7,7 @@ import {
   SessionData,
 } from "../../../pages-components/pages-router-redirect-api-route-fetch/lib";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getIronSession<SessionData>(req, res, sessionOptions);
 
   // POST request handling (for session creation)

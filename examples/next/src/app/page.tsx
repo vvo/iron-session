@@ -11,9 +11,7 @@ export default function Home() {
         <br />
         Note: We&apos;ve added delay to simulate database requests at login.
       </p>
-      <h2 className="text-slate-700 dark:text-slate-300 text-xl">
-        Main Examples:
-      </h2>
+      <h2 className="text-slate-700 dark:text-slate-300 text-xl">Main Examples:</h2>
       <ul className="list-disc list-inside">
         <li>
           <Link
@@ -26,22 +24,16 @@ export default function Home() {
           🤩
         </li>
         <li>
-          <Link
-            href="/pages-router-api-route-swr"
-            className={`${css.link} text-lg`}
-          >
+          <Link href="/pages-router-api-route-swr" className={`${css.link} text-lg`}>
             Pages Router + API routes, getServerSideProps, and SWR
           </Link>{" "}
           🤩
         </li>
       </ul>
       <p className="indent-10 text-center text-md text-slate-700 dark:text-slate-400 max-w-lg">
-        ☝️ These two examples are the most advanced and the ones we recommend
-        for now.
+        ☝️ These two examples are the most advanced and the ones we recommend for now.
       </p>
-      <h2 className="text-slate-700 dark:text-slate-300 text-xl">
-        Other Examples:
-      </h2>
+      <h2 className="text-slate-700 dark:text-slate-300 text-xl">Other Examples:</h2>
       <ul className="list-disc list-inside">
         <li>
           <Link
@@ -62,24 +54,16 @@ export default function Home() {
           </Link>
         </li>
         <li>
-          <Link
-            href="/pages-router-redirect-api-route-fetch"
-            className={`${css.link} text-lg`}
-          >
+          <Link href="/pages-router-redirect-api-route-fetch" className={`${css.link} text-lg`}>
             Pages Router + API routes, redirects, and fetch
           </Link>
         </li>
         <li>
-          <Link
-            href="/app-router-magic-links"
-            className={`${css.link} text-lg`}
-          >
+          <Link href="/app-router-magic-links" className={`${css.link} text-lg`}>
             Magic links
           </Link>
         </li>
-        <li className="text-slate-500">
-          OAuth login example (SWR) (Help needed)
-        </li>
+        <li className="text-slate-500">OAuth login example (SWR) (Help needed)</li>
         <li className="text-slate-500">
           Pages Router (and App Router?) req.session wrappers (Help needed)
         </li>

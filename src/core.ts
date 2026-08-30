@@ -1,10 +1,6 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { parse, serialize, type CookieSerializeOptions } from "cookie";
-import {
-  defaults as ironDefaults,
-  seal as ironSeal,
-  unseal as ironUnseal,
-} from "iron-webcrypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { parseCookie, stringifySetCookie, type SetCookie } from "cookie";
+import { defaults as ironDefaults, seal as ironSeal, unseal as ironUnseal } from "iron-webcrypto";
 
 type PasswordsMap = Record<string, string>;
 type Password = PasswordsMap | string;
@@ -15,17 +11,13 @@ type ResponseType = Response | ServerResponse;
  * {@link https://wicg.github.io/cookie-store/#dictdef-cookielistitem CookieListItem}
  * as specified by W3C.
  */
-interface CookieListItem
-  extends Pick<
-    CookieSerializeOptions,
-    "domain" | "path" | "sameSite" | "secure"
-  > {
+interface CookieListItem extends Pick<SetCookie, "domain" | "path" | "sameSite" | "secure"> {
   /** A string with the name of a cookie. */
   name: string;
   /** A string containing the value of the cookie. */
   value: string;
   /** A number of milliseconds or Date interface containing the expires of the cookie. */
-  expires?: CookieSerializeOptions["expires"] | number;
+  expires?: SetCookie["expires"] | number;
 }
 
 /**
@@ -33,7 +25,9 @@ interface CookieListItem
  * the `httpOnly`, `maxAge` and `priority` properties.
  */
 type ResponseCookie = CookieListItem &
-  Pick<CookieSerializeOptions, "httpOnly" | "maxAge" | "priority">;
+  Pick<SetCookie, "httpOnly" | "priority"> & {
+    maxAge?: number | undefined;
+  };
 
 /**
  * The high-level type definition of the .get() and .set() methods
@@ -48,12 +42,20 @@ export interface CookieStore {
 }
 
 /**
- * Set-Cookie Attributes do not include `encode`. We omit this from our `cookieOptions` type.
+ * Set-Cookie attributes. `name` and `value` are owned by iron-session
+ * (`cookieName` and the seal), so they are not configurable here.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
  * @see https://developer.chrome.com/docs/devtools/application/cookies/
  */
-type CookieOptions = Omit<CookieSerializeOptions, "encode">;
+type CookieOptions = Omit<SetCookie, "name" | "value" | "maxAge"> & {
+  /**
+   * Explicitly allows `undefined` so that `cookieOptions: { maxAge: undefined }`
+   * keeps working under `exactOptionalPropertyTypes`. That is the documented way
+   * to ask for a "session cookie" that the browser drops when it closes.
+   */
+  maxAge?: number | undefined;
+};
 
 export interface SessionOptions {
   /**
@@ -96,6 +98,26 @@ export interface SessionOptions {
    * @see https://github.com/jshttp/cookie#options-1
    */
   cookieOptions?: CookieOptions;
+
+  /**
+   * Called when an existing cookie could not be read, right before the session
+   * is reset to an empty object.
+   *
+   * A stateless session library cannot tell a tampered cookie from a badly
+   * rotated password, so it always starts a new session rather than throwing.
+   * That is the safe default, but it means genuine problems are invisible:
+   * a `"unknown-password"` burst usually means a broken password rotation, and
+   * an `"invalid"` burst can mean someone is probing your cookies. Log them.
+   *
+   * This hook must not throw. It is not a place to deny access: the session is
+   * empty either way.
+   *
+   * @example
+   * onUnsealError: (reason, error) => {
+   *   if (reason !== "expired") logger.warn({ reason, error }, "session cookie rejected");
+   * }
+   */
+  onUnsealError?: (reason: UnsealErrorReason, error: unknown) => void;
 }
 
 export type IronSession<T> = T & {
@@ -125,27 +147,26 @@ const fourteenDaysInSeconds = 14 * 24 * 3600;
 const currentMajorVersion = 2;
 const versionDelimiter = "~";
 
-const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions">> =
-  {
-    ttl: fourteenDaysInSeconds,
-    cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
-  };
+const defaultOptions: Required<Pick<SessionOptions, "ttl" | "cookieOptions">> = {
+  ttl: fourteenDaysInSeconds,
+  cookieOptions: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
+};
 
 function normalizeStringPasswordToMap(password: Password): PasswordsMap {
   return typeof password === "string" ? { 1: password } : password;
 }
 
-function parseSeal(seal: string): {
-  sealWithoutVersion: string;
-  tokenVersion: number | null;
-} {
-  const [sealWithoutVersion, tokenVersionAsString] =
-    seal.split(versionDelimiter);
-  const tokenVersion =
-    tokenVersionAsString == null ? null : parseInt(tokenVersionAsString, 10);
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return { sealWithoutVersion: sealWithoutVersion!, tokenVersion };
+/**
+ * Removes the trailing `~<version>` marker from a seal.
+ *
+ * The marker sits outside the seal's HMAC, so it is attacker-controlled and its
+ * value must never select a code path. iron-session v8 used it to unwrap a
+ * `persistent` key from v6-era cookies; v9 drops that format, so the marker is
+ * now inert metadata that we strip and ignore.
+ */
+function stripVersion(seal: string): string {
+  const delimiterIndex = seal.indexOf(versionDelimiter);
+  return delimiterIndex === -1 ? seal : seal.slice(0, delimiterIndex);
 }
 
 function computeCookieMaxAge(ttl: number): number {
@@ -157,14 +178,37 @@ function computeCookieMaxAge(ttl: number): number {
     return 2147483647;
   }
 
-  // The next line makes sure browser will expire cookies before seals are considered expired by the server.
-  // It also allows for clock difference of 60 seconds between server and clients.
-  return ttl - timestampSkewSec;
+  // Expire the cookie slightly before the seal, and allow for a 60 second clock
+  // difference between server and client. Clamped to 1: a short ttl used to
+  // produce `Max-Age=0` or a negative value, which makes the browser drop the
+  // cookie on arrival while save() still reported success.
+  return Math.max(1, ttl - timestampSkewSec);
+}
+
+/**
+ * Builds the `Set-Cookie` header value.
+ *
+ * `cookie@2` rejects an explicit `maxAge: undefined` under
+ * `exactOptionalPropertyTypes`, and an absent `Max-Age` is exactly what
+ * `maxAge: undefined` is meant to produce, so the key is dropped instead of
+ * forwarded.
+ */
+function serializeCookie(
+  name: string,
+  value: string,
+  { maxAge, ...cookieOptions }: CookieOptions,
+): string {
+  return stringifySetCookie({
+    ...cookieOptions,
+    ...(maxAge === undefined ? {} : { maxAge }),
+    name,
+    value,
+  });
 }
 
 function getCookie(req: RequestType, cookieName: string): string {
   return (
-    parse(
+    parseCookie(
       ("headers" in req && typeof req.headers.get === "function"
         ? req.headers.get("cookie")
         : (req as IncomingMessage).headers.cookie) ?? "",
@@ -172,10 +216,7 @@ function getCookie(req: RequestType, cookieName: string): string {
   );
 }
 
-function getServerActionCookie(
-  cookieName: string,
-  cookieHandler: CookieStore,
-): string {
+function getServerActionCookie(cookieName: string, cookieHandler: CookieStore): string {
   const cookieObject = cookieHandler.get(cookieName);
   const cookie = cookieObject?.value;
   if (typeof cookie === "string") {
@@ -193,98 +234,119 @@ function setCookie(res: ResponseType, cookieValue: string): void {
   if (!Array.isArray(existingSetCookie)) {
     existingSetCookie = [existingSetCookie.toString()];
   }
-  (res as ServerResponse).setHeader("set-cookie", [
-    ...existingSetCookie,
-    cookieValue,
-  ]);
+  (res as ServerResponse).setHeader("set-cookie", [...existingSetCookie, cookieValue]);
 }
 
-export function createSealData(_crypto: Crypto) {
-  return async function sealData(
-    data: unknown,
-    {
-      password,
-      ttl = fourteenDaysInSeconds,
-    }: { password: Password; ttl?: number },
-  ): Promise<string> {
-    const passwordsMap = normalizeStringPasswordToMap(password);
+export async function sealData(
+  data: unknown,
+  { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number },
+): Promise<string> {
+  const passwordsMap = normalizeStringPasswordToMap(password);
 
-    const mostRecentPasswordId = Math.max(
-      ...Object.keys(passwordsMap).map(Number),
+  const mostRecentPasswordId = Math.max(...Object.keys(passwordsMap).map(Number));
+  const secret = passwordsMap[mostRecentPasswordId];
+
+  if (secret === undefined) {
+    throw new Error(
+      "iron-session: Bad usage. The password map has no usable entry, it must be a non-empty object keyed by numbers, for example { 1: 'your-password' }.",
     );
-    const passwordForSeal = {
-      id: mostRecentPasswordId.toString(),
-      secret: passwordsMap[mostRecentPasswordId]!,
-    };
+  }
 
-    const seal = await ironSeal(_crypto, data, passwordForSeal, {
-      ...ironDefaults,
-      ttl: ttl * 1000,
-    });
+  const passwordForSeal = { id: mostRecentPasswordId.toString(), secret };
 
-    return `${seal}${versionDelimiter}${currentMajorVersion}`;
-  };
-}
-
-export function createUnsealData(_crypto: Crypto) {
-  return async function unsealData<T>(
-    seal: string,
-    {
-      password,
-      ttl = fourteenDaysInSeconds,
-    }: { password: Password; ttl?: number },
-  ): Promise<T> {
-    const passwordsMap = normalizeStringPasswordToMap(password);
-    const { sealWithoutVersion, tokenVersion } = parseSeal(seal);
-
-    try {
-      const data =
-        (await ironUnseal(_crypto, sealWithoutVersion, passwordsMap, {
-          ...ironDefaults,
-          ttl: ttl * 1000,
-        })) ?? {};
-
-      if (tokenVersion === 2) {
-        return data as T;
-      }
-
-      // @ts-expect-error `persistent` does not exist on newer tokens
-      return { ...data.persistent } as T;
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        /^(Expired seal|Bad hmac value|Cannot find password|Incorrect number of sealed components)/.test(
-          error.message,
-        )
-      ) {
-        // if seal expired or
-        // if seal is not valid (encrypted using a different password, when passwords are badly rotated) or
-        // if we can't find back the password in the seal
-        // then we just start a new session over
-        return {} as T;
-      }
-
-      throw error;
+  let seal: string;
+  try {
+    // Spread into a plain object: iron-webcrypto v2 refuses to encode the
+    // non-enumerable save/destroy/updateConfig properties we define on sessions.
+    seal = await ironSeal(
+      data !== null && typeof data === "object" ? { ...data } : data,
+      passwordForSeal,
+      { ...ironDefaults, ttl: ttl * 1000 },
+    );
+  } catch (error) {
+    if (error instanceof Error && error.message === "Data is not JSON serializable") {
+      throw new Error(
+        "iron-session: The session data is not JSON serializable. Store plain JSON values only: a Date must be stored as a timestamp (Date.now()) or an ISO string, and Map/Set/BigInt/undefined/functions are not supported.",
+        { cause: error },
+      );
     }
-  };
+    throw error;
+  }
+
+  return `${seal}${versionDelimiter}${currentMajorVersion}`;
 }
 
-function getSessionConfig(
-  sessionOptions: SessionOptions,
-): Required<SessionOptions> {
+/**
+ * Why an existing cookie could not be read. Every reason results in a fresh,
+ * empty session: a session library cannot tell a tampered cookie from a
+ * badly rotated password, so the only safe outcome is to start over.
+ * Use `onUnsealError` to observe these, they are otherwise invisible.
+ */
+export type UnsealErrorReason =
+  /** The seal is past its expiration. Normal, this is how sessions end. */
+  | "expired"
+  /** Integrity check failed, or the value is not a seal at all. Possible tampering. */
+  | "invalid"
+  /** The seal references a password id that is not in the password map. Usually a rotation mistake. */
+  | "unknown-password";
+
+function classifyUnsealError(error: unknown): UnsealErrorReason {
+  if (!(error instanceof Error)) return "invalid";
+  if (error.message.startsWith("Expired seal")) return "expired";
+  if (error.message.startsWith("Cannot find password")) return "unknown-password";
+  // Everything else means "this string is not a seal we can read": bad hmac,
+  // wrong mac prefix, invalid expiration, wrong component count, bad base64.
+  // We deliberately do not enumerate iron-webcrypto's messages here: an
+  // unrecognised failure must still reset the session rather than throw a 500
+  // on every request from a browser holding a poisoned cookie.
+  return "invalid";
+}
+
+export async function unsealData<T>(
+  seal: string,
+  {
+    password,
+    ttl = fourteenDaysInSeconds,
+    onUnsealError,
+  }: {
+    password: Password;
+    ttl?: number;
+    onUnsealError?: (reason: UnsealErrorReason, error: unknown) => void;
+  },
+): Promise<T> {
+  const passwordsMap = normalizeStringPasswordToMap(password);
+  const sealWithoutVersion = stripVersion(seal);
+
+  try {
+    const data =
+      (await ironUnseal(sealWithoutVersion, passwordsMap, {
+        ...ironDefaults,
+        ttl: ttl * 1000,
+      })) ?? {};
+
+    return data as T;
+  } catch (error) {
+    onUnsealError?.(classifyUnsealError(error), error);
+    return {} as T;
+  }
+}
+
+/** The options that actually shape the cookie, with defaults applied. */
+type SessionConfig = Required<
+  Pick<SessionOptions, "cookieName" | "password" | "ttl" | "cookieOptions">
+>;
+
+function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
   const options = {
     ...defaultOptions,
     ...sessionOptions,
     cookieOptions: {
       ...defaultOptions.cookieOptions,
-      ...(sessionOptions.cookieOptions || {}),
+      ...sessionOptions.cookieOptions,
     },
   };
 
-  if (
-    sessionOptions.cookieOptions &&
-    "maxAge" in sessionOptions.cookieOptions
-  ) {
+  if (sessionOptions.cookieOptions && "maxAge" in sessionOptions.cookieOptions) {
     if (sessionOptions.cookieOptions.maxAge === undefined) {
       // session cookies, do not set maxAge, consider token as infinite
       options.ttl = 0;
@@ -299,26 +361,21 @@ function getSessionConfig(
 const badUsageMessage =
   "iron-session: Bad usage: use getIronSession(req, res, options) or getIronSession(cookieStore, options).";
 
-export function createGetIronSession(
-  sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>,
-) {
-  return getIronSession;
-
-  async function getIronSession<T extends object>(
-    cookies: CookieStore,
-    sessionOptions: SessionOptions,
-  ): Promise<IronSession<T>>;
-  async function getIronSession<T extends object>(
-    req: RequestType,
-    res: ResponseType,
-    sessionOptions: SessionOptions,
-  ): Promise<IronSession<T>>;
-  async function getIronSession<T extends object>(
-    reqOrCookieStore: RequestType | CookieStore,
-    resOrsessionOptions: ResponseType | SessionOptions,
-    sessionOptions?: SessionOptions,
-  ): Promise<IronSession<T>> {
+export async function getIronSession<T extends object>(
+  cookies: CookieStore,
+  sessionOptions: SessionOptions,
+): Promise<IronSession<T>>;
+export async function getIronSession<T extends object>(
+  req: RequestType,
+  res: ResponseType,
+  sessionOptions: SessionOptions,
+): Promise<IronSession<T>>;
+export async function getIronSession<T extends object>(
+  reqOrCookieStore: RequestType | CookieStore,
+  resOrsessionOptions: ResponseType | SessionOptions,
+  sessionOptions?: SessionOptions,
+): Promise<IronSession<T>> {
+  {
     if (!reqOrCookieStore) {
       throw new Error(badUsageMessage);
     }
@@ -331,17 +388,11 @@ export function createGetIronSession(
       return getIronSessionFromCookieStore<T>(
         reqOrCookieStore as CookieStore,
         resOrsessionOptions as SessionOptions,
-        sealData,
-        unsealData,
       );
     }
 
     const req = reqOrCookieStore as RequestType;
     const res = resOrsessionOptions as ResponseType;
-
-    if (!sessionOptions) {
-      throw new Error(badUsageMessage);
-    }
 
     if (!sessionOptions.cookieName) {
       throw new Error("iron-session: Bad usage. Missing cookie name.");
@@ -354,9 +405,7 @@ export function createGetIronSession(
     const passwordsMap = normalizeStringPasswordToMap(sessionOptions.password);
 
     if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error(
-        "iron-session: Bad usage. Password must be at least 32 characters long.",
-      );
+      throw new Error("iron-session: Bad usage. Password must be at least 32 characters long.");
     }
 
     let sessionConfig = getSessionConfig(sessionOptions);
@@ -366,6 +415,7 @@ export function createGetIronSession(
       ? await unsealData<T>(sealFromCookies, {
           password: passwordsMap,
           ttl: sessionConfig.ttl,
+          ...(sessionOptions.onUnsealError ? { onUnsealError: sessionOptions.onUnsealError } : {}),
         })
       : ({} as T);
 
@@ -387,7 +437,7 @@ export function createGetIronSession(
             password: passwordsMap,
             ttl: sessionConfig.ttl,
           });
-          const cookieValue = serialize(
+          const cookieValue = serializeCookie(
             sessionConfig.cookieName,
             seal,
             sessionConfig.cookieOptions,
@@ -408,7 +458,7 @@ export function createGetIronSession(
           Object.keys(session).forEach((key) => {
             delete (session as Record<string, unknown>)[key];
           });
-          const cookieValue = serialize(sessionConfig.cookieName, "", {
+          const cookieValue = serializeCookie(sessionConfig.cookieName, "", {
             ...sessionConfig.cookieOptions,
             maxAge: 0,
           });
@@ -425,8 +475,6 @@ export function createGetIronSession(
 async function getIronSessionFromCookieStore<T extends object>(
   cookieStore: CookieStore,
   sessionOptions: SessionOptions,
-  sealData: ReturnType<typeof createSealData>,
-  unsealData: ReturnType<typeof createUnsealData>,
 ): Promise<IronSession<T>> {
   if (!sessionOptions.cookieName) {
     throw new Error("iron-session: Bad usage. Missing cookie name.");
@@ -439,20 +487,16 @@ async function getIronSessionFromCookieStore<T extends object>(
   const passwordsMap = normalizeStringPasswordToMap(sessionOptions.password);
 
   if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-    throw new Error(
-      "iron-session: Bad usage. Password must be at least 32 characters long.",
-    );
+    throw new Error("iron-session: Bad usage. Password must be at least 32 characters long.");
   }
 
   let sessionConfig = getSessionConfig(sessionOptions);
-  const sealFromCookies = getServerActionCookie(
-    sessionConfig.cookieName,
-    cookieStore,
-  );
+  const sealFromCookies = getServerActionCookie(sessionConfig.cookieName, cookieStore);
   const session = sealFromCookies
     ? await unsealData<T>(sealFromCookies, {
         password: passwordsMap,
         ttl: sessionConfig.ttl,
+        ...(sessionOptions.onUnsealError ? { onUnsealError: sessionOptions.onUnsealError } : {}),
       })
     : ({} as T);
 
@@ -480,11 +524,7 @@ async function getIronSessionFromCookieStore<T extends object>(
           );
         }
 
-        cookieStore.set(
-          sessionConfig.cookieName,
-          seal,
-          sessionConfig.cookieOptions,
-        );
+        cookieStore.set(sessionConfig.cookieName, seal, sessionConfig.cookieOptions);
       },
     },
 

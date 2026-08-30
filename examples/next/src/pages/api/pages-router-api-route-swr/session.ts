@@ -8,15 +8,8 @@ import {
 } from "../../../pages-components/pages-router-api-route-swr/lib";
 
 // login
-export default async function handler(
-  request: NextApiRequest,
-  response: NextApiResponse,
-) {
-  const session = await getIronSession<SessionData>(
-    request,
-    response,
-    sessionOptions,
-  );
+export default async function handler(request: NextApiRequest, response: NextApiResponse) {
+  const session = await getIronSession<SessionData>(request, response, sessionOptions);
 
   if (request.method === "POST") {
     const { username = "No username" } = request.body;

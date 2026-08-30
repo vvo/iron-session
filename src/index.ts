@@ -1,12 +1,2 @@
-import {
-  createGetIronSession,
-  createSealData,
-  createUnsealData,
-} from "./core.js";
-
-import * as crypto from "uncrypto";
-
-export type { IronSession, SessionOptions } from "./core.js";
-export const sealData = createSealData(crypto);
-export const unsealData = createUnsealData(crypto);
-export const getIronSession = createGetIronSession(sealData, unsealData);
+export type { CookieStore, IronSession, SessionOptions, UnsealErrorReason } from "./core.js";
+export { getIronSession, sealData, unsealData } from "./core.js";

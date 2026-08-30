@@ -15,8 +15,5 @@ export async function GET(request: NextRequest) {
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
   // not using redirect() yet: https://github.com/vercel/next.js/issues/51592#issuecomment-1810212676
-  return Response.redirect(
-    `${request.nextUrl.origin}/app-router-magic-links`,
-    303,
-  );
+  return Response.redirect(`${request.nextUrl.origin}/app-router-magic-links`, 303);
 }

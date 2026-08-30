@@ -2,10 +2,7 @@ import { Title } from "@/app/title";
 import * as css from "@/app/css";
 
 import { getIronSession } from "iron-session";
-import {
-  SessionData,
-  sessionOptions,
-} from "@/pages-components/pages-router-api-route-swr/lib";
+import { SessionData, sessionOptions } from "@/pages-components/pages-router-api-route-swr/lib";
 import Link from "next/link";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
@@ -26,11 +23,7 @@ export default function ProtectedServer({
 }
 
 export const getServerSideProps = (async (context) => {
-  const session = await getIronSession<SessionData>(
-    context.req,
-    context.res,
-    sessionOptions,
-  );
+  const session = await getIronSession<SessionData>(context.req, context.res, sessionOptions);
 
   if (!session.isLoggedIn) {
     return {
@@ -53,13 +46,10 @@ function Content({ session }: { session: SessionData }) {
         Hello <strong>{session.username}!</strong>
       </p>
       <p>
-        This page is protected and can only be accessed if you are logged in.
-        Otherwise you will be redirected to the login page.
+        This page is protected and can only be accessed if you are logged in. Otherwise you will be
+        redirected to the login page.
       </p>
-      <p>
-        getServerSideProps is used for the isLoggedIn check and to get the
-        session data.
-      </p>
+      <p>getServerSideProps is used for the isLoggedIn check and to get the session data.</p>
     </div>
   );
 }

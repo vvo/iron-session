@@ -16,8 +16,7 @@ export default function AppRouterRedirect() {
       <Title subtitle="+ client components, route handlers, redirects, and fetch" />
 
       <p className="italic max-w-xl">
-        <u>How to test</u>: Login and refresh the page to see iron-session in
-        action.
+        <u>How to test</u>: Login and refresh the page to see iron-session in action.
       </p>
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-slate-500 rounded-md max-w-xl">
@@ -43,22 +42,19 @@ function HowItWorks() {
 
       <ol className="list-decimal list-inside">
         <li>
-          The form is submitted to /app-router-magic-links/session (API route)
-          via a POST call (non-fetch). The API route generates a sealed token
-          and returns the magic link to client so it can be either sent or used
-          right away. When the magic link is visited it sets the session data
-          and redirects back to /app-router-magic-links (this page)
+          The form is submitted to /app-router-magic-links/session (API route) via a POST call
+          (non-fetch). The API route generates a sealed token and returns the magic link to client
+          so it can be either sent or used right away. When the magic link is visited it sets the
+          session data and redirects back to /app-router-magic-links (this page)
         </li>
         <li>
-          The page gets the session data via a fetch call to
-          /app-router-magic-links/session (API route). The API route either
-          return the session data (logged in) or a default session (not logged
-          in).
+          The page gets the session data via a fetch call to /app-router-magic-links/session (API
+          route). The API route either return the session data (logged in) or a default session (not
+          logged in).
         </li>
         <li>
-          The logout is a regular link navigating to
-          /app-router-magic-links/logout which destroy the session and redirects
-          back to /app-router-magic-links (this page).
+          The logout is a regular link navigating to /app-router-magic-links/logout which destroy
+          the session and redirects back to /app-router-magic-links (this page).
         </li>
       </ol>
 
@@ -66,9 +62,8 @@ function HowItWorks() {
         <strong>Pros</strong>: Simple.
       </p>
       <p>
-        <strong>Cons</strong>: Dangerous if not used properly. Without any
-        invalidations or blacklists, the magic link can be used multiple times
-        if compromised.
+        <strong>Cons</strong>: Dangerous if not used properly. Without any invalidations or
+        blacklists, the magic link can be used multiple times if compromised.
       </p>
     </details>
   );
