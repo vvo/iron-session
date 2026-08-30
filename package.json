@@ -62,7 +62,8 @@
     "size-limit": "13.0.3",
     "tsdown": "0.22.14",
     "tsx": "4.23.12",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "unrun": "0.3.1"
   },
   "size-limit": [
     {

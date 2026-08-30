@@ -101,4 +101,8 @@ jobs:
           deno-version: v2.x
       - run: pnpm install --frozen-lockfile
       - name: Test on Deno
-        run: deno test --allow-read --allow-env --node-modules-dir src/index.test.ts
+        # This job is about runtime behaviour, `tsc --noEmit` in the quality job
+        # is the type gate. Both flags are about the same thing: our sources use
+        # NodeNext `./core.js` specifiers that resolve to `.ts` files, which Deno
+        # will not follow on its own.
+        run: deno test --no-check --sloppy-imports --allow-read --allow-env --node-modules-dir src/index.test.ts

@@ -491,15 +491,20 @@ await test("should prevent reassignment of save/destroy functions", async () => 
     password,
   });
 
-  await rejects(async () => {
-    // @ts-expect-error Runtime check
-    session.save = () => {};
-  }, /Cannot assign to read only property 'save' of object '#<Object>'/);
+  // Node says "Cannot assign to read only property 'save'", Bun says
+  // "Attempted to assign to readonly property". Match the behaviour, not the
+  // wording, or this test only passes on one runtime.
+  const readOnly = /read.?only property/iu;
 
   await rejects(async () => {
-    // @ts-expect-error Runtime check
+    // @ts-expect-error assigning to a readonly property is the thing under test
+    session.save = () => {};
+  }, readOnly);
+
+  await rejects(async () => {
+    // @ts-expect-error assigning to a readonly property is the thing under test
     session.destroy = () => {};
-  }, /Cannot assign to read only property 'destroy' of object '#<Object>'/);
+  }, readOnly);
 });
 
 await test("allow to update session configuration", async () => {
