@@ -21,7 +21,14 @@
     "import/no-cycle": "error",
     "promise/prefer-await-to-then": "error"
   },
-  "ignorePatterns": ["dist/**", "examples/**", "coverage/**", ".triage/**"],
+  "ignorePatterns": [
+    "dist/**",
+    "examples/**",
+    "coverage/**",
+    ".triage/**",
+    "e2e/fixture/.next/**",
+    "e2e/fixture/next-env.d.ts"
+  ],
   "overrides": [
     {
       "files": ["**/*.test.ts"],

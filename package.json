@@ -45,6 +45,7 @@
     "size": "size-limit",
     "start": "pnpm --filter=next-example start",
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --import tsx src/*.test.ts",
+    "test:e2e": "playwright test",
     "test:watch": "node --import tsx --test --watch src/*.test.ts"
   },
   "dependencies": {
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
+    "@playwright/test": "1.62.1",
     "@size-limit/preset-small-lib": "13.0.3",
     "@types/node": "26.4.0",
     "@types/react": "19.2.7",

@@ -22,5 +22,5 @@
     "types": ["node"],
     "verbatimModuleSyntax": true
   },
-  "exclude": ["dist", "examples", "coverage", ".triage", "type-tests"]
+  "exclude": ["dist", "examples", "coverage", ".triage", "type-tests", "e2e"]
 }
