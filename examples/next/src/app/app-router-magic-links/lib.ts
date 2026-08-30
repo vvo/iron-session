@@ -13,7 +13,11 @@ export const defaultSession: SessionData = {
 };
 
 export const sessionOptions: SessionOptions = {
-  password: sessionPassword(),
+  // A getter, so the value is read per request: `next build` collects page
+  // data without needing the secret, and a request without it still throws.
+  get password() {
+    return sessionPassword();
+  },
   cookieName: "iron-examples-app-router-magic-links",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -31,7 +35,9 @@ export const fifteenMinutesInSeconds = 15 * 60;
  * so they must not be able to stand in for a session.
  */
 export const magicLinkTokenOptions = {
-  password: magicLinkPassword(),
+  get password() {
+    return magicLinkPassword();
+  },
   ttl: fifteenMinutesInSeconds,
 };
 
