@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'npm dist-tag. Use "beta" for prereleases, "latest" only for a stable release.'
+        required: true
+        default: "beta"
+        type: choice
+        options:
+          - beta
+          - latest
+      dry-run:
+        description: "Pack and run every check, but do not publish."
+        required: false
+        default: false
+        type: boolean
+
+# `id-token: write` is what lets npm attach a provenance statement, so anyone can
+# verify a tarball was built from this repository at this commit.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".node-version"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: pnpm install --frozen-lockfile
+
+      # Publishing something that does not pass its own gates is how a bad
+      # release happens, so run them here too rather than trusting that CI ran.
+      - name: Verify
+        run: |
+          pnpm format:check
+          pnpm oxlint --type-aware
+          pnpm tsc --noEmit
+          pnpm test
+          pnpm build
+          pnpm publint
+          pnpm attw --pack . --ignore-rules cjs-resolves-to-esm
+          pnpm size
+          pnpm lint:types
+
+      - name: Guard the dist-tag against the version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version tag=${{ inputs.tag }}"
+          case "$version" in
+            *-*)
+              if [ "${{ inputs.tag }}" = "latest" ]; then
+                echo "::error::$version is a prerelease and must not be published as 'latest'."
+                exit 1
+              fi
+              ;;
+            *)
+              if [ "${{ inputs.tag }}" = "beta" ]; then
+                echo "::notice::$version is stable but is being published under 'beta'."
+              fi
+              ;;
+          esac
+
+      - name: Publish
+        if: ${{ !inputs.dry-run }}
+        run: pnpm publish --tag ${{ inputs.tag }} --provenance --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Pack only (dry run)
+        if: ${{ inputs.dry-run }}
+        run: pnpm pack
