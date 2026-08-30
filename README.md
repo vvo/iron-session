@@ -46,12 +46,6 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 pnpm add iron-session
 ```
 
-Prereleases are published under the `beta` tag:
-
-```sh
-pnpm add iron-session@beta
-```
-
 v9 needs **Node 22.13 or later** and is **ESM-only**. `require()` still works on
 Node 22.13+, which supports `require()` of an ES module. If you are stuck on an
 older Node, stay on v8: `pnpm add iron-session@8`.

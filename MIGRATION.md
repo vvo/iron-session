@@ -3,8 +3,7 @@
 ## v8 to v9
 
 ```sh
-pnpm add iron-session          # latest
-pnpm add iron-session@beta     # prereleases
+pnpm add iron-session
 ```
 
 Most apps need two changes: Node 22 and one line if you store a `Date` in the

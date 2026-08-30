@@ -4,9 +4,8 @@
 ### Install
 
 ```sh
-pnpm add iron-session          # latest
-pnpm add iron-session@beta     # prereleases
-pnpm add iron-session@8        # if you are still on Node 20 or need CommonJS
+pnpm add iron-session
+pnpm add iron-session@8   # if you are still on Node 20 or need CommonJS
 ```
 
 ### How to upgrade
