@@ -14,6 +14,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
+- [Upgrading to v9](#upgrading-to-v9)
 - [Usage](#usage)
 - [Examples](#examples)
 - [Runtimes](#runtimes)
@@ -25,6 +26,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 - [API](#api)
   - [`getIronSession<T>(req, res, sessionOptions): Promise<IronSession<T>>`](#getironsessiontreq-res-sessionoptions-promiseironsessiont)
   - [`getIronSession<T>(cookieStore, sessionOptions): Promise<IronSession<T>>`](#getironsessiontcookiestore-sessionoptions-promiseironsessiont)
+  - [`nodeCookies`, `webCookies`, `nextProxyCookies`](#nodecookiesreq-res-webcookiesrequest-responseorheaders-nextproxycookiesrequest-response)
   - [`session.save(): Promise<void>`](#sessionsave-promisevoid)
   - [`session.destroy(): void`](#sessiondestroy-void)
   - [`session.updateConfig(sessionOptions: SessionOptions): void`](#sessionupdateconfigsessionoptions-sessionoptions-void)
@@ -43,6 +45,57 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 ```sh
 pnpm add iron-session
 ```
+
+Prereleases are published under the `beta` tag:
+
+```sh
+pnpm add iron-session@beta
+```
+
+v9 needs **Node 22.13 or later** and is **ESM-only**. `require()` still works on
+Node 22.13+, which supports `require()` of an ES module. If you are stuck on an
+older Node, stay on v8: `pnpm add iron-session@8`.
+
+## Upgrading to v9
+
+Most apps change two things. Both are things v8 got wrong quietly.
+
+**1. Store timestamps, not `Date` objects.**
+
+```diff
+- session.lastSeen = new Date();
++ session.lastSeen = Date.now();
+```
+
+v8 turned a `Date` into a string when sealing, so the type you wrote was not the
+type you read back. v9 throws and names the field.
+
+**2. Handle a session that does not exist yet.**
+
+```diff
+- const userId = session.user.id;
++ const userId = session.user?.id;
+```
+
+Reads are typed as `Partial<T>` now. A first visit, an expired cookie and a
+`destroy()` all leave you an empty object, so the old type let this compile and
+then throw at runtime.
+
+Nothing else is required. `getIronSession(req, res, options)` and
+`getIronSession(await cookies(), options)` both still work, v9 reads v8 cookies
+and v8 reads v9 cookies, so you can roll a deploy back without signing everyone
+out. If you had `as any` on `await cookies()`, delete it.
+
+Worth adopting while you are here:
+
+- [`nextProxyCookies`](#runtimes) if you ever tried to save a session in Next.js
+  middleware and it did not stick.
+- [`onUnsealError`](#watching-for-unreadable-cookies) to see why cookies get
+  rejected instead of guessing.
+- [`chunk: true`](#session-size) if your session outgrew one cookie.
+
+The full guide, including the removed APIs and the security fix that signs pre-v8
+cookies out once, is in [MIGRATION.md](./MIGRATION.md).
 
 ## Usage
 
@@ -258,7 +311,21 @@ type SessionData = {
   // Your data
 };
 
-const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+```
+
+Reads are typed as `Partial<T>`, because a session that does not exist yet is an
+empty object. Use optional chaining, or narrow once and pass the result around.
+
+### `nodeCookies(req, res)`, `webCookies(request, responseOrHeaders)`, `nextProxyCookies(request, response)`
+
+Cookie jars you pass in place of `req, res`, for when the shorthand cannot tell
+what your framework wants. See [Runtimes](#runtimes).
+
+```ts
+import { getIronSession, nextProxyCookies } from "iron-session";
+
+const session = await getIronSession(nextProxyCookies(request, response), sessionOptions);
 ```
 
 ### `session.save(): Promise<void>`
@@ -282,6 +349,8 @@ session.destroy();
 ### `session.updateConfig(sessionOptions: SessionOptions): void`
 
 Updates the configuration of the session with new session options. You still need to call save() if you want them to be applied.
+
+It rebuilds the whole configuration, including the password, so this is what you use to rotate a password mid-request. In v8 a new password passed here was ignored.
 
 ### `sealData(data: unknown, { password, ttl }): Promise<string>`
 
