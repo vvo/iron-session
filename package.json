@@ -47,6 +47,7 @@
     "start": "pnpm --filter=next-example start",
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --import tsx src/*.test.ts",
     "test:e2e": "playwright test",
+    "test:e2e:deployed": "playwright test --config=playwright.deployed.config.ts",
     "test:watch": "node --import tsx --test --watch src/*.test.ts"
   },
   "dependencies": {

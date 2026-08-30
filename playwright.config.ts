@@ -4,6 +4,9 @@ const port = 3210;
 
 export default defineConfig({
   testDir: "./e2e",
+  // The examples suite runs against a deployed URL, not the fixture below.
+  // See `playwright.deployed.config.ts`.
+  testIgnore: "examples.spec.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env["CI"]),
   retries: process.env["CI"] ? 2 : 0,

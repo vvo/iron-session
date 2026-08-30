@@ -42,6 +42,11 @@ jobs:
         run: pnpm lint:types
       - name: Build
         run: pnpm build
+      # The examples app is what get-iron-session.vercel.app serves. Nothing
+      # here used to build it, so a break in it only showed up as a failed
+      # Vercel deploy after merge.
+      - name: Build the examples app
+        run: pnpm --filter=next-example build
       - name: Package lint (publint)
         run: pnpm publint
       # `cjs-resolves-to-esm` is expected: v9 is ESM-only on purpose, and Node

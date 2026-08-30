@@ -18,8 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await sleep(250);
 
-    // Redirect after creating session
-    res.status(303).redirect("/pages-router-redirect-api-route-fetch");
+    // The status goes in `redirect()`, not in a preceding `status()`: passing
+    // only a URL makes Next answer 307, which keeps the method, so the browser
+    // re-POSTs to the page and gets a blank 405. It has to be 303 to turn the
+    // POST into a GET.
+    res.redirect(303, "/pages-router-redirect-api-route-fetch");
     return;
   }
 

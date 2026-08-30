@@ -82,6 +82,52 @@ If a release is half-done (published but untagged, or tagged but unpublished),
 say so rather than papering over it. Check the real state with
 `npm view iron-session dist-tags` and `git ls-remote --tags origin`.
 
+## Testing
+
+Three layers, and they catch different things.
+
+```sh
+pnpm test            # unit tests, src/*.test.ts
+pnpm test:e2e        # browser tests against a local fixture app
+pnpm test:e2e:deployed   # the examples site, on a real deployment
+```
+
+`pnpm test:e2e` runs `e2e/session.spec.ts` on Chromium, Firefox and WebKit
+against `e2e/fixture`, a minimal Next app on localhost:3210. Playwright starts
+it. WebKit is not optional: #870 is a Safari cookie report, so we need a real
+assertion there rather than another theory.
+
+`pnpm test:e2e:deployed` runs `e2e/examples.spec.ts` against a URL you give it.
+It needs `BASE_URL`, and a preview URL also needs the project's Protection
+Bypass for Automation secret, because previews are behind Vercel
+Authentication and otherwise answer 302 to `vercel.com/sso-api`:
+
+```sh
+BASE_URL=https://get-iron-session.vercel.app pnpm test:e2e:deployed
+BASE_URL=https://<preview>.vercel.app \
+  VERCEL_AUTOMATION_BYPASS_SECRET=... pnpm test:e2e:deployed
+```
+
+CI runs it on `deployment_status`, so every preview is tested before merge and
+production again after. That workflow exists because v9 shipped with every
+example answering an empty 500: the examples read their passwords from the
+environment, nothing set them on the Vercel project, and since the password is
+read per request the builds stayed green.
+
+Two traps in the deployed suite. Both look like flakiness and are not, so don't
+"simplify" the waits away:
+
+- The SWR examples render their login form in the server HTML, and it submits
+  through a React `onSubmit` that calls `preventDefault()`. Clicking before
+  hydration posts to the page URL instead of the session route and logs nobody
+  in. `openExample` waits for the client's session GET first.
+- They also pass `optimisticData`, so the logged-in UI appears before the POST
+  that sets the cookie has answered. The rendered state proves nothing: `login`
+  waits for the cookie, and the counter waits for its PATCH.
+
+To run the examples app locally, copy `examples/next/.env.example` to
+`examples/next/.env.local` first. Without it every session route throws.
+
 ## Conventions
 
 - Commit messages and PR titles follow
@@ -89,6 +135,7 @@ say so rather than papering over it. Check the real state with
 - Open PRs as drafts with no reviewers assigned.
 - Pin third-party GitHub Actions to a full commit SHA with the version in a
   trailing comment, matching the existing workflows.
-- `pnpm test` runs the unit tests. The full gate the release runs is in the
-  `Verify` step of `.github/workflows/release.yaml`; run those locally before
-  asking for a release.
+- `pnpm test` runs the unit tests, see Testing above for the other two layers.
+  The full gate the release runs is in the `Verify` step of
+  `.github/workflows/release.yaml`; run those locally before asking for a
+  release.
