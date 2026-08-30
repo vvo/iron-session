@@ -39,11 +39,21 @@ A session that does not exist yet is an empty object. The old type claimed
 otherwise, so `session.user.id` compiled and threw on a first visit, on an
 expired cookie, and after `destroy()`.
 
-**3. Do not `save()` after `destroy()`.**
+**3. Do not write to a session after `destroy()`.**
 
-`destroy()` is terminal now, and `save()` after it throws. Before, the save
-re-sealed the session and the browser kept the last `Set-Cookie`, so the logout
-silently did not happen.
+`destroy()` is terminal now. A bare `save()` after it is ignored, so a logout
+handler that calls both keeps working and the user ends up signed out. Writing
+fields back in and then saving throws:
+
+```diff
+  session.destroy();
+- session.lastSeen = Date.now();
+- await session.save();
+```
+
+Before, that save re-sealed the session and the browser kept the last
+`Set-Cookie`, so the logout silently did not happen. A wrapper refreshing a
+rolling expiry at the end of every request cancelled every logout in the app.
 
 **4. Pass a real password to `updateConfig()`.**
 

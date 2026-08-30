@@ -234,7 +234,7 @@ Two options are required: `password` and `cookieName`. Everything else is automa
     httpOnly: true,
     secure: true, // set this to false in local (non-HTTPS) development
     sameSite: "lax",// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-    maxAge: (ttl === 0 ? 2147483647 : ttl) - 60, // Expire cookie before the session expires.
+    maxAge: (ttl === 0 ? 2147483647 : ttl) - 60, // Expire cookie before the session expires. A ttl of 60 or less keeps its full value.
     path: "/",
   }
   ```
@@ -276,6 +276,8 @@ Destroys the session. This is a synchronous operation as it only removes the coo
 ```ts
 session.destroy();
 ```
+
+`destroy()` is terminal. A `save()` after it is ignored, so a logout handler that calls both still signs the user out. Writing fields back into the session and then saving throws, because the last `Set-Cookie` would win and leave the user signed in.
 
 ### `session.updateConfig(sessionOptions: SessionOptions): void`
 

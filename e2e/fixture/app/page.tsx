@@ -5,6 +5,7 @@ import {
   loginSecure,
   loginThenSetAnotherCookie,
   logout,
+  logoutThenSave,
   shrinkBig,
 } from "./actions";
 
@@ -34,6 +35,12 @@ export default async function Home() {
       <form action={logout}>
         <button type="submit" data-testid="logout">
           log out
+        </button>
+      </form>
+
+      <form action={logoutThenSave}>
+        <button type="submit" data-testid="logout-then-save">
+          log out then save
         </button>
       </form>
 
