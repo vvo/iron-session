@@ -1,2 +1,9 @@
 packages:
   - examples/*
+
+# Lifecycle scripts are blocked by default in pnpm 11. These two build a native
+# binary and need it. Nothing else may run code at install time, which matters
+# because CI installs run in the same job that can publish.
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true

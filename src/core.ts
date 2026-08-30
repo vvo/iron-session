@@ -30,15 +30,31 @@ type ResponseCookie = CookieListItem &
   };
 
 /**
- * The high-level type definition of the .get() and .set() methods
- * of { cookies() } from "next/headers"
+ * What iron-session needs from a cookie store. This is deliberately the shape
+ * of `await cookies()` from `next/headers`, so it can be passed in directly.
+ *
+ * `getAll` is optional: it is only used to find cookie chunks, and stores that
+ * cannot enumerate are probed by name instead.
  */
 export interface CookieStore {
   get: (name: string) => { name: string; value: string } | undefined;
-  set: {
-    (name: string, value: string, cookie?: Partial<ResponseCookie>): void;
-    (options: ResponseCookie): void;
-  };
+  getAll?: () => { name: string; value: string }[];
+  /**
+   * One signature with a required third argument, returning `unknown`.
+   *
+   * Every part of that matters for `getIronSession(await cookies(), ...)` to
+   * typecheck against Next.js, which is what #840 was about:
+   *
+   * - not an overload pair. Next declares a single signature over a tuple
+   *   union, and a single signature is not assignable to an overload pair.
+   * - the third argument is required, not optional. Next's tuple element is
+   *   `cookie?: Partial<ResponseCookie>`, and under
+   *   `exactOptionalPropertyTypes` our optional parameter widened to
+   *   `Partial<ResponseCookie> | undefined`, which their tuple rejects. We
+   *   always pass cookie options anyway.
+   * - `unknown` return. Next returns the cookie store itself, not void.
+   */
+  set: (name: string, value: string, cookie: Partial<ResponseCookie>) => unknown;
 }
 
 /**
@@ -56,6 +72,20 @@ type CookieOptions = Omit<SetCookie, "name" | "value" | "maxAge"> & {
    */
   maxAge?: number | undefined;
 };
+
+/**
+ * Why an existing cookie could not be read. Every reason results in a fresh,
+ * empty session: a session library cannot tell a tampered cookie from a
+ * badly rotated password, so the only safe outcome is to start over.
+ * Use `onUnsealError` to observe these, they are otherwise invisible.
+ */
+export type UnsealErrorReason =
+  /** The seal is past its expiration. Normal, this is how sessions end. */
+  | "expired"
+  /** Integrity check failed, or the value is not a seal at all. Possible tampering. */
+  | "invalid"
+  /** The seal references a password id that is not in the password map. Usually a rotation mistake. */
+  | "unknown-password";
 
 export interface SessionOptions {
   /**
@@ -83,7 +113,8 @@ export interface SessionOptions {
    * `max-age` attribute of the cookie automatically (`= ttl - 60s`, so that the
    * cookie always expire before the session).
    *
-   * `ttl = 0` means no expiration.
+   * `ttl = 0` means no expiration. Do not use it for authentication: the seal
+   * is then accepted forever and there is no way to revoke it.
    *
    * @default 1209600
    */
@@ -185,58 +216,6 @@ function computeCookieMaxAge(ttl: number): number {
   return Math.max(1, ttl - timestampSkewSec);
 }
 
-/**
- * Builds the `Set-Cookie` header value.
- *
- * `cookie@2` rejects an explicit `maxAge: undefined` under
- * `exactOptionalPropertyTypes`, and an absent `Max-Age` is exactly what
- * `maxAge: undefined` is meant to produce, so the key is dropped instead of
- * forwarded.
- */
-function serializeCookie(
-  name: string,
-  value: string,
-  { maxAge, ...cookieOptions }: CookieOptions,
-): string {
-  return stringifySetCookie({
-    ...cookieOptions,
-    ...(maxAge === undefined ? {} : { maxAge }),
-    name,
-    value,
-  });
-}
-
-function getCookie(req: RequestType, cookieName: string): string {
-  return (
-    parseCookie(
-      ("headers" in req && typeof req.headers.get === "function"
-        ? req.headers.get("cookie")
-        : (req as IncomingMessage).headers.cookie) ?? "",
-    )[cookieName] ?? ""
-  );
-}
-
-function getServerActionCookie(cookieName: string, cookieHandler: CookieStore): string {
-  const cookieObject = cookieHandler.get(cookieName);
-  const cookie = cookieObject?.value;
-  if (typeof cookie === "string") {
-    return cookie;
-  }
-  return "";
-}
-
-function setCookie(res: ResponseType, cookieValue: string): void {
-  if ("headers" in res && typeof res.headers.append === "function") {
-    res.headers.append("set-cookie", cookieValue);
-    return;
-  }
-  let existingSetCookie = (res as ServerResponse).getHeader("set-cookie") ?? [];
-  if (!Array.isArray(existingSetCookie)) {
-    existingSetCookie = [existingSetCookie.toString()];
-  }
-  (res as ServerResponse).setHeader("set-cookie", [...existingSetCookie, cookieValue]);
-}
-
 export async function sealData(
   data: unknown,
   { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number },
@@ -275,20 +254,6 @@ export async function sealData(
 
   return `${seal}${versionDelimiter}${currentMajorVersion}`;
 }
-
-/**
- * Why an existing cookie could not be read. Every reason results in a fresh,
- * empty session: a session library cannot tell a tampered cookie from a
- * badly rotated password, so the only safe outcome is to start over.
- * Use `onUnsealError` to observe these, they are otherwise invisible.
- */
-export type UnsealErrorReason =
-  /** The seal is past its expiration. Normal, this is how sessions end. */
-  | "expired"
-  /** Integrity check failed, or the value is not a seal at all. Possible tampering. */
-  | "invalid"
-  /** The seal references a password id that is not in the password map. Usually a rotation mistake. */
-  | "unknown-password";
 
 function classifyUnsealError(error: unknown): UnsealErrorReason {
   if (!(error instanceof Error)) return "invalid";
@@ -331,19 +296,245 @@ export async function unsealData<T>(
   }
 }
 
+/**
+ * The one thing iron-session needs from a runtime: read a cookie by name, and
+ * write a cookie back. Everything else (Node req/res, web Request/Response,
+ * Next's `cookies()`, Next's proxy) is an adapter that produces one of these.
+ *
+ * There used to be two copies of the read/save/destroy logic, one per calling
+ * convention, and they drifted: the cookie size limit was computed differently
+ * in each, and only one of them checked whether it was still possible to send a
+ * header. Everything now goes through a single implementation.
+ */
+export interface CookieJar {
+  read: (name: string) => string | undefined;
+  write: (name: string, value: string, options: CookieOptions) => void;
+  /**
+   * Names of the cookies present on the request, when the runtime can list
+   * them. Used to find cookie chunks.
+   */
+  names?: () => string[];
+  /**
+   * Throws if a cookie can no longer be sent, for runtimes where writing after
+   * a certain point is silently dropped. Losing a session cookie without an
+   * error is much worse than a loud failure.
+   */
+  assertWritable?: () => void;
+}
+
+function isWebRequest(req: RequestType): req is Request {
+  return "headers" in req && typeof (req as Request).headers.get === "function";
+}
+
+function readCookieHeader(req: RequestType, name: string): string | undefined {
+  const header = isWebRequest(req) ? req.headers.get("cookie") : req.headers.cookie;
+  return parseCookie(header ?? "")[name];
+}
+
+function cookieHeaderNames(req: RequestType): string[] {
+  const header = isWebRequest(req) ? req.headers.get("cookie") : req.headers.cookie;
+  return Object.keys(parseCookie(header ?? ""));
+}
+
+/**
+ * `cookie@2` rejects an explicit `maxAge: undefined` under
+ * `exactOptionalPropertyTypes`, and an absent `Max-Age` is exactly what
+ * `maxAge: undefined` is meant to produce, so the key is dropped instead of
+ * forwarded.
+ */
+function serializeCookie(
+  name: string,
+  value: string,
+  { maxAge, ...cookieOptions }: CookieOptions,
+): string {
+  return stringifySetCookie({
+    ...cookieOptions,
+    ...(maxAge === undefined ? {} : { maxAge }),
+    name,
+    value,
+  });
+}
+
+/**
+ * Node's `http` server, which is also Express, Connect and Next.js API routes.
+ *
+ * @example
+ * const session = await getIronSession(nodeCookies(req, res), options);
+ */
+export function nodeCookies(req: IncomingMessage, res: ServerResponse): CookieJar {
+  return {
+    read: (name) => readCookieHeader(req, name),
+    names: () => cookieHeaderNames(req),
+    assertWritable: () => {
+      if (res.headersSent) {
+        throw new Error(
+          "iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()",
+        );
+      }
+    },
+    write: (name, value, options) => {
+      const existing = res.getHeader("set-cookie") ?? [];
+      const previous = Array.isArray(existing) ? existing : [existing.toString()];
+      res.setHeader("set-cookie", [...previous, serializeCookie(name, value, options)]);
+    },
+  };
+}
+
+/**
+ * Web-standard `Request` plus anything with appendable headers: a `Response`,
+ * a bare `Headers`, or Next's `NextResponse`.
+ *
+ * @example
+ * const headers = new Headers();
+ * const session = await getIronSession(webCookies(request, headers), options);
+ * return new Response(body, { headers });
+ */
+export function webCookies(request: Request, response: Response | Headers): CookieJar {
+  const headers = response instanceof Headers ? response : response.headers;
+
+  return {
+    read: (name) => readCookieHeader(request, name),
+    names: () => cookieHeaderNames(request),
+    assertWritable: () => {
+      // A Response the runtime has already started sending ignores header
+      // mutations without complaining, which loses the session silently.
+      if (response instanceof Response && response.bodyUsed) {
+        throw new Error(
+          "iron-session: Cannot set session cookie: the response body has already been consumed, so the Set-Cookie header would be dropped. Call session.save() before returning or streaming the response.",
+        );
+      }
+    },
+    write: (name, value, options) => {
+      headers.append("set-cookie", serializeCookie(name, value, options));
+    },
+  };
+}
+
+/**
+ * The parts of `NextRequest`/`NextResponse` we touch, structurally typed so
+ * `next` is not a dependency.
+ *
+ * Request and response cookies are not the same type in Next: request cookies
+ * take `(name, value)` only, because attributes are meaningless on an incoming
+ * cookie, while response cookies take `(name, value, options)`. Declaring one
+ * shared interface for both is what made `NextRequest` fail to assign.
+ */
+interface NextRequestCookies {
+  get: (name: string) => { name: string; value: string } | undefined;
+  getAll?: () => { name: string; value: string }[];
+  set: (name: string, value: string) => unknown;
+}
+
+interface NextResponseCookies {
+  set: (name: string, value: string, options: Partial<ResponseCookie>) => unknown;
+}
+
+/**
+ * Next.js `proxy.ts` (called `middleware.ts` before Next 16).
+ *
+ * Writing a raw `set-cookie` header here does not work the way you would
+ * expect: Next only merges a cookie into the current render when it goes
+ * through `response.cookies.set()`, so `session.save()` in middleware appeared
+ * to succeed and then vanished. Writing to `request.cookies` as well makes the
+ * new value visible to code that reads the session later in the same request,
+ * which is what makes rotation work.
+ *
+ * @example
+ * export async function proxy(request: NextRequest) {
+ *   const response = NextResponse.next();
+ *   const session = await getIronSession(nextProxyCookies(request, response), options);
+ *   session.lastSeen = Date.now();
+ *   await session.save();
+ *   return response;
+ * }
+ */
+export function nextProxyCookies(
+  request: { cookies: NextRequestCookies },
+  response: { cookies: NextResponseCookies },
+): CookieJar {
+  return {
+    read: (name) => request.cookies.get(name)?.value,
+    names: () => request.cookies.getAll?.().map((cookie) => cookie.name) ?? [],
+    write: (name, value, options) => {
+      // The response carries the cookie to the browser.
+      response.cookies.set(name, value, options);
+      // The request makes it visible to the rest of this same request.
+      // No attributes here on purpose, they mean nothing on an incoming cookie
+      // and Next's request cookies only accept a name and a value.
+      request.cookies.set(name, value);
+    },
+  };
+}
+
+/** Wraps a `cookies()`-style store (Next's App Router) in a jar. */
+function cookieStoreJar(cookieStore: CookieStore): CookieJar {
+  return {
+    read: (name) => cookieStore.get(name)?.value,
+    names: () => cookieStore.getAll?.().map((cookie) => cookie.name) ?? [],
+    write: (name, value, options) => {
+      cookieStore.set(name, value, options);
+    },
+  };
+}
+
+function isCookieJar(value: unknown): value is CookieJar {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as CookieJar).read === "function" &&
+    typeof (value as CookieJar).write === "function"
+  );
+}
+
+function isCookieStore(value: unknown): value is CookieStore {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as CookieStore).get === "function" &&
+    typeof (value as CookieStore).set === "function"
+  );
+}
+
 /** The options that actually shape the cookie, with defaults applied. */
 type SessionConfig = Required<
   Pick<SessionOptions, "cookieName" | "password" | "ttl" | "cookieOptions">
->;
+> & {
+  passwordsMap: PasswordsMap;
+};
 
 function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
+  if (!sessionOptions.cookieName) {
+    throw new Error("iron-session: Bad usage. Missing cookie name.");
+  }
+
+  if (!sessionOptions.password) {
+    throw new Error("iron-session: Bad usage. Missing password.");
+  }
+
+  const passwordsMap = normalizeStringPasswordToMap(sessionOptions.password);
+
+  if (Object.keys(passwordsMap).length === 0) {
+    throw new Error(
+      "iron-session: Bad usage. The password map is empty, it must be keyed by numbers, for example { 1: 'your-password' }.",
+    );
+  }
+
+  for (const [id, password] of Object.entries(passwordsMap)) {
+    if (!Number.isInteger(Number(id))) {
+      throw new Error(
+        `iron-session: Bad usage. Password ids must be integers, got ${JSON.stringify(id)}. Use { 1: '...', 2: '...' }.`,
+      );
+    }
+    if (typeof password !== "string" || password.length < 32) {
+      throw new Error("iron-session: Bad usage. Password must be at least 32 characters long.");
+    }
+  }
+
   const options = {
     ...defaultOptions,
     ...sessionOptions,
-    cookieOptions: {
-      ...defaultOptions.cookieOptions,
-      ...sessionOptions.cookieOptions,
-    },
+    passwordsMap,
+    cookieOptions: { ...defaultOptions.cookieOptions, ...sessionOptions.cookieOptions },
   };
 
   if (sessionOptions.cookieOptions && "maxAge" in sessionOptions.cookieOptions) {
@@ -355,14 +546,110 @@ function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
+  const { expires } = options.cookieOptions;
+  if (expires instanceof Date && expires.getTime() < Date.now()) {
+    throw new Error(
+      `iron-session: Bad usage. cookieOptions.expires is in the past (${expires.toISOString()}), so the browser will discard the cookie and the session will never persist. This usually means the Date was created once at module scope. Use \`ttl\` instead.`,
+    );
+  }
+
   return options;
+}
+
+/**
+ * The single session implementation. Reads the cookie through the jar, and
+ * defines save/destroy/updateConfig against that same jar.
+ */
+async function createSession<T extends object>(
+  jar: CookieJar,
+  sessionOptions: SessionOptions,
+): Promise<IronSession<T>> {
+  let config = getSessionConfig(sessionOptions);
+  let onUnsealError = sessionOptions.onUnsealError;
+
+  const sealFromCookies = jar.read(config.cookieName);
+  const session = sealFromCookies
+    ? await unsealData<T>(sealFromCookies, {
+        password: config.passwordsMap,
+        ttl: config.ttl,
+        ...(onUnsealError ? { onUnsealError } : {}),
+      })
+    : ({} as T);
+
+  // `destroy()` used to only clear the object and queue an expired cookie, so a
+  // later `save()` re-sealed the same session and the last Set-Cookie won. A
+  // wrapper that refreshed a rolling expiry at end of request silently
+  // cancelled every logout in the app.
+  let destroyed = false;
+
+  Object.defineProperties(session, {
+    updateConfig: {
+      value: function updateConfig(newSessionOptions: SessionOptions) {
+        // Rebuilt in full, including the password map. It used to only refresh
+        // the cookie options, so passing a new password here silently kept
+        // sealing with the old one and skipped the length check entirely.
+        config = getSessionConfig(newSessionOptions);
+        onUnsealError = newSessionOptions.onUnsealError;
+      },
+    },
+    save: {
+      value: async function save() {
+        if (destroyed) {
+          throw new Error(
+            "iron-session: Cannot save a destroyed session. session.destroy() signs the user out, and saving afterwards would restore the cookie you just cleared. Get a fresh session if you need to write one.",
+          );
+        }
+
+        jar.assertWritable?.();
+
+        const seal = await sealData(session, {
+          password: config.passwordsMap,
+          ttl: config.ttl,
+        });
+
+        assertCookieFits(config.cookieName, seal, config.cookieOptions);
+        jar.write(config.cookieName, seal, config.cookieOptions);
+      },
+    },
+    destroy: {
+      value: function destroy() {
+        destroyed = true;
+        for (const key of Object.keys(session)) {
+          delete (session as Record<string, unknown>)[key];
+        }
+        jar.write(config.cookieName, "", { ...config.cookieOptions, maxAge: 0 });
+      },
+    },
+  });
+
+  return session as IronSession<T>;
+}
+
+/**
+ * Browsers cap a single cookie at 4096 bytes, counted over the whole
+ * `Set-Cookie` value. The two old code paths measured this differently: the
+ * Node path measured the real header, the cookie-store path added up
+ * `name.length + seal.length + JSON.stringify(options).length`, which is not
+ * the same number, so identical data was accepted by one and rejected by the
+ * other. Both now measure the header that actually goes out, in bytes rather
+ * than UTF-16 code units.
+ */
+function assertCookieFits(name: string, seal: string, cookieOptions: CookieOptions): void {
+  const header = serializeCookie(name, seal, cookieOptions);
+  const bytes = new TextEncoder().encode(header).length;
+
+  if (bytes > 4096) {
+    throw new Error(
+      `iron-session: Cookie length is too big (${bytes} bytes), browsers will refuse it. Try to remove some data.`,
+    );
+  }
 }
 
 const badUsageMessage =
   "iron-session: Bad usage: use getIronSession(req, res, options) or getIronSession(cookieStore, options).";
 
 export async function getIronSession<T extends object>(
-  cookies: CookieStore,
+  cookies: CookieStore | CookieJar,
   sessionOptions: SessionOptions,
 ): Promise<IronSession<T>>;
 export async function getIronSession<T extends object>(
@@ -371,174 +658,36 @@ export async function getIronSession<T extends object>(
   sessionOptions: SessionOptions,
 ): Promise<IronSession<T>>;
 export async function getIronSession<T extends object>(
-  reqOrCookieStore: RequestType | CookieStore,
-  resOrsessionOptions: ResponseType | SessionOptions,
-  sessionOptions?: SessionOptions,
+  first: RequestType | CookieStore | CookieJar,
+  second: ResponseType | SessionOptions,
+  third?: SessionOptions,
 ): Promise<IronSession<T>> {
-  {
-    if (!reqOrCookieStore) {
-      throw new Error(badUsageMessage);
-    }
-
-    if (!resOrsessionOptions) {
-      throw new Error(badUsageMessage);
-    }
-
-    if (!sessionOptions) {
-      return getIronSessionFromCookieStore<T>(
-        reqOrCookieStore as CookieStore,
-        resOrsessionOptions as SessionOptions,
-      );
-    }
-
-    const req = reqOrCookieStore as RequestType;
-    const res = resOrsessionOptions as ResponseType;
-
-    if (!sessionOptions.cookieName) {
-      throw new Error("iron-session: Bad usage. Missing cookie name.");
-    }
-
-    if (!sessionOptions.password) {
-      throw new Error("iron-session: Bad usage. Missing password.");
-    }
-
-    const passwordsMap = normalizeStringPasswordToMap(sessionOptions.password);
-
-    if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-      throw new Error("iron-session: Bad usage. Password must be at least 32 characters long.");
-    }
-
-    let sessionConfig = getSessionConfig(sessionOptions);
-
-    const sealFromCookies = getCookie(req, sessionConfig.cookieName);
-    const session = sealFromCookies
-      ? await unsealData<T>(sealFromCookies, {
-          password: passwordsMap,
-          ttl: sessionConfig.ttl,
-          ...(sessionOptions.onUnsealError ? { onUnsealError: sessionOptions.onUnsealError } : {}),
-        })
-      : ({} as T);
-
-    Object.defineProperties(session, {
-      updateConfig: {
-        value: function updateConfig(newSessionOptions: SessionOptions) {
-          sessionConfig = getSessionConfig(newSessionOptions);
-        },
-      },
-      save: {
-        value: async function save() {
-          if ("headersSent" in res && res.headersSent) {
-            throw new Error(
-              "iron-session: Cannot set session cookie: session.save() was called after headers were sent. Make sure to call it before any res.send() or res.end()",
-            );
-          }
-
-          const seal = await sealData(session, {
-            password: passwordsMap,
-            ttl: sessionConfig.ttl,
-          });
-          const cookieValue = serializeCookie(
-            sessionConfig.cookieName,
-            seal,
-            sessionConfig.cookieOptions,
-          );
-
-          if (cookieValue.length > 4096) {
-            throw new Error(
-              `iron-session: Cookie length is too big (${cookieValue.length} bytes), browsers will refuse it. Try to remove some data.`,
-            );
-          }
-
-          setCookie(res, cookieValue);
-        },
-      },
-
-      destroy: {
-        value: function destroy() {
-          Object.keys(session).forEach((key) => {
-            delete (session as Record<string, unknown>)[key];
-          });
-          const cookieValue = serializeCookie(sessionConfig.cookieName, "", {
-            ...sessionConfig.cookieOptions,
-            maxAge: 0,
-          });
-
-          setCookie(res, cookieValue);
-        },
-      },
-    });
-
-    return session as IronSession<T>;
-  }
-}
-
-async function getIronSessionFromCookieStore<T extends object>(
-  cookieStore: CookieStore,
-  sessionOptions: SessionOptions,
-): Promise<IronSession<T>> {
-  if (!sessionOptions.cookieName) {
-    throw new Error("iron-session: Bad usage. Missing cookie name.");
+  if (!first || !second) {
+    throw new Error(badUsageMessage);
   }
 
-  if (!sessionOptions.password) {
-    throw new Error("iron-session: Bad usage. Missing password.");
+  // getIronSession(cookieStoreOrJar, options)
+  if (!third) {
+    const options = second as SessionOptions;
+
+    if (isCookieJar(first)) {
+      return createSession<T>(first, options);
+    }
+
+    if (isCookieStore(first)) {
+      return createSession<T>(cookieStoreJar(first), options);
+    }
+
+    throw new Error(badUsageMessage);
   }
 
-  const passwordsMap = normalizeStringPasswordToMap(sessionOptions.password);
+  // getIronSession(req, res, options), kept so Node and Express keep working
+  // without a code change. It just picks the matching adapter.
+  const req = first as RequestType;
+  const res = second as ResponseType;
+  const jar = isWebRequest(req)
+    ? webCookies(req, res as Response)
+    : nodeCookies(req, res as ServerResponse);
 
-  if (Object.values(passwordsMap).some((password) => password.length < 32)) {
-    throw new Error("iron-session: Bad usage. Password must be at least 32 characters long.");
-  }
-
-  let sessionConfig = getSessionConfig(sessionOptions);
-  const sealFromCookies = getServerActionCookie(sessionConfig.cookieName, cookieStore);
-  const session = sealFromCookies
-    ? await unsealData<T>(sealFromCookies, {
-        password: passwordsMap,
-        ttl: sessionConfig.ttl,
-        ...(sessionOptions.onUnsealError ? { onUnsealError: sessionOptions.onUnsealError } : {}),
-      })
-    : ({} as T);
-
-  Object.defineProperties(session, {
-    updateConfig: {
-      value: function updateConfig(newSessionOptions: SessionOptions) {
-        sessionConfig = getSessionConfig(newSessionOptions);
-      },
-    },
-    save: {
-      value: async function save() {
-        const seal = await sealData(session, {
-          password: passwordsMap,
-          ttl: sessionConfig.ttl,
-        });
-
-        const cookieLength =
-          sessionConfig.cookieName.length +
-          seal.length +
-          JSON.stringify(sessionConfig.cookieOptions).length;
-
-        if (cookieLength > 4096) {
-          throw new Error(
-            `iron-session: Cookie length is too big (${cookieLength} bytes), browsers will refuse it. Try to remove some data.`,
-          );
-        }
-
-        cookieStore.set(sessionConfig.cookieName, seal, sessionConfig.cookieOptions);
-      },
-    },
-
-    destroy: {
-      value: function destroy() {
-        Object.keys(session).forEach((key) => {
-          delete (session as Record<string, unknown>)[key];
-        });
-
-        const cookieOptions = { ...sessionConfig.cookieOptions, maxAge: 0 };
-        cookieStore.set(sessionConfig.cookieName, "", cookieOptions);
-      },
-    },
-  });
-
-  return session as IronSession<T>;
+  return createSession<T>(jar, third);
 }
