@@ -1,6 +1,6 @@
 {
   "name": "iron-session",
-  "version": "9.0.0",
+  "version": "9.0.0-beta.0",
   "description": "Secure, stateless, and cookie-based session library for JavaScript",
   "keywords": [
     "cookie",
@@ -21,7 +21,8 @@
     "https://github.com/sponsors/brc-dd"
   ],
   "files": [
-    "dist/*"
+    "dist/*",
+    "MIGRATION.md"
   ],
   "type": "module",
   "sideEffects": false,

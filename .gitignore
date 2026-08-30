@@ -10,6 +10,9 @@ coverage*
 # local env
 .env.local
 
+# scratch research output, not part of the repo
+.triage/
+
 # playwright
 /playwright-report/
 /test-results/
