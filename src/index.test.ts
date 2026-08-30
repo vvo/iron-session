@@ -1,4 +1,4 @@
-import { deepEqual, doesNotMatch, equal, match, rejects, throws } from "node:assert";
+import { deepEqual, doesNotMatch, equal, match, ok, rejects, throws } from "node:assert";
 import { mock, test } from "node:test";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { SessionOptions } from "./index.js";
@@ -657,6 +657,7 @@ function fakeCookieStore(initial: Record<string, string> = {}) {
         jar.set(name, value);
         sets.push({ name, value, options });
       },
+      delete: (name: string) => jar.delete(name),
     },
     sets,
   };
@@ -830,4 +831,293 @@ await test("webCookies: should throw when the response body was already consumed
   // Mutating headers on a response the runtime has started sending is ignored
   // without complaining, which loses the session silently.
   await rejects(async () => session.save(), /already been consumed/);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cookie chunking.
+//
+// The seal's HMAC covers the whole string, so reassembly integrity is free as
+// long as nothing here inspects an individual chunk. The tests below are mostly
+// about proving that: a deleted, reordered, foreign or extra chunk must produce
+// an empty session and must never throw.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface BigData {
+  blob?: string;
+  small?: number;
+}
+
+/** Enough random-ish data that the seal cannot fit in one cookie. */
+const bigBlob = (bytes: number): string => "x".repeat(bytes);
+
+await test("chunking: should refuse an oversized session when chunking is off", async () => {
+  const { store } = fakeCookieStore();
+  const session = await getIronSession<BigData>(store, { cookieName, password });
+  session.blob = bigBlob(5000);
+
+  await rejects(async () => session.save(), /set `chunk: true`/u);
+});
+
+await test("chunking: should split and reassemble a large session", async () => {
+  const { store, sets } = fakeCookieStore();
+
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  session.blob = bigBlob(5000);
+  await session.save();
+
+  // Split across chunk cookies, nothing written to the base name.
+  const names = sets.map((entry) => entry.name);
+  ok(names.includes(`${cookieName}.0`), `expected chunk 0, got ${names.join(", ")}`);
+  ok(names.includes(`${cookieName}.1`), `expected chunk 1, got ${names.join(", ")}`);
+  ok(!names.includes(cookieName), "base cookie should not hold a chunked seal");
+
+  // Every chunk must fit in a real cookie.
+  for (const entry of sets) {
+    const bytes = new TextEncoder().encode(
+      `${entry.name}=${entry.value}; Max-Age=1209540; Path=/; HttpOnly; Secure; SameSite=Lax`,
+    ).length;
+    ok(bytes <= 4096, `${entry.name} is ${bytes} bytes`);
+  }
+
+  const restored = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  equal(restored.blob, bigBlob(5000));
+});
+
+await test("chunking: should read chunks even when chunking is off", async () => {
+  // Turning the option off must not sign existing users out.
+  const { store } = fakeCookieStore();
+  const writer = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  writer.blob = bigBlob(5000);
+  await writer.save();
+
+  const reader = await getIronSession<BigData>(store, { cookieName, password });
+  equal(reader.blob, bigBlob(5000));
+});
+
+await test("chunking: should clean up chunks when the session shrinks", async () => {
+  // The self-inflicted lockout: stale chunks left behind get concatenated onto
+  // the new chunk 0, the HMAC fails, and every later request reads an empty
+  // session while save() keeps reporting success.
+  const { store } = fakeCookieStore();
+
+  const big = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  big.blob = bigBlob(9000);
+  await big.save();
+  ok(store.get(`${cookieName}.2`), "expected a 3-chunk session to start with");
+
+  const shrunk = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  delete shrunk.blob;
+  shrunk.small = 1;
+  await shrunk.save();
+
+  equal(store.get(`${cookieName}.1`)?.value, "", "stale chunk 1 should be expired");
+  equal(store.get(`${cookieName}.2`)?.value, "", "stale chunk 2 should be expired");
+
+  const restored = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  deepEqual({ ...restored }, { small: 1 });
+});
+
+await test("chunking: should clean up the base cookie when the session grows", async () => {
+  const { store } = fakeCookieStore();
+
+  const small = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  small.small = 1;
+  await small.save();
+  ok(store.get(cookieName)?.value, "expected an unchunked cookie to start with");
+
+  const grown = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  grown.blob = bigBlob(5000);
+  await grown.save();
+
+  // Otherwise the stale unchunked cookie wins on read and pins the old session.
+  equal(store.get(cookieName)?.value, "", "stale base cookie should be expired");
+
+  const restored = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  equal(restored.blob, bigBlob(5000));
+});
+
+await test("chunking: destroy should expire every chunk", async () => {
+  const { store } = fakeCookieStore();
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  session.blob = bigBlob(9000);
+  await session.save();
+
+  const live = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  live.destroy();
+
+  for (const index of [0, 1, 2]) {
+    equal(store.get(`${cookieName}.${index}`)?.value, "", `chunk ${index} should be expired`);
+  }
+
+  const after = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  deepEqual({ ...after }, {});
+});
+
+await test("chunking: should refuse a session that needs too many cookies", async () => {
+  const { store } = fakeCookieStore();
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  session.blob = bigBlob(40_000);
+
+  await rejects(async () => session.save(), /maximum is 4/u);
+});
+
+// ─── Tampering. All four must yield {} and must not throw. ───
+
+async function chunkedStore(): Promise<ReturnType<typeof fakeCookieStore>> {
+  const jar = fakeCookieStore();
+  const session = await getIronSession<BigData>(jar.store, { cookieName, password, chunk: true });
+  session.blob = bigBlob(9000);
+  await session.save();
+  return jar;
+}
+
+await test("chunking: a deleted chunk should reset the session", async () => {
+  const { store } = await chunkedStore();
+  store.delete(`${cookieName}.1`);
+
+  const reasons: string[] = [];
+  const session = await getIronSession<BigData>(store, {
+    cookieName,
+    password,
+    chunk: true,
+    onUnsealError: (reason) => reasons.push(reason),
+  });
+
+  deepEqual({ ...session }, {});
+  deepEqual(reasons, ["invalid"]);
+});
+
+await test("chunking: reordered chunks should reset the session", async () => {
+  const { store } = await chunkedStore();
+  const zero = store.get(`${cookieName}.0`)?.value ?? "";
+  const one = store.get(`${cookieName}.1`)?.value ?? "";
+  store.set(`${cookieName}.0`, one, {});
+  store.set(`${cookieName}.1`, zero, {});
+
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  deepEqual({ ...session }, {});
+});
+
+await test("chunking: a chunk from another session should reset the session", async () => {
+  // Same password, different session. The HMAC is over the whole seal, so this
+  // must not produce a mixed or partial session.
+  const { store } = await chunkedStore();
+  const other = await chunkedStore();
+  store.set(`${cookieName}.1`, other.store.get(`${cookieName}.1`)?.value ?? "", {});
+
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  deepEqual({ ...session }, {});
+});
+
+await test("chunking: an appended bogus chunk should reset the session", async () => {
+  const { store } = await chunkedStore();
+  store.set(`${cookieName}.3`, "bogus", {});
+
+  const session = await getIronSession<BigData>(store, { cookieName, password, chunk: true });
+  deepEqual({ ...session }, {});
+});
+
+await test("chunking: probing must stop at the first gap and stay bounded", async () => {
+  // No cookie holds the chunk count on purpose: that number would be
+  // attacker-controlled. Discovery stops at the first missing index, and is
+  // capped, so a browser full of `name.N` cookies cannot make us do unbounded
+  // work before anyone is authenticated.
+  const { store } = fakeCookieStore();
+  for (let index = 0; index < 50; index += 1) {
+    store.set(`${cookieName}.${index}`, "x".repeat(100), {});
+  }
+
+  const reads: string[] = [];
+  const counting = {
+    get: (name: string) => {
+      reads.push(name);
+      return store.get(name);
+    },
+    getAll: () => store.getAll(),
+    set: (name: string, value: string, options: unknown) => store.set(name, value, options),
+  };
+
+  const session = await getIronSession<BigData>(counting, { cookieName, password, chunk: true });
+
+  deepEqual({ ...session }, {});
+  ok(reads.length <= 1 + 4, `probed ${reads.length} cookies: ${reads.join(", ")}`);
+});
+
+await test("chunking: no chunk should ever exceed the browser limit", async () => {
+  // Walk across the single-cookie boundary and well past it, with a long cookie
+  // name and extra attributes so the per-chunk overhead is not trivial.
+  const longName = "my-application-session-cookie";
+  const cookieOptions = {
+    path: "/",
+    domain: "app.example.com",
+    sameSite: "strict" as const,
+    priority: "high" as const,
+  };
+
+  for (const size of [3000, 3900, 3950, 4000, 4100, 6000, 8000, 11_000]) {
+    const { store, sets } = fakeCookieStore();
+    const session = await getIronSession<BigData>(store, {
+      cookieName: longName,
+      password,
+      chunk: true,
+      cookieOptions,
+    });
+    session.blob = bigBlob(size);
+    await session.save();
+
+    for (const entry of sets) {
+      if (entry.value === "") continue;
+      const header = `${entry.name}=${entry.value}; Max-Age=1209540; Path=/; Domain=app.example.com; HttpOnly; Secure; SameSite=Strict; Priority=High`;
+      const bytes = new TextEncoder().encode(header).length;
+      ok(bytes <= 4096, `size ${size}: ${entry.name} serialized to ${bytes} bytes`);
+    }
+
+    const restored = await getIronSession<BigData>(store, {
+      cookieName: longName,
+      password,
+      chunk: true,
+      cookieOptions,
+    });
+    equal(restored.blob, bigBlob(size), `size ${size} did not round-trip`);
+  }
+});
+
+await test("chunking: should work through Set-Cookie headers, not just a cookie store", async () => {
+  // The header path builds a Cookie request header by hand, so it exercises
+  // parsing and serialization that the cookie-store path skips.
+  const setCookies: string[] = [];
+  const res = {
+    getHeader: () => setCookies,
+    setHeader: (_name: string, value: string[]) => {
+      setCookies.length = 0;
+      setCookies.push(...value);
+    },
+    headersSent: false,
+  };
+
+  const session = await getIronSession<BigData>(
+    nodeCookies({ headers: {} } as IncomingMessage, res as unknown as ServerResponse),
+    { cookieName, password, chunk: true },
+  );
+  session.blob = bigBlob(6000);
+  await session.save();
+
+  ok(setCookies.length >= 2, `expected several Set-Cookie headers, got ${setCookies.length}`);
+
+  // Feed the Set-Cookie values back as a Cookie request header, the way a
+  // browser would on the next request.
+  const cookieHeader = setCookies
+    .map((header) => header.split(";")[0] ?? "")
+    .filter((pair) => !pair.endsWith("="))
+    .join("; ");
+
+  const restored = await getIronSession<BigData>(
+    nodeCookies(
+      { headers: { cookie: cookieHeader } } as IncomingMessage,
+      res as unknown as ServerResponse,
+    ),
+    { cookieName, password, chunk: true },
+  );
+
+  equal(restored.blob, bigBlob(6000));
 });
