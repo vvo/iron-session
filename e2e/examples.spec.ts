@@ -37,6 +37,9 @@ const counter = (page: Page, value: string) =>
 // element, not the role.
 const logout = (page: Page) => page.locator("a", { hasText: /^Logout$/ });
 
+// The Server Action examples submit their logout instead, so it is a button.
+const logoutButton = (page: Page) => page.getByRole("button", { name: "Logout" });
+
 async function sessionCookies(page: Page) {
   const cookies = await page.context().cookies();
   return cookies.filter((cookie) => cookie.name.startsWith(cookiePrefix));
@@ -81,16 +84,27 @@ async function expectProtectedPage(page: Page, url: string) {
   await expect(page.getByText(`Hello ${username}!`)).toBeVisible();
 }
 
-test("home page lists the examples", async ({ page }) => {
+test("home page leads with the App Router examples", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Main Examples:" })).toBeVisible();
+  // The order is the recommendation, so it gets an assertion. "Start here" has
+  // to come first and has to be the two App Router examples.
+  await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "App router + client components, route handlers, and SWR" }),
+    page.getByRole("link", { name: "Server Components and Server Actions", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Pages Router + API routes, getServerSideProps, and SWR" }),
+    page.getByRole("link", { name: "Cache Components and Partial Prerendering" }),
   ).toBeVisible();
+
+  await expect(
+    page.getByRole("heading", { name: "Reading the session from the client" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pages Router" })).toBeVisible();
+
+  const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
+  expect(headings.indexOf("Start here")).toBe(0);
+  expect(headings.indexOf("Start here")).toBeLessThan(headings.indexOf("Pages Router"));
 });
 
 // The two examples the README points at first, so they get the full flow:
@@ -226,4 +240,87 @@ test("magic links: a tampered seal does not log you in", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/app-router-magic-links\/?$/);
   await expect(loginForm(page)).toBeVisible();
+});
+
+/**
+ * The two examples the home page now leads with. Both write the session from a
+ * Server Action rather than a route handler, which is a different code path
+ * from everything above and had no deployed coverage at all.
+ */
+test("server components and actions: login, reload, logout", async ({ page }) => {
+  await page.goto("/app-router-server-component-and-action");
+
+  await loginForm(page).fill(username);
+  await loginButton(page).click();
+  await loggedInAs(page, username);
+
+  await expect.poll(async () => (await sessionCookies(page)).length).toBeGreaterThan(0);
+
+  await page.reload();
+  await loggedInAs(page, username);
+
+  await logoutButton(page).click();
+  await expect(loginForm(page)).toBeVisible();
+  await expect.poll(async () => (await sessionCookies(page)).length).toBe(0);
+});
+
+/**
+ * Cache Components. The page mixes a `use cache` panel, a static shell and a
+ * session read inside <Suspense>, so this asserts the boundary holds on a real
+ * deployment: the cached half must not move when the session changes.
+ */
+test("cache components: the cached panel stays put while the session changes", async ({ page }) => {
+  await page.goto("/app-router-cache-components");
+
+  const cached = page.getByText(/^Cache entry filled at /);
+  await expect(cached).toBeVisible();
+  const before = await cached.textContent();
+
+  await loginForm(page).fill(username);
+  await loginButton(page).click();
+  await loggedInAs(page, username);
+
+  await expect(cached).toHaveText(String(before));
+
+  await page.reload();
+  await loggedInAs(page, username);
+  await expect(cached).toHaveText(String(before));
+
+  await logoutButton(page).click();
+  await expect(loginForm(page)).toBeVisible();
+  await expect.poll(async () => (await sessionCookies(page)).length).toBe(0);
+});
+
+// `useActionState` carries the error back to the form. A rejected login must not
+// create a session.
+test("cache components: a rejected login reports an error and writes nothing", async ({ page }) => {
+  await page.goto("/app-router-cache-components");
+
+  await loginForm(page).fill("A");
+  await loginButton(page).click();
+
+  await expect(page.getByText("Pick a username with at least 2 characters.")).toBeVisible();
+  await expect(loginForm(page)).toBeVisible();
+  expect(await sessionCookies(page)).toHaveLength(0);
+});
+
+// Session rotation from `proxy.ts` has to reach the dynamic hole of a partially
+// prerendered page, not just a fully dynamic one.
+test("cache components: proxy.ts rotation reaches the prerendered page", async ({ page }) => {
+  await page.goto("/app-router-cache-components");
+
+  await loginForm(page).fill(username);
+  await loginButton(page).click();
+  await loggedInAs(page, username);
+
+  const lastSeen = page.getByText(/^Last seen /);
+
+  // proxy.ts runs before the action that creates the session, so the login
+  // request itself has nothing to rotate. The next one is the interesting one.
+  await page.reload();
+  await expect(lastSeen).not.toHaveText(/never/);
+  const first = await lastSeen.textContent();
+
+  await page.reload();
+  await expect(lastSeen).not.toHaveText(String(first));
 });
