@@ -18,7 +18,9 @@ export const sessionOptions: SessionOptions = {
   },
   cookieName: "iron-examples-app-router-oauth",
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    // `secure: true` is the default and stays on in development: `pnpm dev`
+    // serves the examples over real https through portless.
+    secure: true,
   },
 };
 
@@ -37,7 +39,9 @@ export const oauthStateOptions: SessionOptions = {
   cookieName: "iron-examples-app-router-oauth-state",
   ttl: 10 * 60,
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    // `secure: true` is the default and stays on in development: `pnpm dev`
+    // serves the examples over real https through portless.
+    secure: true,
     // Written before a redirect to the provider and read on the way back, so a
     // stricter SameSite would drop it on the return trip in some browsers.
     sameSite: "lax",

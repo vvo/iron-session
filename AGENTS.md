@@ -128,6 +128,23 @@ Two traps in the deployed suite. Both look like flakiness and are not, so don't
 To run the examples app locally, copy `examples/next/.env.example` to
 `examples/next/.env.local` first. Without it every session route throws.
 
+`pnpm dev` serves the examples on **https://iron-session.localhost** through
+[portless](https://portless.sh), which replaces `next dev --experimental-https`
+and the certificates it wanted managed. The first run asks for your password
+once, to trust a local CA and bind port 443; without that it falls back to a
+port-suffixed URL, which still works.
+
+The https is the point, not the nice URL. Our cookies default to `secure: true`,
+and browsers disagree about storing those on an insecure origin: WebKit refuses,
+Chromium and Firefox keep them on localhost. Developing over plain http means
+the session works in Chrome and breaks in Safari, which is
+[#870](https://github.com/vvo/iron-session/issues/870). Over https the examples
+run the same defaults locally that they run in production.
+
+Note `.node-version` pins **24**, because portless needs it. That is the version
+for our own tooling and CI jobs. The library still supports Node 22.13+:
+`engines` says so and the `test-node` matrix covers 22.13.0 explicitly.
+
 ## Conventions
 
 - Commit messages and PR titles follow

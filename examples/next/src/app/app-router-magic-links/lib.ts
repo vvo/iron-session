@@ -15,7 +15,9 @@ export const sessionOptions: SessionOptions = {
   },
   cookieName: "iron-examples-app-router-magic-links",
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    // `secure: true` is the default and stays on in development: `pnpm dev`
+    // serves the examples over real https through portless.
+    secure: true,
   },
 };
 

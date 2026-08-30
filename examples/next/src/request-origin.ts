@@ -13,7 +13,12 @@ import { headers } from "next/headers";
 export async function requestOrigin(): Promise<string> {
   const headerList = await headers();
   const host = headerList.get("host") ?? "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+
+  // portless and Vercel both terminate TLS in front of the app, so trust the
+  // proxy's header before guessing from the host.
+  const forwardedProtocol = headerList.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const isPlainLocalhost = host.startsWith("localhost") || host.startsWith("127.0.0.1");
+  const protocol = forwardedProtocol ?? (isPlainLocalhost ? "http" : "https");
 
   return `${protocol}://${host}`;
 }
