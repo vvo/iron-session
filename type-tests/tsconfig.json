@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // `bundler` is what `next dev` writes into a real app's tsconfig, so this
+    // is the resolution mode our users actually typecheck under.
+    "allowImportingTsExtensions": false,
+    "exactOptionalPropertyTypes": true,
+    "jsx": "preserve",
+    "lib": ["ES2023", "DOM"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "iron-session": ["../dist/index.d.ts"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2023",
+    "types": ["node"]
+  },
+  "include": ["*.ts"]
+}
