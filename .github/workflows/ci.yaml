@@ -112,14 +112,43 @@ jobs:
         # use what pnpm already installed instead of resolving npm itself.
         run: deno test --no-check --sloppy-imports --allow-read --allow-env --node-modules-dir=manual src/index.test.ts
 
+  # Browser-level tests against a real Next.js 16 app. Several open issues were
+  # about cookies not reaching or leaving the browser, which unit tests cannot
+  # see: #870 (Safari), #910 (destroy in a Server Action), #684 (a cookie set
+  # after save), #887 and #709 (rotation in middleware).
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: ".node-version"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Build the library
+        run: pnpm build
+      - name: Install browsers
+        run: pnpm playwright install --with-deps chromium firefox webkit
+      - name: Build the fixture app
+        run: pnpm --filter=e2e-fixture build
+      - name: Run Playwright
+        run: pnpm playwright test
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   # `main` requires a check literally named "test". The single job that used to
-  # provide it is now a quality job plus a runtime matrix, so this aggregates
-  # them: it fails if any one of them failed or was skipped. Without it the
-  # required check never reports and nothing can merge.
+  # provide it is now a quality job plus a runtime matrix plus the browser
+  # suite, so this aggregates them: it fails if any one of them failed or was
+  # skipped. Without it the required check never reports and nothing can merge.
   test:
     runs-on: ubuntu-latest
     if: ${{ always() }}
-    needs: [quality, test-node, test-bun, test-deno]
+    needs: [quality, test-node, test-bun, test-deno, e2e]
     steps:
       - name: Check the results
         run: |
@@ -127,7 +156,9 @@ jobs:
           echo "test-node: ${{ needs.test-node.result }}"
           echo "test-bun:  ${{ needs.test-bun.result }}"
           echo "test-deno: ${{ needs.test-deno.result }}"
+          echo "e2e:       ${{ needs.e2e.result }}"
           [ "${{ needs.quality.result }}" = "success" ] \
             && [ "${{ needs.test-node.result }}" = "success" ] \
             && [ "${{ needs.test-bun.result }}" = "success" ] \
-            && [ "${{ needs.test-deno.result }}" = "success" ]
+            && [ "${{ needs.test-deno.result }}" = "success" ] \
+            && [ "${{ needs.e2e.result }}" = "success" ]

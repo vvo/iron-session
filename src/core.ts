@@ -768,8 +768,16 @@ function writeSeal(jar: CookieJar, config: SessionConfig, seal: string): void {
   }
 
   if (!config.chunk) {
+    // If the session we just read was itself chunked, the problem is almost
+    // certainly a second options object somewhere without `chunk` set, rather
+    // than a session that suddenly grew. Say so: otherwise this reads as "it
+    // works in my route handler but not in my middleware".
+    const wasChunked = Boolean(jar.read(chunkName(cookieName, 0)));
+
     throw new Error(
-      `iron-session: Cookie length is too big (${wholeBytes} bytes), browsers will refuse it. Remove some data from the session, or set \`chunk: true\` to split it across several cookies.`,
+      wasChunked
+        ? `iron-session: Cookie length is too big (${wholeBytes} bytes) and \`chunk\` is not enabled here, but this session is already stored across several cookies. You have more than one options object and only some of them set \`chunk: true\`. Use the same options everywhere you call getIronSession, including middleware.`
+        : `iron-session: Cookie length is too big (${wholeBytes} bytes), browsers will refuse it. Remove some data from the session, or set \`chunk: true\` to split it across several cookies.`,
     );
   }
 

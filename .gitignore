@@ -9,3 +9,10 @@ coverage*
 
 # local env
 .env.local
+
+# playwright
+/playwright-report/
+/test-results/
+/blob-report/
+/e2e/fixture/.next/
+/e2e/fixture/next-env.d.ts
