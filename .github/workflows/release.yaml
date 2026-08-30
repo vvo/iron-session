@@ -91,22 +91,28 @@ jobs:
         run: pnpm publish --tag ${{ inputs.tag }} --provenance --no-git-checks --access public
 
       # The failure we care about is publishing without provenance, which looks
-      # exactly like a success. Ask the registry what it actually stored. Note
-      # `npm view` exits 0 with empty output for a missing field, so test the
-      # output rather than the exit code.
+      # exactly like a success. Ask the registry what it actually stored.
+      #
+      # A new version takes a while to show up in the packument: on 9.0.1 it was
+      # 80s, so poll for 5 minutes. Query registry.npmjs.org directly rather than
+      # via `npm view`, which reads whatever registry is configured and caches.
       - name: Verify the published version has provenance
         if: ${{ !inputs.dry-run }}
         run: |
           version=$(node -p "require('./package.json').version")
-          for _ in 1 2 3 4 5; do
-            url=$(npm view "iron-session@$version" dist.attestations.url 2>/dev/null || true)
+          for i in $(seq 1 30); do
+            url=$(curl -sf -H 'Cache-Control: no-cache' \
+              "https://registry.npmjs.org/iron-session/$version" \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).dist?.attestations?.url??"")}catch{}})' \
+              || true)
             if [ -n "$url" ]; then
               echo "::notice::iron-session@$version published with provenance: $url"
               exit 0
             fi
-            sleep 5
+            echo "attempt $i: no attestation yet, waiting"
+            sleep 10
           done
-          echo "::error::iron-session@$version has no provenance attestation. Trusted publishing did not run."
+          echo "::error::iron-session@$version has no provenance attestation after 5 minutes. Check the trusted publisher config on npmjs.com."
           exit 1
 
       - name: Pack only (dry run)

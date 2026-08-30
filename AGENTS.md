@@ -13,7 +13,8 @@ Publishing locally is possible, and that is the problem. It skips the checks the
 workflow runs, and it produces a tarball with no provenance attestation, which
 cannot be fixed after the fact: npm versions are immutable. `9.0.0`,
 `9.0.0-beta.0` and `9.0.0-beta.1` all went out this way and none of them can be
-verified against a commit.
+verified against a commit. `9.0.1` was the first release published from CI, and
+its attestation resolves to commit `a0bd646`.
 
 ### How the workflow authenticates
 
@@ -66,6 +67,9 @@ workflow checks the registry afterwards rather than trusting the exit code.
    a `-` in the version, `latest` only for a stable release. The workflow refuses
    `latest` for a prerelease.
 4. Confirm the run's "Verify the published version has provenance" step passed.
+   A new version can take a couple of minutes to appear on npm, so the step
+   polls for 5 minutes. `pnpm publish` printing `✅ Published` is not proof: on
+   `9.0.1` the version was invisible on the registry for 80 seconds after that.
 5. Tag it and create the GitHub release. Use `--prerelease` for betas.
 
 ```sh
