@@ -2,15 +2,19 @@
 
 ## v8 to v9
 
+```sh
+pnpm add iron-session
+```
+
 Most apps need two changes: Node 22 and one line if you store a `Date` in the
 session. Everything else below is either a type error TypeScript will point at,
 or a bug fix you want.
 
 ### Requirements
 
-- **Node 22.12 or later.** Node 20 reached end of life in April 2026.
+- **Node 22.13 or later.** Node 20 reached end of life in April 2026.
 - **The package is ESM-only.** There is no CommonJS build. `require()` still
-  works on Node 22.12+, which supports `require()` of an ES module, so most CJS
+  works on Node 22.13+, which supports `require()` of an ES module, so most CJS
   code keeps working. If you are bundling for an older target, keep v8.
 
 ### Do this

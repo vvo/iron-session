@@ -1,13 +1,37 @@
 
 ## [9.0.0](https://github.com/vvo/iron-session/compare/v8.0.4...v9.0.0)
 
-See [MIGRATION.md](./MIGRATION.md). Most apps need two changes: Node 22, and one
-line if they store a `Date` in the session.
+### Install
+
+```sh
+pnpm add iron-session
+pnpm add iron-session@8   # if you are still on Node 20 or need CommonJS
+```
+
+### How to upgrade
+
+Requires Node 22.13+, and the package is ESM-only (`require()` works on Node
+22.13+). Two code changes cover most apps:
+
+```diff
+- session.lastSeen = new Date();   // v8 sealed it as a string
++ session.lastSeen = Date.now();
+
+- const userId = session.user.id;  // empty on a first visit
++ const userId = session.user?.id;
+```
+
+Nothing else is required. `getIronSession(req, res, options)` and
+`getIronSession(await cookies(), options)` both still work, and v9 reads v8
+cookies while v8 reads v9 cookies, so a deploy rolls back without signing
+everyone out. Delete any `as any` you had on `await cookies()`.
+
+Full guide, including removed APIs: [MIGRATION.md](./MIGRATION.md).
 
 ### ⚠ BREAKING CHANGES
 
-* **Node 22.12 or later is required.** Node 20 reached end of life in April 2026.
-* **The package is ESM-only.** `require()` still works on Node 22.12+, which
+* **Node 22.13 or later is required.** Node 20 reached end of life in April 2026.
+* **The package is ESM-only.** `require()` still works on Node 22.13+, which
   supports `require()` of an ES module.
 * **`Date` values can no longer be stored in a session.** v8 turned them into an
   ISO string when sealing and returned a string when reading, so the type you
