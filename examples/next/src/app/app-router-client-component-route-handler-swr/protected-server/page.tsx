@@ -7,12 +7,11 @@ import { redirect } from "next/navigation";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "../lib";
 import Link from "next/link";
+import { SessionSkeleton } from "@/app/session-skeleton";
 
-// Broken: None of these parameters is working, thus we have caching issues
-// TODO fix this
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
+// No route segment config here on purpose. `cacheComponents` is on, so the
+// shell below prerenders and the session read inside <Suspense> runs per
+// request. That is what `force-dynamic` and `revalidate = 0` were reaching for.
 async function getSession() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
@@ -22,8 +21,8 @@ async function getSession() {
 export default function ProtectedServer() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="Protected page" />
-      <Suspense fallback={<p className="text-lg">Loading...</p>}>
+      <Title subtitle="Protected page" category="Checked in a Server Component" />
+      <Suspense fallback={<SessionSkeleton />}>
         <Content />
       </Suspense>
       <p>

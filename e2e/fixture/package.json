@@ -13,7 +13,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3"
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5"
   }
 }

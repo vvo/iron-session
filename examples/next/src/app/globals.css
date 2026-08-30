@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
 
 body {
   @apply bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white;

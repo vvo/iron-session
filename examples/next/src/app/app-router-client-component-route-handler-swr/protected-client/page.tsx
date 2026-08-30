@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function ProtectedClient() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="Protected page" />
+      <Title subtitle="Protected page" category="Checked in a Client Component" />
       <Content />
       <p>
         <Link href="/app-router-client-component-route-handler-swr" className={css.link}>

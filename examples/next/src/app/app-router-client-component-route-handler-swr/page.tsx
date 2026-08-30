@@ -13,16 +13,7 @@ export const metadata: Metadata = {
 export default function AppRouterSWR() {
   return (
     <main className="p-10 space-y-5">
-      <Title
-        subtitle={
-          <>
-            + client components, route handlers, and{" "}
-            <a className={css.link} href="https://swr.vercel.app" target="_blank">
-              SWR
-            </a>
-          </>
-        }
-      />
+      <Title subtitle="Route Handlers and SWR" category="App Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in action. Bonus: open

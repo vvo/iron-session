@@ -7,11 +7,6 @@ export interface SessionData {
   isLoggedIn: boolean;
 }
 
-export const defaultSession: SessionData = {
-  username: "",
-  isLoggedIn: false,
-};
-
 export const sessionOptions: SessionOptions = {
   // A getter, so the value is read per request: `next build` collects page
   // data without needing the secret, and a request without it still throws.
@@ -20,9 +15,13 @@ export const sessionOptions: SessionOptions = {
   },
   cookieName: "iron-examples-app-router-magic-links",
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    // `secure: true` is the default and stays on in development: `pnpm dev`
+    // serves the examples over real https through portless.
+    secure: true,
   },
 };
+
+export const basePath = "/app-router-magic-links";
 
 export const fifteenMinutesInSeconds = 15 * 60;
 
@@ -40,7 +39,3 @@ export const magicLinkTokenOptions = {
   },
   ttl: fifteenMinutesInSeconds,
 };
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

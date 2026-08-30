@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function AppRouterRedirect() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="+ client components, route handlers, redirects, and fetch" />
+      <Title subtitle="Route Handlers and redirects" category="App Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in action.

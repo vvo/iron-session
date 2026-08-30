@@ -26,4 +26,6 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   return response;
 }
 
-export const config = { matcher: ["/", "/other"] };
+// `/cache` is partially prerendered, so it also covers rotation reaching a
+// dynamic hole rather than a fully dynamic page.
+export const config = { matcher: ["/", "/other", "/cache"] };

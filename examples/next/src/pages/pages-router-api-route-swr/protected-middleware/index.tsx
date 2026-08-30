@@ -15,7 +15,7 @@ export default function ProtectedServer({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="Protected page" />
+      <Title subtitle="Protected page" category="Redirected in proxy.ts" />
       <Content session={session} />
       <p>
         <Link href="/pages-router-api-route-swr" className={css.link}>

@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import * as css from "@/app/css";
 import { Title } from "../title";
 import { GetTheCode } from "../../get-the-code";
+import { SessionSkeleton } from "../session-skeleton";
 
 export const metadata: Metadata = {
   title: "🛠 iron-session examples: Server components, and server actions",
@@ -14,17 +15,26 @@ export const metadata: Metadata = {
 export default async function AppRouter() {
   return (
     <main className="p-10 space-y-5">
-      <Title subtitle="+ server components, and server actions" />
+      <Title subtitle="Server Components and Server Actions" category="App Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in action.
       </p>
 
       <div className="grid grid-cols-1 gap-4 p-10 border border-slate-500 rounded-md max-w-xl">
-        <Suspense fallback={<p className="text-lg">Loading...</p>}>
+        <Suspense fallback={<SessionSkeleton />}>
           <Form />
         </Suspense>
       </div>
+
+      <p className="max-w-xl">
+        <Link href="/app-router-server-component-and-action/protected" className={css.link}>
+          Protected page →
+        </Link>{" "}
+        <span className={css.sectionHint}>
+          redirects back here unless you are logged in, checked in the Data Access Layer.
+        </span>
+      </p>
 
       <GetTheCode path="app/app-router-server-component-and-action" />
       <HowItWorks />

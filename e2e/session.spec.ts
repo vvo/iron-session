@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContext } from "@playwright/test";
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
 const cookieName = "e2e-session";
 const chunkedCookieName = "e2e-chunked";
@@ -14,6 +14,13 @@ const chunkCookies = (context: BrowserContext) => cookiesNamed(context, chunkedC
 /** The cookie jar can lag the rendered response slightly, so poll it. */
 function expectCookieCount(context: BrowserContext, name: string) {
   return expect.poll(async () => (await cookiesNamed(context, name)).length);
+}
+
+/** Rendered text of a testid, asserted present so callers get a plain string. */
+async function textOf(page: Page, testId: string): Promise<string> {
+  const value = await page.getByTestId(testId).textContent();
+  expect(value).not.toBeNull();
+  return value ?? "";
 }
 
 test("login sets a session cookie with safe attributes", async ({ page, context }) => {
@@ -162,25 +169,128 @@ test("shrinking a chunked session cleans up its old chunks", async ({ page, cont
  * #870: "cookie not being saved with Next.js 15 and Safari".
  *
  * The library default is `secure: true` and this fixture is served over plain
- * http. Every engine we test refuses to store that cookie, including Chromium,
- * so the "Safari" framing in the issue was a red herring: the header we send is
- * correct and complete, and the browser is doing what the spec says.
+ * http. The engines disagree about that, and the disagreement is the point:
+ * WebKit refuses the cookie, Chromium and Firefox keep it because they treat
+ * localhost as a trustworthy origin even on http.
  *
- * The fix is `cookieOptions: { secure: false }` in local development, or serving
- * over https (`next dev --experimental-https`).
+ * So the report was right to name Safari. Anyone developing on Chrome sees
+ * their session work locally and then breaks for Safari users, which is why
+ * this runs on all three engines.
+ *
+ * The fix either way is `cookieOptions: { secure: false }` in local
+ * development, or serving over https (`next dev --experimental-https`).
  */
-test("a Secure cookie is dropped over plain http, in every browser", async ({ page, context }) => {
+test("a Secure cookie over plain http is kept or dropped depending on the engine", async ({
+  page,
+  context,
+  browserName,
+}) => {
   await page.goto("/");
+
+  // Wait for the action to answer before looking at the jar. Sampling early
+  // reads zero cookies for the boring reason that none have arrived yet, which
+  // is a pass for the wrong reason.
+  const saved = page.waitForResponse(
+    (response) => response.request().method() === "POST" && response.status() < 400,
+  );
   await page.getByTestId("login-secure").click();
+  await saved;
 
-  // The response carries a well-formed `Secure` cookie, verified separately with
-  // curl, and no browser keeps it on an insecure origin.
-  await expectCookieCount(context, "e2e-secure").toBe(0);
-  await expect(page.getByTestId("secure-username")).toHaveText("anonymous");
+  const keepsSecureCookieOnLocalhost = browserName !== "webkit";
 
-  // The non-secure session still works on the same page, which rules out the
-  // fixture or the action being broken.
+  await expectCookieCount(context, "e2e-secure").toBe(keepsSecureCookieOnLocalhost ? 1 : 0);
+
+  // WebKit never got the cookie, so it cannot send it back and the session
+  // stays anonymous on the next request.
+  if (!keepsSecureCookieOnLocalhost) {
+    await page.reload();
+    await expect(page.getByTestId("secure-username")).toHaveText("anonymous");
+  }
+
+  // The non-secure session works on the same page in every engine, which rules
+  // out the fixture or the action being broken.
   await page.getByTestId("login").click();
   await expect(page.getByTestId("username")).toHaveText("alison");
+  await expectCookieCount(context, cookieName).toBe(1);
+});
+
+/**
+ * Cache Components, the Next 16 default shape. `/cache` is one page with a
+ * `use cache` component and a session read in a <Suspense> boundary.
+ *
+ * The cached panel must never move, and the session panel must be per visitor.
+ * A session leaking into the cached half would be the worst bug this library
+ * could have, so it gets an assertion rather than a comment.
+ */
+test("a cached component stays frozen while the session stays per request", async ({ page }) => {
+  await page.goto("/cache");
+
+  const cachedAt = await textOf(page, "cached-at");
+
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+
+  // The session changed, the cache entry did not.
+  await expect(page.getByTestId("cached-at")).toHaveText(cachedAt);
+
+  await page.reload();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  await expect(page.getByTestId("cached-at")).toHaveText(cachedAt);
+});
+
+test("a second visitor sees the same cached half and no session", async ({ page, browser }) => {
+  await page.goto("/cache");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  const cachedAt = await textOf(page, "cached-at");
+
+  // A fresh context is a different browser with an empty cookie jar.
+  const other = await browser.newContext();
+  const otherPage = await other.newPage();
+  await otherPage.goto("/cache");
+
+  await expect(otherPage.getByTestId("cached-at")).toHaveText(cachedAt);
+  await expect(otherPage.getByTestId("username")).toHaveText("anonymous");
+
+  await other.close();
+});
+
+// #887, #709, #938 again, on a partially prerendered page: proxy.ts writes the
+// session and the dynamic hole rendering the same request has to read it.
+test("proxy rotation reaches a dynamic hole in a prerendered page", async ({ page }) => {
+  await page.goto("/cache");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+
+  await page.reload();
+  const first = await textOf(page, "last-seen");
+  expect(first).not.toBe("never");
+
+  await page.waitForTimeout(5);
+  await page.reload();
+  const second = await textOf(page, "last-seen");
+  expect(Number(second)).toBeGreaterThan(Number(first));
+});
+
+// A rejected login has to come back as state, not an exception, and must not
+// write a cookie.
+test("useActionState surfaces a validation error without touching the session", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/cache");
+
+  await page.getByTestId("cache-username-input").fill("a");
+  await page.getByTestId("cache-login").click();
+
+  await expect(page.getByTestId("cache-login-error")).toHaveText("too short");
+  await expect(page.getByTestId("username")).toHaveText("anonymous");
+  await expectCookieCount(context, cookieName).toBe(0);
+
+  // And the same form still works once the input is valid.
+  await page.getByTestId("cache-username-input").fill("alison");
+  await page.getByTestId("cache-login").click();
+  await expect(page.getByTestId("username")).toHaveText("alison");
+  await expect(page.getByTestId("cache-login-error")).toHaveText("");
   await expectCookieCount(context, cookieName).toBe(1);
 });

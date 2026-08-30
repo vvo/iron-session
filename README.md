@@ -2,6 +2,11 @@
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
 
+> [!IMPORTANT]
+> **Coming from v8?** Read [Upgrading to v9](#upgrading-to-v9) for the two changes
+> most apps need, or [MIGRATION.md](./MIGRATION.md) for the full guide. v9 needs
+> Node 22.13+ and is ESM-only.
+
 ---
 
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
@@ -169,7 +174,31 @@ header there looks like it works and then has no effect.
 
 ## Examples
 
-We have many different patterns and examples on the online demo, have a look: https://get-iron-session.vercel.app/.
+Runnable examples for every pattern: https://get-iron-session.vercel.app/. Two
+of them are where to start, and they follow the
+[Next.js authentication guide](https://nextjs.org/docs/app/guides/authentication):
+
+- [Server Components and Server Actions](https://get-iron-session.vercel.app/app-router-server-component-and-action)
+  ([source](./examples/next/src/app/app-router-server-component-and-action)).
+  A form posts to a Server Action, the action writes the session, the page reads
+  it on the server. This is the default.
+- [Cache Components and Partial Prerendering](https://get-iron-session.vercel.app/app-router-cache-components)
+  ([source](./examples/next/src/app/app-router-cache-components)), for Next.js
+  16 with `cacheComponents` on. Also covers `useActionState` for form errors and
+  session rotation in `proxy.ts`.
+
+Three rules once `cacheComponents` is on:
+
+- A session read is dynamic, because it reads a cookie. Put it inside a
+  `<Suspense>` boundary and the rest of the page still prerenders.
+- Never read a session inside `use cache`. Runtime APIs are rejected there, and
+  whatever it renders is shared between visitors.
+- `export const dynamic = "force-dynamic"` is no longer allowed, and no longer
+  needed. The `<Suspense>` boundary is what marks the dynamic part.
+
+The session belongs next to the data it protects: read it in the Server
+Component, Server Action or Route Handler that needs it. A layout does not
+protect the pages under it, and neither does a redirect in `proxy.ts`.
 
 ## Runtimes
 

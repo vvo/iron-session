@@ -11,7 +11,7 @@ export default function PagesRouterRedirect() {
       <Head>
         <title>🛠 iron-session examples: Pages Router, API routes, redirects and fetch</title>
       </Head>
-      <Title category="Pages Router" subtitle="+ API routes, redirects, and fetch" />
+      <Title subtitle="API Routes and redirects" category="Pages Router" />
 
       <p className="italic max-w-xl">
         <u>How to test</u>: Login and refresh the page to see iron-session in action.
