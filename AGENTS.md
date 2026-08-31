@@ -141,6 +141,18 @@ the session works in Chrome and breaks in Safari, which is
 [#870](https://github.com/vvo/iron-session/issues/870). Over https the examples
 run the same defaults locally that they run in production.
 
+Because portless terminates TLS in front of Next, an absolute redirect built
+from `request.nextUrl.origin` or `new URL(request.url).origin` points at the
+port Next is listening on, `https://localhost:<dev port>`, which speaks plain
+http. The browser gets `ERR_SSL_PROTOCOL_ERROR` and the flow dies. Route
+handlers redirect with `seeOther()` from `examples/next/src/see-other.ts`, which
+sends a relative `Location` the browser resolves against the URL it asked for,
+correct behind the proxy and on Vercel both. The magic-link and OAuth callback
+routes were still building absolute URLs, so those two examples were broken
+under `pnpm dev` while every other one worked. Anything needing a real absolute
+URL, a magic link or an OAuth `redirect_uri`, uses `requestOrigin()`, which
+reads `host` and `x-forwarded-proto` off the request.
+
 Note `.node-version` pins **24**, because portless needs it. That is the version
 for our own tooling and CI jobs. The library still supports Node 22.13+:
 `engines` says so and the `test-node` matrix covers 22.13.0 explicitly.

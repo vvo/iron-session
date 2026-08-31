@@ -4,6 +4,7 @@ import { getIronSession } from "iron-session";
 import { defaultSession, sessionOptions } from "../lib";
 import { redirect } from "next/navigation";
 import { sleep, SessionData } from "../lib";
+import { seeOther } from "../../../see-other";
 
 // /app-router-client-component-redirect-route-handler-fetch/session
 export async function POST(request: NextRequest) {
@@ -19,11 +20,7 @@ export async function POST(request: NextRequest) {
   await sleep(250);
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
-  // not using redirect() yet: https://github.com/vercel/next.js/issues/51592#issuecomment-1810212676
-  return Response.redirect(
-    `${request.nextUrl.origin}/app-router-client-component-redirect-route-handler-fetch`,
-    303,
-  );
+  return seeOther("/app-router-client-component-redirect-route-handler-fetch");
 }
 
 // /app-router-client-component-redirect-route-handler-fetch/session

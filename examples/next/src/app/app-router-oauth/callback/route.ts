@@ -2,6 +2,7 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
+import { seeOther } from "../../../see-other";
 import {
   basePath,
   oauthStateOptions,
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   stateCookie.destroy();
 
   if (!code || !returnedState || !expectedState || returnedState !== expectedState) {
-    return Response.redirect(`${url.origin}${basePath}?error=state`, 303);
+    return seeOther(`${basePath}?error=state`);
   }
 
   // A real provider gets called here to exchange the code for an access token,
@@ -39,5 +40,5 @@ export async function GET(request: NextRequest): Promise<Response> {
   session.isLoggedIn = true;
   await session.save();
 
-  return Response.redirect(`${url.origin}${basePath}`, 303);
+  return seeOther(basePath);
 }
