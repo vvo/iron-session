@@ -97,6 +97,12 @@ against `e2e/fixture`, a minimal Next app on localhost:3210. Playwright starts
 it. WebKit is not optional: #870 is a Safari cookie report, so we need a real
 assertion there rather than another theory.
 
+Playwright builds the fixture before starting it, because `next start` serves
+whatever is already in `.next`. Without that build step a stale `.next` silently
+tests the previous commit: adding the `/cache` route left 12 local failures
+pointing at missing test ids, while CI stayed green because it builds the fixture
+in its own step.
+
 `pnpm test:e2e:deployed` runs `e2e/examples.spec.ts` against a URL you give it.
 It needs `BASE_URL`, and a preview URL also needs the project's Protection
 Bypass for Automation secret, because previews are behind Vercel

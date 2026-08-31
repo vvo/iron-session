@@ -21,7 +21,11 @@ export default defineConfig({
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
-    command: "pnpm --filter=e2e-fixture start",
+    // Build before starting. `next start` serves whatever is in `.next`, so
+    // without this a stale build silently tests the previous commit's fixture:
+    // adding a route made 12 tests fail locally while CI, which builds in its
+    // own step, was green.
+    command: "pnpm --filter=e2e-fixture build && pnpm --filter=e2e-fixture start",
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env["CI"],
     env: { PORT: String(port) },
