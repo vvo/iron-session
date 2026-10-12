@@ -97,9 +97,9 @@ importers:
 
   examples/next:
     dependencies:
-      fathom-client:
-        specifier: 3.7.2
-        version: 3.7.2
+      '@vercel/analytics':
+        specifier: 2.0.1
+        version: 2.0.1(next@16.3.3(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       iron-session:
         specifier: workspace:*
         version: link:../..
@@ -1201,6 +1201,35 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@vercel/analytics@2.0.1':
+    resolution: {integrity: sha512-MTQG6V9qQrt1tsDeF+2Uoo5aPjqbVPys1xvnIftXSJYG2SrwXRHnqEvVoYID7BTruDz4lCd2Z7rM1BdkUehk2g==}
+    peerDependencies:
+      '@remix-run/react': ^2
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
+
   '@yuku-codegen/binding-android-arm64@0.8.7':
     resolution: {integrity: sha512-C/0zV5IhgVdYhGJTwrY0v8dknxlhiKwtVJkMUaexu9/QvRmzlV4vfU3hZlUSgqc2BxQHntL1mCVbDq8j0FRFDw==}
     cpu: [arm64]
@@ -1485,9 +1514,6 @@ packages:
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
-
-  fathom-client@3.7.2:
-    resolution: {integrity: sha512-sWtaNivhg7uwp/q1bUuIiNj4LeQZMEZ5NXXFFpZ8le4uDedAfQG84gPOdYehtVXbl+1yX2s8lmXZ2+IQ9a/xxA==}
 
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
@@ -2699,6 +2725,11 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
+  '@vercel/analytics@2.0.1(next@16.3.3(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+    optionalDependencies:
+      next: 16.3.3(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+
   '@yuku-codegen/binding-android-arm64@0.8.7':
     optional: true
 
@@ -2913,8 +2944,6 @@ snapshots:
       '@esbuild/win32-x64': 0.28.2
 
   escalade@3.2.0: {}
-
-  fathom-client@3.7.2: {}
 
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
