@@ -7,6 +7,15 @@
 > most apps need, or [MIGRATION.md](./MIGRATION.md) for the full guide. v9 needs
 > Node 22.13+ and is ESM-only.
 
+<p align="center">
+  <a href="https://turnshift.app/?utm_source=github&utm_medium=sponsor&utm_campaign=iron-session">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./sponsor/turnshift-dark.png">
+      <img width="880" alt="Sponsored by TurnShift, the team calendar in Slack. Try it free for 14 days." src="./sponsor/turnshift-light.png">
+    </picture>
+  </a>
+</p>
+
 ---
 
 The session data is stored in signed and encrypted cookies which are decoded by your server code in a stateless fashion (= no network involved). This is the same technique used by frameworks like
