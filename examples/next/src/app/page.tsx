@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import * as css from "@/app/css";
 
 import { ExampleGrid, type Example } from "./example-card";
+import { SponsorBanner } from "./sponsor";
 
 export const metadata: Metadata = {
   title: "🛠 iron-session examples",
@@ -83,6 +84,8 @@ export default function Home() {
     <main className="p-10 space-y-12">
       <Hero />
 
+      <SponsorBanner />
+
       <Section
         title="Start here"
         hint="App Router, the shape the Next.js authentication guide describes."
@@ -119,6 +122,26 @@ function Hero() {
         The session lives in a signed and encrypted cookie, so there is no session store to run and
         no lookup on the way in. Reading it is a decrypt, which is why these pages render on the
         server with no loading state.
+      </p>
+
+      <p className="text-slate-700 dark:text-slate-300">
+        ⭐️ Featured in the{" "}
+        <a
+          href="https://nextjs.org/docs/app/guides/authentication"
+          target="_blank"
+          className={css.link}
+        >
+          Next.js
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://tanstack.com/start/latest/docs/framework/react/guide/authentication"
+          target="_blank"
+          className={css.link}
+        >
+          TanStack Start
+        </a>{" "}
+        authentication guides.
       </p>
 
       <p className={css.sectionHint}>

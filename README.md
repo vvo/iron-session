@@ -22,7 +22,7 @@ The session data is stored in signed and encrypted cookies which are decoded by 
 [Ruby On Rails](https://guides.rubyonrails.org/security.html#session-storage).
 
 <p align="center"><i>Online demo and examples: <a href="https://get-iron-session.vercel.app/">https://get-iron-session.vercel.app</a></i> 👀 <br/>
- <i>Featured in the <a href="https://nextjs.org/docs/app/guides/authentication">Next.js documentation</a></i> ⭐️</p>
+ <i>Featured in the <a href="https://nextjs.org/docs/app/guides/authentication">Next.js</a> and <a href="https://tanstack.com/start/latest/docs/framework/react/guide/authentication">TanStack Start</a> authentication guides</i> ⭐️</p>
 
 ## Table of Contents
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import * as css from "@/app/css";
 import GitHubLogo from "./GitHubLogo";
+import { SponsorLink } from "./sponsor";
 
 /**
  * The same header on every page, home included.
@@ -20,6 +21,7 @@ export function SiteHeader() {
       </Link>
 
       <nav className="flex items-center gap-4 text-sm">
+        <SponsorLink />
         <a href="https://www.npmjs.com/package/iron-session" target="_blank" className={css.link}>
           npm
         </a>
