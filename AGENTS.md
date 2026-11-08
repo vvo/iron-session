@@ -28,49 +28,56 @@ but pnpm is not running in an interactive terminal
 
 Rotating the token does not help. No token type bypasses 2FA anymore.
 
-Instead the workflow uses npm **trusted publishing**: `permissions: id-token:
-write` lets pnpm exchange a GitHub OIDC token for a short-lived publish
-credential, and npm attaches the provenance statement itself. This is configured
-on npmjs.com, under the `iron-session` package → Settings → Trusted Publisher:
+Instead the workflow uses npm **trusted publishing** with **staged
+publishing**: the `stage` job's `permissions: id-token: write` lets npm
+exchange a GitHub OIDC token for a short-lived credential that can only run
+`npm stage publish`. A staged version is not public. It goes live once Vincent
+approves it with 2FA on npmjs.com. This is configured on npmjs.com, under the
+`iron-session` package → Settings → Trusted Publisher:
 
 - Publisher: GitHub Actions
 - Repository: `vvo/iron-session`
 - Workflow: `release.yaml`
 - Environment: `release`
+- Allowed: `npm stage publish` only
 
-If that entry is missing or its workflow filename does not match, publish fails
-with a bare `404 Not Found - PUT https://registry.npmjs.org/iron-session`. npm
-masks OIDC failures as 404s, so a 404 on publish means "check the trusted
-publisher config", not "the package does not exist".
+`pnpm publish` and `npm publish` are rejected by that config. If the entry is
+missing or its workflow filename does not match, staging fails with a bare
+`404` or `ENEEDAUTH`. npm masks OIDC failures, so either error means "check the
+trusted publisher config", not "the package does not exist".
 
-### Two ways to silently lose provenance
+### The job that can stage installs nothing
 
-Both of these publish successfully and produce an unverifiable tarball, so the
-workflow checks the registry afterwards rather than trusting the exit code.
+The workflow has two jobs. `build` has no `id-token` permission: it installs
+dependencies with `--ignore-scripts`, runs every check and packs the tarball
+with `pnpm pack`. `stage` holds `id-token: write` and only runs Node and npm on
+that tarball. Never add a `pnpm install` or `npm install` of project
+dependencies to `stage`: a compromised dev dependency would get a token that
+can stage a release.
 
-1. **Do not add `registry-url` to `actions/setup-node`.** It writes an
-   `_authToken` line into `.npmrc`, and a statically configured token used to
-   make `pnpm publish` skip the OIDC exchange entirely
-   ([pnpm/pnpm#11495](https://github.com/pnpm/pnpm/pull/11495)). Fixed in recent
-   pnpm, but there is no reason to have the line at all.
-2. **Do not route publishing through `changeset publish` or a spawned
-   `npm publish`.** Under pnpm 11 that path did not reach npm's OIDC flow
-   ([pnpm/pnpm#11566](https://github.com/pnpm/pnpm/issues/11566)). Call
-   `pnpm publish` directly.
+`build` must not set `registry-url` on `actions/setup-node`. It writes an
+`_authToken` line into `.npmrc`, which used to make `pnpm publish` skip the
+OIDC exchange and publish without provenance
+([pnpm/pnpm#11495](https://github.com/pnpm/pnpm/pull/11495)). `stage` does set
+it, because it runs npm, not pnpm, and `NODE_AUTH_TOKEN` stays unset there so
+OIDC wins.
 
 ### Release checklist
 
 1. Bump `version` in `package.json` and update `CHANGELOG.md` on a PR, merge it.
 2. Dispatch `Release` with `dry-run: true` first. It runs every check and packs
-   the tarball without publishing.
+   the tarball without staging.
 3. Dispatch `Release` for real with the right dist-tag. `beta` for anything with
    a `-` in the version, `latest` only for a stable release. The workflow refuses
    `latest` for a prerelease.
-4. Confirm the run's "Verify the published version has provenance" step passed.
-   A new version can take a couple of minutes to appear on npm, so the step
-   polls for 5 minutes. `pnpm publish` printing `✅ Published` is not proof: on
-   `9.0.1` the version was invisible on the registry for 80 seconds after that.
-5. Tag it and create the GitHub release. Use `--prerelease` for betas.
+4. Approve the staged version with 2FA: on
+   https://www.npmjs.com/package/iron-session (Staged Packages tab), or with
+   `npm stage list iron-session` then `npm stage approve <id>`. Nothing is public
+   before this.
+5. Check it went out with provenance:
+   `npm view iron-session@X.Y.Z dist.attestations.url` must print a URL. A new
+   version can take a couple of minutes to show up on the registry.
+6. Tag it and create the GitHub release. Use `--prerelease` for betas.
 
 ```sh
 git tag -a vX.Y.Z -m vX.Y.Z
@@ -78,7 +85,8 @@ git push origin vX.Y.Z
 gh release create vX.Y.Z --generate-notes
 ```
 
-If a release is half-done (published but untagged, or tagged but unpublished),
+If a release is half-done (staged but not approved, published but untagged, or
+tagged but unpublished),
 say so rather than papering over it. Check the real state with
 `npm view iron-session dist-tags` and `git ls-remote --tags origin`.
 
