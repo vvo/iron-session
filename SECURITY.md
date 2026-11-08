@@ -82,8 +82,9 @@ A burst of `"invalid"` can mean someone is probing your cookies. A burst of
 
 ## Supply chain
 
-Releases are published from CI with
+Releases are staged from CI with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements), so you
-can verify a tarball was built from this repository. CI workflows pin actions by
+can verify a tarball was built from this repository, and a version goes live
+only after the maintainer approves it with 2FA on npmjs.com. CI workflows pin actions by
 commit SHA and run with read-only permissions. Dependency updates are never
 merged automatically.

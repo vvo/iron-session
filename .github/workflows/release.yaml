@@ -12,37 +12,45 @@ on:
           - beta
           - latest
       dry-run:
-        description: "Pack and run every check, but do not publish."
+        description: "Pack and run every check, but do not stage."
         required: false
         default: false
         type: boolean
 
-# `id-token: write` is what npm's trusted publishing exchanges for a short-lived
-# publish token, and what lets npm attach a provenance statement so anyone can
-# verify a tarball was built from this repository at this commit. There is no
-# NPM_TOKEN on purpose: see AGENTS.md.
-permissions:
-  contents: read
-  id-token: write
+# Releases are staged, not published. The npm trusted publisher for
+# iron-session allows only `npm stage publish`: the `stage` job exchanges a
+# GitHub OIDC token (`id-token: write`) for a short-lived stage credential, and
+# the version goes live only once a maintainer approves it with 2FA on
+# npmjs.com. There is no NPM_TOKEN on purpose: see AGENTS.md.
+#
+# The job holding `id-token: write` installs no dependencies. It only runs Node
+# and npm on the tarball the `build` job packed, so a compromised dev
+# dependency never sees a token that can stage a release.
+permissions: {}
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    environment: release
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      # No `registry-url` here on purpose. It makes setup-node write an
-      # `_authToken` line into .npmrc, and a statically configured token used to
-      # make pnpm skip the OIDC exchange entirely, publishing without provenance.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: ".node-version"
           cache: "pnpm"
 
-      - run: pnpm install --frozen-lockfile
+      # No install script is needed: esbuild's postinstall only re-checks the
+      # binary its platform package already ships, and unrs-resolver is not in
+      # the lockfile anymore.
+      - run: pnpm install --frozen-lockfile --ignore-scripts
 
-      # Publishing something that does not pass its own gates is how a bad
+      # Staging something that does not pass its own gates is how a bad
       # release happens, so run them here too rather than trusting that CI ran.
       - name: Verify
         run: |
@@ -56,65 +64,91 @@ jobs:
           pnpm size
           pnpm lint:types
 
+      - id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Guard the dist-tag against the version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ inputs.tag }}
         run: |
-          version=$(node -p "require('./package.json').version")
-          echo "version=$version tag=${{ inputs.tag }}"
-          case "$version" in
+          echo "version=$VERSION tag=$TAG"
+          case "$VERSION" in
             *-*)
-              if [ "${{ inputs.tag }}" = "latest" ]; then
-                echo "::error::$version is a prerelease and must not be published as 'latest'."
+              if [ "$TAG" = "latest" ]; then
+                echo "::error::$VERSION is a prerelease and must not be published as 'latest'."
                 exit 1
               fi
               ;;
             *)
-              if [ "${{ inputs.tag }}" = "beta" ]; then
-                echo "::notice::$version is stable but is being published under 'beta'."
+              if [ "$TAG" = "beta" ]; then
+                echo "::notice::$VERSION is stable but is being published under 'beta'."
               fi
               ;;
           esac
 
       - name: Refuse to republish a version that is already on npm
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DRY_RUN: ${{ inputs.dry-run }}
         run: |
-          version=$(node -p "require('./package.json').version")
-          if npm view "iron-session@$version" version > /dev/null 2>&1; then
-            if [ "${{ inputs.dry-run }}" = "true" ]; then
-              echo "::warning::iron-session@$version is already published. A real release would fail here."
+          if npm view "iron-session@$VERSION" version > /dev/null 2>&1; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "::warning::iron-session@$VERSION is already published. A real release would fail here."
             else
-              echo "::error::iron-session@$version is already published. Bump the version instead."
+              echo "::error::iron-session@$VERSION is already published. Bump the version instead."
               exit 1
             fi
           fi
 
-      - name: Publish
-        if: ${{ !inputs.dry-run }}
-        run: pnpm publish --tag ${{ inputs.tag }} --provenance --no-git-checks --access public
+      # pnpm, not npm, so workspace and catalog protocols resolve in the tarball.
+      - name: Pack
+        run: pnpm pack --pack-destination "$RUNNER_TEMP/pack"
 
-      # The failure we care about is publishing without provenance, which looks
-      # exactly like a success. Ask the registry what it actually stored.
-      #
-      # A new version takes a while to show up in the packument: on 9.0.1 it was
-      # 80s, so poll for 5 minutes. Query registry.npmjs.org directly rather than
-      # via `npm view`, which reads whatever registry is configured and caches.
-      - name: Verify the published version has provenance
-        if: ${{ !inputs.dry-run }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pack
+          path: ${{ runner.temp }}/pack
+          if-no-files-found: error
+          retention-days: 7
+
+  stage:
+    needs: build
+    if: ${{ !inputs.dry-run }}
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # mint the OIDC token npm exchanges for a stage token
+    steps:
+      # Writes the .npmrc pointing at the npm registry, deliberately without
+      # NODE_AUTH_TOKEN: a token in the environment would take precedence over
+      # OIDC.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+
+      # `npm stage` needs npm >= 11.15.
+      - run: npm install --global --ignore-scripts npm@11.21.2
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: pack
+          path: ${{ runner.temp }}/pack
+
+      - name: Stage
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TAG: ${{ inputs.tag }}
+        run: npm stage publish "$RUNNER_TEMP/pack/iron-session-$VERSION.tgz" --tag "$TAG" --provenance
+
+      # A staged version is not public until it is approved, so provenance can
+      # only be checked after approval, with `npm view` or on npmjs.com.
+      - name: Ask for approval
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TAG: ${{ inputs.tag }}
         run: |
-          version=$(node -p "require('./package.json').version")
-          for i in $(seq 1 30); do
-            url=$(curl -sf -H 'Cache-Control: no-cache' \
-              "https://registry.npmjs.org/iron-session/$version" \
-              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).dist?.attestations?.url??"")}catch{}})' \
-              || true)
-            if [ -n "$url" ]; then
-              echo "::notice::iron-session@$version published with provenance: $url"
-              exit 0
-            fi
-            echo "attempt $i: no attestation yet, waiting"
-            sleep 10
-          done
-          echo "::error::iron-session@$version has no provenance attestation after 5 minutes. Check the trusted publisher config on npmjs.com."
-          exit 1
-
-      - name: Pack only (dry run)
-        if: ${{ inputs.dry-run }}
-        run: pnpm pack
+          echo "::notice::iron-session@$VERSION is staged under '$TAG'. Approve it with 2FA at https://www.npmjs.com/package/iron-session (Staged Packages tab), or run 'npm stage list iron-session' then 'npm stage approve <id>'."
