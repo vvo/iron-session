@@ -6,7 +6,7 @@ import { seeOther } from "../../../see-other";
 import { magicLinkTokenOptions, sessionOptions, type SessionData } from "../lib";
 
 export async function GET(request: NextRequest) {
-  const seal = new URL(request.url).searchParams.get("seal") as string;
+  const seal = new URL(request.url).searchParams.get("seal") ?? "";
   const { username } = await unsealData<{ username: string }>(seal, magicLinkTokenOptions);
 
   // An expired or tampered token unseals to an empty object rather than
