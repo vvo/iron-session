@@ -42,7 +42,8 @@ export default defineConfig({
   reporter: process.env["CI"] ? [["html"], ["list"]] : "list",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    // Traces record request headers, which would put the secret in the report.
+    trace: bypassSecret ? "off" : "on-first-retry",
     ...(bypassSecret && {
       extraHTTPHeaders: { "x-vercel-protection-bypass": bypassSecret },
     }),
