@@ -27,10 +27,8 @@ jobs:
     if: ${{ github.event.deployment_status.state == 'success' && github.event.deployment_status.environment_url != '' }}
     runs-on: ubuntu-latest
     steps:
-      # The test step gets the bypass secret, so it runs the suite from the
-      # default branch, never the deployed commit: a PR could otherwise edit its
-      # own tests or scripts to read the secret. A PR that changes
-      # examples.spec.ts is tested against its preview only once merged.
+      # The suite runs with the bypass secret, so it comes from the default
+      # branch: a PR could edit its own tests to read the secret.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.repository.default_branch }}
