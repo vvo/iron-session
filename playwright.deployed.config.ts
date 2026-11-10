@@ -42,7 +42,10 @@ export default defineConfig({
   reporter: process.env["CI"] ? [["html"], ["list"]] : "list",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    // Traces record request headers, so with the bypass header set they would
+    // put the secret in the uploaded report.
+    trace: bypassSecret ? "off" : "on-first-retry",
+    screenshot: "only-on-failure",
     ...(bypassSecret && {
       extraHTTPHeaders: { "x-vercel-protection-bypass": bypassSecret },
     }),
