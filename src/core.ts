@@ -468,7 +468,7 @@ export function webCookies(request: Request, response: Response | Headers): Cook
       // mutations without complaining, which loses the session silently.
       if (response instanceof Response && response.bodyUsed) {
         throw new Error(
-          "iron-session: Cannot set session cookie: the response body has already been consumed, so the Set-Cookie header would be dropped. Call session.save() before returning or streaming the response.",
+          "iron-session: Cannot set session cookie: the response body has already been consumed, so the Set-Cookie header would be dropped. Call session.save() or session.destroy() before returning or streaming the response.",
         );
       }
     },
@@ -692,6 +692,7 @@ async function createSession<T extends object>(
     },
     destroy: {
       value: function destroy() {
+        jar.assertWritable?.();
         destroyed = true;
         for (const key of Object.keys(session)) {
           delete (session as Record<string, unknown>)[key];
