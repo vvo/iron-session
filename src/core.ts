@@ -605,9 +605,8 @@ function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
     cookieOptions: { ...defaultOptions.cookieOptions, ...sessionOptions.cookieOptions },
   };
 
-  // `maxAge: undefined` only drops Max-Age (a browser session cookie). The seal
-  // keeps its ttl, so a copied cookie still expires.
-  if (!(sessionOptions.cookieOptions && "maxAge" in sessionOptions.cookieOptions)) {
+  // `maxAge: undefined` makes a browser session cookie, the seal still expires.
+  if (!("maxAge" in (sessionOptions.cookieOptions ?? {}))) {
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
