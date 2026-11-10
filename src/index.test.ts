@@ -191,6 +191,31 @@ await test("should not set max-age for session cookies", async () => {
   mock.reset();
 });
 
+await test("session cookies keep the seal ttl", async () => {
+  const real = Date.now;
+  Date.now = () => 0;
+
+  const headers = new Headers();
+  const options = { cookieName, password, ttl: 60, cookieOptions: { maxAge: undefined } };
+  const session = await getIronSession<Data>(
+    webCookies(new Request("https://example.com"), headers),
+    options,
+  );
+  session.user = { id: 1 };
+  await session.save();
+  const cookie = (headers.get("set-cookie") ?? "").split(";")[0] ?? "";
+  const request = new Request("https://example.com", { headers: { cookie } });
+
+  deepEqual(await getIronSession<Data>(webCookies(request, new Headers()), options), {
+    user: { id: 1 },
+  });
+
+  Date.now = () => 120_000; // = ttl + 60s skew
+  deepEqual(await getIronSession<Data>(webCookies(request, new Headers()), options), {});
+
+  Date.now = real;
+});
+
 await test("should expire the cookie on destroying the session", async () => {
   const res = { getHeader: mock.fn(), setHeader: mock.fn() };
 

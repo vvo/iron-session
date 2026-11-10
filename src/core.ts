@@ -124,7 +124,8 @@ export interface SessionOptions {
    * The options that will be passed to the cookie library.
    *
    * If you want to use "session cookies" (cookies that are deleted when the browser
-   * is closed) then you need to pass `cookieOptions: { maxAge: undefined }`
+   * is closed) then you need to pass `cookieOptions: { maxAge: undefined }`.
+   * The seal still expires after `ttl`, even if the browser stays open.
    *
    * @see https://github.com/jshttp/cookie#options-1
    */
@@ -604,12 +605,8 @@ function getSessionConfig(sessionOptions: SessionOptions): SessionConfig {
     cookieOptions: { ...defaultOptions.cookieOptions, ...sessionOptions.cookieOptions },
   };
 
-  if (sessionOptions.cookieOptions && "maxAge" in sessionOptions.cookieOptions) {
-    if (sessionOptions.cookieOptions.maxAge === undefined) {
-      // session cookies, do not set maxAge, consider token as infinite
-      options.ttl = 0;
-    }
-  } else {
+  // `maxAge: undefined` makes a browser session cookie, the seal still expires.
+  if (!("maxAge" in (sessionOptions.cookieOptions ?? {}))) {
     options.cookieOptions.maxAge = computeCookieMaxAge(options.ttl);
   }
 
