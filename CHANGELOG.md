@@ -1,4 +1,26 @@
 
+## [9.1.0-beta.0](https://github.com/vvo/iron-session/compare/v9.0.1...v9.1.0-beta.0)
+
+### Session cookies now expire
+
+`cookieOptions: { maxAge: undefined }` gives you a cookie the browser deletes
+when it closes. It also used to set `ttl` to 0, which sealed the session with no
+expiry at all, even when you passed your own `ttl`. A copied cookie stayed valid
+until you rotated the password.
+
+The seal now keeps its `ttl`, 14 days by default. If a browser stays open longer
+than that, the session reads as empty and the user signs in again. If you really
+want a seal that never expires, pass `ttl: 0` yourself. Seals created before
+this version have no expiry inside them and keep working until you rotate the
+password. ([#968](https://github.com/vvo/iron-session/pull/968))
+
+### Fixes
+
+- `session.destroy()` with `webCookies` throws when the response body was
+  already consumed, like `save()` does. Before, the session looked cleared on
+  the server while the browser kept its cookie.
+  ([#967](https://github.com/vvo/iron-session/pull/967))
+
 ## [9.0.1](https://github.com/vvo/iron-session/compare/v9.0.0...v9.0.1)
 
 No code changes. `dist/index.js` and `dist/index.d.ts` are byte-for-byte
