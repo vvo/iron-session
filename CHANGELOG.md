@@ -1,5 +1,5 @@
 
-## [9.1.0-beta.0](https://github.com/vvo/iron-session/compare/v9.0.1...v9.1.0-beta.0)
+## [9.1.0](https://github.com/vvo/iron-session/compare/v9.0.1...v9.1.0)
 
 ### Session cookies now expire
 
