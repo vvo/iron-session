@@ -1,4 +1,4 @@
-# iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/master/LICENSE) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) ![npm](https://img.shields.io/npm/dm/iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
+# iron-session ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/vvo/iron-session/ci.yaml) [![GitHub license](https://img.shields.io/github/license/vvo/iron-session?style=flat)](https://github.com/vvo/iron-session/blob/main/LICENSE.md) [![npm](https://img.shields.io/npm/v/iron-session)](https://www.npmjs.com/package/iron-session) ![npm](https://img.shields.io/npm/dm/iron-session) ![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/iron-session?exports=getIronSession)
 
 **`iron-session` is a secure, stateless, and cookie-based session library for JavaScript.**
 
@@ -430,7 +430,7 @@ Generated with [usedby.dev](https://usedby.dev/)
 
 - [Eran Hammer and hapi.js contributors](https://github.com/hapijs/iron/graphs/contributors)
   for creating the underlying cryptography library
-  [`@hapi/iron`](https://hapi.dev/module/iron/).
+  [`@hapi/iron`](https://github.com/hapijs/iron).
 - [Divyansh Singh](https://github.com/brc-dd) for reimplementing `@hapi/iron` as
   [`iron-webcrypto`](https://github.com/brc-dd/iron-webcrypto) using standard
   web APIs.
