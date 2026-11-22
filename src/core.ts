@@ -687,7 +687,10 @@ async function createSession<T extends object>(
           ttl: config.ttl,
         });
 
-        writeSeal(jar, config, seal);
+        // destroy() can run while the seal is pending, and the last Set-Cookie wins.
+        if (!destroyed) {
+          writeSeal(jar, config, seal);
+        }
       },
     },
     destroy: {

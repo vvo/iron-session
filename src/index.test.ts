@@ -973,6 +973,25 @@ await test("webCookies: destroy throws when the response body was already consum
   deepEqual(session.user, { id: 1 });
 });
 
+await test("webCookies: destroy() during a pending save() keeps the cookie cleared", async () => {
+  const headers = new Headers();
+  const session = await getIronSession<Data>(
+    webCookies(new Request("https://example.com"), headers),
+    { cookieName, password },
+  );
+  session.user = { id: 1 };
+
+  // A save() nobody awaited, such as a rolling refresh, must not undo a logout.
+  const pending = session.save();
+  session.destroy();
+  await pending;
+
+  deepEqual(
+    headers.getSetCookie().map((cookie) => /Max-Age=0/.test(cookie)),
+    [true],
+  );
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Cookie chunking.
 //
