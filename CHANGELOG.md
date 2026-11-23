@@ -1,4 +1,14 @@
 
+## [9.1.1](https://github.com/vvo/iron-session/compare/v9.1.0...v9.1.1)
+
+### Fixes
+
+- `session.destroy()` called while a `save()` is still pending keeps the cookie
+  cleared. Before, the pending `save()` wrote the session cookie after the
+  deletion and the user stayed signed in. It needs a `save()` that is not
+  awaited. Reported by Rathnadeepan (HotWater-015).
+  ([#974](https://github.com/vvo/iron-session/pull/974))
+
 ## [9.1.0](https://github.com/vvo/iron-session/compare/v9.0.1...v9.1.0)
 
 ### Session cookies now expire
