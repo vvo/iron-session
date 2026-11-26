@@ -284,6 +284,12 @@ function describeUnserializable(data: unknown, path = "session", depth = 0): str
   return "";
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object") return false;
+  const prototype = Object.getPrototypeOf(value) as unknown;
+  return prototype === Object.prototype || prototype === null;
+}
+
 export async function sealData(
   data: unknown,
   { password, ttl = fourteenDaysInSeconds }: { password: Password; ttl?: number },
@@ -303,13 +309,15 @@ export async function sealData(
 
   let seal: string;
   try {
-    // Spread into a plain object: iron-webcrypto v2 refuses to encode the
+    // Copy plain objects: iron-webcrypto v2 refuses to encode the
     // non-enumerable save/destroy/updateConfig properties we define on sessions.
-    seal = await ironSeal(
-      data !== null && typeof data === "object" ? { ...data } : data,
-      passwordForSeal,
-      { ...ironDefaults, ttl: ttl * 1000 },
-    );
+    // Only plain objects, though. Spreading an array turned it into
+    // `{ 0: ..., 1: ... }`, and spreading a top-level Date, Map or URL turned it
+    // into `{}` instead of the "not JSON serializable" error it gets when nested.
+    seal = await ironSeal(isPlainObject(data) ? { ...data } : data, passwordForSeal, {
+      ...ironDefaults,
+      ttl: ttl * 1000,
+    });
   } catch (error) {
     if (error instanceof Error && error.message === "Data is not JSON serializable") {
       throw new Error(
@@ -631,11 +639,12 @@ function assertCookieCanPersist(cookieOptions: CookieOptions): void {
  * defines save/destroy/updateConfig against that same jar.
  */
 async function createSession<T extends object>(
-  jar: CookieJar,
+  requestJar: CookieJar,
   sessionOptions: SessionOptions,
 ): Promise<IronSession<T>> {
   let config = getSessionConfig(sessionOptions);
   let onUnsealError = sessionOptions.onUnsealError;
+  const jar = rememberWrites(requestJar);
 
   const sealFromCookies = readSeal(jar, config.cookieName);
   const session = sealFromCookies
@@ -711,6 +720,30 @@ async function createSession<T extends object>(
   });
 
   return session as IronSession<T>;
+}
+
+/**
+ * Makes cookies this session already wrote in the current response readable
+ * through the jar, on top of the ones the request came with.
+ *
+ * `nodeCookies` and `webCookies` only read the request's `Cookie` header, so
+ * {@link clearStaleCookies} could not see chunks written by an earlier `save()`
+ * in the same request. `destroy()` after a chunked `save()` then only expired
+ * the base cookie and left the user signed in, and a small `save()` followed by
+ * a chunked one left both shapes behind, with the stale base cookie winning on
+ * the next read. An expired cookie is remembered as `""`, so it reads as gone.
+ */
+function rememberWrites(jar: CookieJar): CookieJar {
+  const written = new Map<string, string>();
+  return {
+    read: (name) => (written.has(name) ? written.get(name) : jar.read(name)),
+    write: (name, value, options) => {
+      jar.write(name, value, options);
+      written.set(name, options.maxAge === 0 ? "" : value);
+    },
+    ...(jar.names ? { names: () => jar.names?.() ?? [] } : {}),
+    ...(jar.assertWritable ? { assertWritable: () => jar.assertWritable?.() } : {}),
+  };
 }
 
 /** Browsers cap one cookie at 4096 bytes over the whole `Set-Cookie` value. */
