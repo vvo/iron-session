@@ -1280,3 +1280,102 @@ await test("chunking: should work through Set-Cookie headers, not just a cookie 
 
   equal(restored.blob, bigBlob(6000));
 });
+
+// #972: sealData copied everything into a plain object, and chunk cleanup only
+// saw cookies from the request, not ones written earlier in the same response.
+// ─────────────────────────────────────────────────────────────────────────────
+
+await test("sealData: should round-trip arrays and primitives unchanged", async () => {
+  deepEqual(await unsealData(await sealData([1, 2, 3], { password }), { password }), [1, 2, 3]);
+  deepEqual(await unsealData(await sealData([{ id: 1 }], { password }), { password }), [{ id: 1 }]);
+  equal(await unsealData(await sealData("hello", { password }), { password }), "hello");
+  equal(await unsealData(await sealData(42, { password }), { password }), 42);
+});
+
+await test("sealData: should reject a top-level non-plain object like a nested one", async () => {
+  await rejects(async () => sealData(new Date(0), { password }), /\(session is a Date\)/);
+  await rejects(async () => sealData(new Map(), { password }), /\(session is a Map\)/);
+  await rejects(
+    async () => sealData(new URL("https://example.com"), { password }),
+    /session is a URL/,
+  );
+});
+
+/** Applies Set-Cookie headers in order, the way a browser would. */
+function browserCookies(setCookies: string[]): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  for (const header of setCookies) {
+    const [pair = "", ...attributes] = header.split(";");
+    const [name = "", value = ""] = pair.split("=");
+    if (attributes.some((attribute) => attribute.trim() === "Max-Age=0")) {
+      delete cookies[name];
+    } else {
+      cookies[name] = value;
+    }
+  }
+  return cookies;
+}
+
+function fakeNodeResponse() {
+  const setCookies: string[] = [];
+  const res = {
+    getHeader: () => [...setCookies],
+    setHeader: (_name: string, value: string[]) => {
+      setCookies.splice(0, setCookies.length, ...value);
+    },
+    headersSent: false,
+  };
+  return { res: res as unknown as ServerResponse, setCookies };
+}
+
+await test("chunking: destroy after a chunked save in the same request expires every chunk", async () => {
+  const { res, setCookies } = fakeNodeResponse();
+  const session = await getIronSession<BigData>(
+    nodeCookies({ headers: {} } as IncomingMessage, res),
+    { cookieName, password, chunk: true },
+  );
+  session.blob = bigBlob(6000);
+  await session.save();
+  session.destroy();
+
+  deepEqual(browserCookies(setCookies), {}, "the browser should be left with no session cookie");
+});
+
+await test("chunking: a small then a chunked save in the same request leaves only the chunks", async () => {
+  const { res, setCookies } = fakeNodeResponse();
+  const session = await getIronSession<BigData>(
+    nodeCookies({ headers: {} } as IncomingMessage, res),
+    { cookieName, password, chunk: true },
+  );
+  session.small = 1;
+  await session.save();
+  session.blob = bigBlob(6000);
+  await session.save();
+
+  const cookies = browserCookies(setCookies);
+  equal(cookies[cookieName], undefined, "the earlier unchunked cookie should be expired");
+
+  const cookieHeader = Object.entries(cookies)
+    .map(([name, value]) => `${name}=${value}`)
+    .join("; ");
+  const restored = await getIronSession<BigData>(
+    nodeCookies({ headers: { cookie: cookieHeader } } as IncomingMessage, fakeNodeResponse().res),
+    { cookieName, password, chunk: true },
+  );
+  deepEqual({ ...restored }, { small: 1, blob: bigBlob(6000) });
+});
+
+await test("chunking: a chunked then a small save in the same request leaves only the base cookie", async () => {
+  const headers = new Headers();
+  const session = await getIronSession<BigData>(
+    webCookies(new Request("https://example.com"), headers),
+    { cookieName, password, chunk: true },
+  );
+  session.blob = bigBlob(9000);
+  await session.save();
+  delete session.blob;
+  session.small = 1;
+  await session.save();
+
+  deepEqual(Object.keys(browserCookies(headers.getSetCookie())), [cookieName]);
+});
